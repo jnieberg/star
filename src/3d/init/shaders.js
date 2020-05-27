@@ -1,6 +1,6 @@
 export default function initShaders(win) {
-    var node = document.createElement('div');
-    node.innerHTML = `<script type="x-shader/x-vertex" id="vertexShader">
+	const node = document.createElement('div');
+	node.innerHTML = `<script type="x-shader/x-vertex" id="vertexShader">
     attribute float size;
     varying vec3 vColor;
     void main() {
@@ -33,5 +33,5 @@ export default function initShaders(win) {
         gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
     }
 </script>`;
-    win.appendChild(node);
+	win.appendChild(node);
 }

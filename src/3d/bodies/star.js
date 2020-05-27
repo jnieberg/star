@@ -1,114 +1,144 @@
-import seedrandom from "seedrandom";
-import { getPlanetInfo } from "./planets";
-import { toCelcius } from "../../misc/temperature";
-import getName from "../../name-generator/name";
-import { TD } from "../../variables";
-import * as THREE from "three";
-import { deleteThree } from "../init/init";
+import seedrandom from 'seedrandom';
+import { getPlanetInfo, drawPlanet } from './planets';
+import { toCelcius } from '../../misc/temperature';
+import getName from '../../name-generator/name';
+import { TD, MISC } from '../../variables';
+import * as THREE from 'three';
+import { deleteThree } from '../init/init';
 
-function getStarSize(star) {
-    let size = 'Hypergiant';
-    if (star.size < 1) {
-        size = 'Dwarf';
-    } else if (star.size < 3) {
-        size = 'Star';
-    } else if (star.size < 4) {
-        size = 'Giant';
-    } else if (star.size < 4.5) {
-        size = 'Supergiant';
-    }
+export function getStarSize(star) {
+	return star.size;
+}
 
-    return size;
+function getStarSizeName(star) {
+	let size = 'Hypergiant';
+	if (star.size < 1) {
+		size = 'Dwarf';
+	} else if (star.size < 3) {
+		size = 'Star';
+	} else if (star.size < 4) {
+		size = 'Giant';
+	} else if (star.size < 4.5) {
+		size = 'Supergiant';
+	}
+
+	return size;
 }
 
 function getStarColor(star) {
-    let color = 'Red';
-    if (star.brightness > 0.95) {
-        return 'White';
-    }
-    if (star.hue < 0.05) {
-    } else if (star.hue < 0.15) {
-        color = 'Orange'
-    } else if (star.hue < 0.2) {
-        color = 'Yellow'
-    } else if (star.hue < 0.5) {
-        color = 'Green'
-    } else if (star.hue < 0.7) {
-        color = 'Blue'
-    } else if (star.hue < 0.9) {
-        color = 'Purple'
-    }
-    return color;
+	let color = 'Red';
+	if (star.brightness > 0.9) {
+		return 'White';
+	}
+	if (star.hue < 0.05) {
+	} else if (star.hue < 0.15) {
+		color = 'Orange';
+	} else if (star.hue < 0.2) {
+		color = 'Yellow';
+	} else if (star.hue < 0.5) {
+		color = 'Green';
+	} else if (star.hue < 0.7) {
+		color = 'Blue';
+	} else if (star.hue < 0.9) {
+		color = 'Purple';
+	}
+	return color;
 }
 
 function getStarPlanets(star) {
-    var rnd = seedrandom(`star_planets_${star.id}`);
-    var planetLength = Math.floor(rnd() * star.size * 4); // number of planets depends on star size
-    var planets = [];
-    for (var p = 0; p < planetLength; p++) {
-        planets.push(getPlanetInfo(star, p));
-    }
-    return planets;
+	MISC.rnd = seedrandom(`star_planets_${star.id}`);
+	const planetLength = Math.floor(MISC.rnd() * star.size * 4); // number of planets depends on star size
+	const planets = [];
+	for (let p = 0; p < planetLength; p++) {
+		planets.push(getPlanetInfo(star, p));
+	}
+	return planets;
 }
 
 function getStarPlanetsString(star) {
-    var planets = getStarPlanets(star);
-    var planetsString = [];
-    for (var p = 0; p < planets.length; p++) {
-        planetsString.push(`  ${planets[p].id}. ${planets[p].name} / ${toCelcius(planets[p].temperature.min)} ${toCelcius(planets[p].temperature.max)}`);
-    }
-    return planetsString;
+	return star.planets.map(planet => `  ${planet.id}. ${planet.name} / ${toCelcius(planet.temperature.min)} ${toCelcius(planet.temperature.max)}`);
 }
 
 export function getStarName(star) {
-    return getName(`star_${star.id}`, 3, 3, 999);
+	MISC.rnd = seedrandom(`star_${star.id}`);
+	return getName(3, 3, 999);
 }
 
 export function getStarTemperature(star) {
-    var rnd = seedrandom(`star_temperarure_${star.id}`);
-    var tempMin = 0;
-    var tempMax = 0;
-    switch (getStarColor(star)) {
-        case 'Red': tempMin = 500; tempMax = 3700; break;
-        case 'Orange': tempMin = 3700; tempMax = 5200; break;
-        case 'Yellow': tempMin = 5200; tempMax = 6000; break;
-        case 'White': tempMin = 6000; tempMax = 7500; break;
-        case 'Green': tempMin = 7500; tempMax = 10000; break;
-        case 'Blue': tempMin = 10000; tempMax = 30000; break;
-        case 'Purple': tempMin = 30000; tempMax = 40000; break;
-    }
-    return Math.floor(rnd() * (tempMax - tempMin)) + tempMin;
+	MISC.rnd = seedrandom(`star_temperature_${star.id}`);
+	let tempMin = 0;
+	let tempMax = 0;
+	switch (getStarColor(star)) {
+	case 'Red': tempMin = 500; tempMax = 3700; break;
+	case 'Orange': tempMin = 3700; tempMax = 5200; break;
+	case 'Yellow': tempMin = 5200; tempMax = 6000; break;
+	case 'White': tempMin = 6000; tempMax = 7500; break;
+	case 'Green': tempMin = 7500; tempMax = 10000; break;
+	case 'Blue': tempMin = 10000; tempMax = 30000; break;
+	case 'Purple': tempMin = 30000; tempMax = 40000; break;
+	default: break;
+	}
+	return Math.floor(MISC.rnd() * (tempMax - tempMin)) + tempMin;
+}
+
+export function getStarData(x, y, z, index) {
+	return {
+		id: `${x}_${y}_${z}_${index}`,
+		size: (MISC.rnd() * 4 + 1),
+		hue: MISC.rnd(),
+		brightness: MISC.rnd() * 0.5 + 0.5,
+		x: x + MISC.rnd(),
+		y: y + MISC.rnd(),
+		z: z + MISC.rnd()
+	};
+}
+
+export function getStarInfo(star) {
+	return {
+		...star,
+		name: getStarName(star),
+		temperature: getStarTemperature(star),
+		planets: getStarPlanets(star)
+	};
 }
 
 export function getStarInfoString(star) {
-    var planets = getStarPlanets(star).length ? ['Planets:', ...getStarPlanetsString(star)] : [];
-    return [
-        getStarName(star),
-        getStarColor(star) + ' ' + getStarSize(star),
-        'Temperature: ' + toCelcius(getStarTemperature(star)),
-        ...planets
-    ];
+	const planets = star.planets && star.planets.length ? [ 'Planets:', ...getStarPlanetsString(star) ] : [];
+	return [
+		star.name,
+		getStarColor(star) + ' ' + getStarSizeName(star),
+		'Temperature: ' + toCelcius(star.temperature),
+		...planets
+	];
 }
 
 export default function drawStar() {
-    var star = TD.star.this;
-    if (star) {
-        deleteThree(TD.star.object);
-        TD.star.geometry = new THREE.SphereGeometry(star.size * 0.01, 32, 32);
-        TD.colorHelper.setHSL(star.hue, 1.0, star.brightness);
-        TD.star.material = new THREE.MeshBasicMaterial({ color: TD.colorHelper });
-        TD.star.object = new THREE.Mesh(TD.star.geometry, TD.star.material);
-        TD.star.flare.material = new THREE.SpriteMaterial({
-            map: TD.stars.texture,
-            color: TD.colorHelper,
-            depthTest: false,
-            blending: THREE.AdditiveBlending,
-            transparent: true
-        })
-        TD.star.flare.sprite = new THREE.Sprite(TD.star.flare.material);
-        TD.star.flare.sprite.scale.set(star.size * 0.1, star.size * 0.1, star.size * 0.1);
-        TD.star.object.add(TD.star.flare.sprite);
-        TD.star.object.position.set(star.x * 100, star.y * 100, star.z * 100);
-        TD.scene.add(TD.star.object);
-    }
+	const star = TD.star.this;
+	if (star) {
+		const size = star.size * 0.002 * TD.scale;
+		deleteThree(TD.star.sphere);
+		const geometry = new THREE.SphereGeometry(size * 0.1, 32, 32);
+		TD.colorHelper.setHSL(star.hue, 1.0, star.brightness);
+		const material = new THREE.MeshBasicMaterial({ color: TD.colorHelper });
+		TD.star.sphere = new THREE.Mesh(geometry, material);
+		const flareMaterial = new THREE.SpriteMaterial({
+			map: TD.stars.texture,
+			color: TD.colorHelper,
+			opacity: 0.5,
+			depthTest: false,
+			blending: THREE.AdditiveBlending
+		});
+		TD.star.flare = new THREE.Sprite(flareMaterial);
+		TD.star.flare.scale.set(size, size, size);
+		TD.star.sphere.add(TD.star.flare);
+		TD.star.light = new THREE.PointLight(TD.colorHelper, 2, 50 * TD.scale);
+		TD.star.sphere.add(TD.star.light);
+		TD.star.sphere.position.set(star.x * 100 * TD.scale, star.y * 100 * TD.scale, star.z * 100 * TD.scale);
+		if (star.planets) {
+			for (let index = 0; index < star.planets.length; index++) {
+				drawPlanet(index);
+			}
+		}
+		TD.scene.add(TD.star.sphere);
+	}
 }

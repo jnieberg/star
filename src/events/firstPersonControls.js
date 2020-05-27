@@ -8,15 +8,13 @@ import {
 	MathUtils,
 	Spherical,
 	Vector3
-} from "three";
+} from 'three';
 
-var FirstPersonControls = function (object, domElement) {
-
+const FirstPersonControls = function(object, domElementA) {
+	let domElement = domElementA;
 	if (domElement === undefined) {
-
 		console.warn('THREE.FirstPersonControls: The second parameter "domElement" is now mandatory.');
 		domElement = document;
-
 	}
 
 	this.object = object;
@@ -69,159 +67,142 @@ var FirstPersonControls = function (object, domElement) {
 
 	// private variables
 
-	var lat = 0;
-	var lon = 0;
+	let lat = 0;
+	let lon = 0;
 
-	var lookDirection = new Vector3();
-	var spherical = new Spherical();
-	var target = new Vector3();
+	const lookDirection = new Vector3();
+	const spherical = new Spherical();
+	const target = new Vector3();
 
 	//
 
 	if (this.domElement !== document) {
-
-		this.domElement.setAttribute('tabindex', - 1);
-
+		this.domElement.setAttribute('tabindex', -1);
 	}
 
 	//
 
-	this.handleResize = function () {
-
+	this.handleResize = function() {
 		if (this.domElement === document) {
-
 			this.viewHalfX = window.innerWidth / 2;
 			this.viewHalfY = window.innerHeight / 2;
-
 		} else {
-
 			this.viewHalfX = this.domElement.offsetWidth / 2;
 			this.viewHalfY = this.domElement.offsetHeight / 2;
-
 		}
-
 	};
 
-	this.onMouseDown = function (event) {
-
+	this.onMouseDown = function(event) {
 		if (this.domElement !== document) {
-
 			this.domElement.focus();
-
 		}
 
 		event.preventDefault();
 		event.stopPropagation();
 
 		if (this.activeLook) {
-
 			switch (event.button) {
-
-				case 0: this.moveForward = true; break;
-				case 2: this.moveBackward = true; break;
-
+			case 0: this.moveForward = true; break;
+			case 2: this.moveBackward = true; break;
+			default: break;
 			}
-
 		}
 
 		this.mouseDragOn = true;
-
 	};
 
-	this.onMouseUp = function (event) {
-
+	this.onMouseUp = function(event) {
 		event.preventDefault();
 		event.stopPropagation();
 
 		if (this.activeLook) {
-
 			switch (event.button) {
-
-				case 0: this.moveForward = false; break;
-				case 2: this.moveBackward = false; break;
-
+			case 0: this.moveForward = false; break;
+			case 2: this.moveBackward = false; break;
+			default: break;
 			}
-
 		}
 
 		this.mouseDragOn = false;
-
 	};
 
-	this.onMouseMove = function (event) {
-
+	this.onMouseMove = function(event) {
 		if (this.domElement === document) {
-
 			this.mouseX = event.pageX - this.viewHalfX;
 			this.mouseY = event.pageY - this.viewHalfY;
-
 		} else {
-
 			this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
 			this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
-
 		}
-
 	};
 
-	this.onKeyDown = function (event) {
-
-		//event.preventDefault();
+	this.onKeyDown = function(event) {
+		// event.preventDefault();
 
 		switch (event.keyCode) {
+		case 38: /* up*/
+		case 87: /* W*/ this.moveForward = true; break;
 
-			case 38: /*up*/
-			case 87: /*W*/ this.moveForward = true; break;
+		case 37: /* left*/
+		case 65: /* A*/ this.moveLeft = true; break;
 
-			case 37: /*left*/
-			case 65: /*A*/ this.moveLeft = true; break;
+		case 40: /* down*/
+		case 83: /* S*/ this.moveBackward = true; break;
 
-			case 40: /*down*/
-			case 83: /*S*/ this.moveBackward = true; break;
+		case 39: /* right*/
+		case 68: /* D*/ this.moveRight = true; break;
 
-			case 39: /*right*/
-			case 68: /*D*/ this.moveRight = true; break;
-
-			case 82: /*R*/ this.moveUp = true; break;
-			case 70: /*F*/ this.moveDown = true; break;
-
+		case 82: /* R*/ this.moveUp = true; break;
+		case 70: /* F*/ this.moveDown = true; break;
+		default: break;
 		}
-
 	};
 
-	this.onKeyUp = function (event) {
-
+	this.onKeyUp = function(event) {
 		switch (event.keyCode) {
+		case 38: /* up*/
+		case 87: /* W*/ this.moveForward = false; break;
 
-			case 38: /*up*/
-			case 87: /*W*/ this.moveForward = false; break;
+		case 37: /* left*/
+		case 65: /* A*/ this.moveLeft = false; break;
 
-			case 37: /*left*/
-			case 65: /*A*/ this.moveLeft = false; break;
+		case 40: /* down*/
+		case 83: /* S*/ this.moveBackward = false; break;
 
-			case 40: /*down*/
-			case 83: /*S*/ this.moveBackward = false; break;
+		case 39: /* right*/
+		case 68: /* D*/ this.moveRight = false; break;
 
-			case 39: /*right*/
-			case 68: /*D*/ this.moveRight = false; break;
-
-			case 82: /*R*/ this.moveUp = false; break;
-			case 70: /*F*/ this.moveDown = false; break;
-
+		case 82: /* R*/ this.moveUp = false; break;
+		case 70: /* F*/ this.moveDown = false; break;
+		default: break;
 		}
-
 	};
 
-	this.lookAt = function (x, y, z) {
+	function setOrientation(ctrl) {
+		const quaternion = ctrl.object.quaternion;
 
+		lookDirection.set(0, 0, -1).applyQuaternion(quaternion);
+		spherical.setFromVector3(lookDirection);
+
+		lat = 90 - MathUtils.radToDeg(spherical.phi);
+		lon = MathUtils.radToDeg(spherical.theta);
+	}
+
+	function contextmenu(event) {
+		event.preventDefault();
+	}
+
+	function bind(scope, fn) {
+		return function() {
+			fn.apply(scope, arguments);
+		};
+	}
+
+	this.lookAt = function(x, y, z) {
 		if (x.isVector3) {
-
 			target.copy(x);
-
 		} else {
-
 			target.set(x, y, z);
-
 		}
 
 		this.object.lookAt(target);
@@ -229,30 +210,25 @@ var FirstPersonControls = function (object, domElement) {
 		setOrientation(this);
 
 		return this;
-
 	};
 
-	this.update = function () {
-
-		var targetPosition = new Vector3();
+	this.update = (function() {
+		const targetPosition = new Vector3();
 
 		return function update(delta) {
-
-			if (this.enabled === false) return;
+			if (this.enabled === false) {
+				return;
+			}
 
 			if (this.heightSpeed) {
-
-				var y = MathUtils.clamp(this.object.position.y, this.heightMin, this.heightMax);
-				var heightDelta = y - this.heightMin;
+				const y = MathUtils.clamp(this.object.position.y, this.heightMin, this.heightMax);
+				const heightDelta = y - this.heightMin;
 
 				this.autoSpeedFactor = delta * (heightDelta * this.heightCoef);
-
 			} else {
-
 				this.autoSpeedFactor = 0.0;
-
 			}
-			var actualMoveSpeed = delta * this.movementSpeed;
+			const actualMoveSpeed = delta * this.movementSpeed;
 			if (!this.acceleration) {
 				this.accF = 0;
 				this.accL = 0;
@@ -281,58 +257,51 @@ var FirstPersonControls = function (object, domElement) {
 			this.object.translateZ(this.accF * this.speedFactor);
 			this.object.translateX(this.accL * this.speedFactor);
 			this.object.translateY(this.accU * this.speedFactor);
-			this.accF *= 0.99;
-			this.accL *= 0.99;
-			this.accU *= 0.99;
+			this.accF = this.accF * 0.99;
+			this.accL = this.accL * 0.99;
+			this.accU = this.accU * 0.99;
 
-			var actualLookSpeed = delta * this.lookSpeed;
+			let actualLookSpeed = delta * this.lookSpeed;
 
 			if (!this.activeLook) {
-
 				actualLookSpeed = 0;
-
 			}
 
-			var verticalLookRatio = 1;
+			let verticalLookRatio = 1;
 
 			if (this.constrainVertical) {
-
 				verticalLookRatio = Math.PI / (this.verticalMax - this.verticalMin);
-
 			}
 
-			lon -= this.mouseX * actualLookSpeed;
-			if (this.lookVertical) lat -= this.mouseY * actualLookSpeed * verticalLookRatio;
+			lon = lon - this.mouseX * actualLookSpeed;
+			if (this.lookVertical) {
+				lat = lat - this.mouseY * actualLookSpeed * verticalLookRatio;
+			}
 
-			lat = Math.max(- 85, Math.min(85, lat));
+			lat = Math.max(-85, Math.min(85, lat));
 
-			var phi = MathUtils.degToRad(90 - lat);
-			var theta = MathUtils.degToRad(lon);
+			let phi = MathUtils.degToRad(90 - lat);
+			const theta = MathUtils.degToRad(lon);
 
 			if (this.constrainVertical) {
-
 				phi = MathUtils.mapLinear(phi, 0, Math.PI, this.verticalMin, this.verticalMax);
-
 			}
 
-			var position = this.object.position;
+			const position = this.object.position;
 
 			targetPosition.setFromSphericalCoords(1, phi, theta).add(position);
 
 			this.object.lookAt(targetPosition);
-
 		};
+	}());
 
-	}();
+	const _onMouseMove = bind(this, this.onMouseMove);
+	const _onMouseDown = bind(this, this.onMouseDown);
+	const _onMouseUp = bind(this, this.onMouseUp);
+	const _onKeyDown = bind(this, this.onKeyDown);
+	const _onKeyUp = bind(this, this.onKeyUp);
 
-	function contextmenu(event) {
-
-		event.preventDefault();
-
-	}
-
-	this.dispose = function () {
-
+	this.dispose = function() {
 		this.domElement.removeEventListener('contextmenu', contextmenu, false);
 		this.domElement.removeEventListener('mousedown', _onMouseDown, false);
 		this.domElement.removeEventListener('mousemove', _onMouseMove, false);
@@ -340,14 +309,7 @@ var FirstPersonControls = function (object, domElement) {
 
 		window.removeEventListener('keydown', _onKeyDown, false);
 		window.removeEventListener('keyup', _onKeyUp, false);
-
 	};
-
-	var _onMouseMove = bind(this, this.onMouseMove);
-	var _onMouseDown = bind(this, this.onMouseDown);
-	var _onMouseUp = bind(this, this.onMouseUp);
-	var _onKeyDown = bind(this, this.onKeyDown);
-	var _onKeyUp = bind(this, this.onKeyUp);
 
 	this.domElement.addEventListener('contextmenu', contextmenu, false);
 	this.domElement.addEventListener('mousemove', _onMouseMove, false);
@@ -357,32 +319,9 @@ var FirstPersonControls = function (object, domElement) {
 	window.addEventListener('keydown', _onKeyDown, false);
 	window.addEventListener('keyup', _onKeyUp, false);
 
-	function bind(scope, fn) {
-
-		return function () {
-
-			fn.apply(scope, arguments);
-
-		};
-
-	}
-
-	function setOrientation(ctrl) {
-
-		var quaternion = ctrl.object.quaternion;
-
-		lookDirection.set(0, 0, - 1).applyQuaternion(quaternion);
-		spherical.setFromVector3(lookDirection);
-
-		lat = 90 - MathUtils.radToDeg(spherical.phi);
-		lon = MathUtils.radToDeg(spherical.theta);
-
-	}
-
 	this.handleResize();
 
 	setOrientation(this);
-
 };
 
 export { FirstPersonControls };

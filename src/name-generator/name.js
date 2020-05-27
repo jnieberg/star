@@ -1,28 +1,26 @@
-import seedrandom from "seedrandom";
-import { NAME_LETTERS } from "../variables";
+import { NAME_LETTERS, MISC } from '../variables';
 
-function getRandomLetter(letters, rnd) {
-    return letters[Math.floor(rnd() * letters.length)];
+function getRandomLetter(letters) {
+	return letters[Math.floor(MISC.rnd() * letters.length)];
 }
 
-export default function getName(id, wordsTotal = 3, wordTotal = 3, number = 0) {
-    var rnd = seedrandom(id);
-    var wordsTotal = Math.floor(rnd() * wordsTotal) + 1;
-    var consS = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM);
-    var consM = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM, NAME_LETTERS.consM);
-    var consE = NAME_LETTERS.cons.concat(NAME_LETTERS.consME);
-    var wordList = [];
-    for (var w = 0; w < wordsTotal; w++) {
-        var wordLength = Math.floor(rnd() * wordTotal) + 1;
-        var word = '';
-        for (var l = 0; l < wordLength; l++) {
-            word += Math.floor(rnd() * 2) === 0 && l === 0 && wordLength > 2 ? '' : getRandomLetter(l === 0 ? consS : consM, rnd);
-            word += getRandomLetter(NAME_LETTERS.vowels, rnd);
-        }
-        word += Math.floor(rnd() * 2) === 0 ? getRandomLetter(consE, rnd) : '';
-        wordList.push(word);
-    }
-    var text = wordList.join(' ');
-    text += Math.floor(rnd() * 5) === 0 && number > 0 ? ' ' + (Math.floor(rnd() * number) + 1) : ''
-    return text.replace(/(^| )(.)/g, (a, a1, a2) => a.toUpperCase());
+export default function getName(wordsTotalA = 3, wordTotal = 3, number = 0) {
+	const wordsTotal = Math.floor(MISC.rnd() * wordsTotalA) + 1;
+	const consS = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM);
+	const consM = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM, NAME_LETTERS.consM);
+	const consE = NAME_LETTERS.cons.concat(NAME_LETTERS.consME);
+	const wordList = [];
+	for (let w = 0; w < wordsTotal; w++) {
+		const wordLength = Math.floor(MISC.rnd() * wordTotal) + 1;
+		let word = '';
+		for (let l = 0; l < wordLength; l++) {
+			word = word + (Math.floor(MISC.rnd() * 2) === 0 && l === 0 && wordLength > 2 ? '' : getRandomLetter(l === 0 ? consS : consM));
+			word = word + getRandomLetter(NAME_LETTERS.vowels, MISC.rnd);
+		}
+		word = word + (Math.floor(MISC.rnd() * 2) === 0 ? getRandomLetter(consE, MISC.rnd) : '');
+		wordList.push(word);
+	}
+	let text = wordList.join(' ');
+	text = text + (Math.floor(MISC.rnd() * 5) === 0 && number > 0 ? ' ' + (Math.floor(MISC.rnd() * number) + 1) : '');
+	return text.replace(/(^| )(.)/g, a => a.toUpperCase());
 }
