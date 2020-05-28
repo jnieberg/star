@@ -35,6 +35,7 @@ export default function raycastStar(obj) {
 			if (distanceCam >= distance * TD.scale) {
 				TD.star.this = undefined;
 				EVENT.controls.speedFactorStar = 1.0;
+				EVENT.controls.speedFactorPlanet = 1.0;
 			} else {
 				EVENT.controls.speedFactorStar = distanceCam / (distance * 2 * TD.scale);
 			}

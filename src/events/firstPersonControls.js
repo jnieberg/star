@@ -68,8 +68,8 @@ const FirstPersonControls = function(object, domElementA) {
 
 	// private variables
 
-	let lat = 0;
-	let lon = 0;
+	// let lat = 0;
+	// let lon = 0;
 
 	const lookDirection = new Vector3();
 	const spherical = new Spherical();
@@ -185,8 +185,8 @@ const FirstPersonControls = function(object, domElementA) {
 		lookDirection.set(0, 0, -1).applyQuaternion(quaternion);
 		spherical.setFromVector3(lookDirection);
 
-		lat = 90 - MathUtils.radToDeg(spherical.phi);
-		lon = MathUtils.radToDeg(spherical.theta);
+		// lat = 90 - MathUtils.radToDeg(spherical.phi);
+		// lon = MathUtils.radToDeg(spherical.theta);
 	}
 
 	function contextmenu(event) {
@@ -214,7 +214,7 @@ const FirstPersonControls = function(object, domElementA) {
 	};
 
 	this.update = (function() {
-		const targetPosition = new Vector3();
+		// const targetPosition = new Vector3();
 
 		return function update(delta) {
 			if (this.enabled === false) {

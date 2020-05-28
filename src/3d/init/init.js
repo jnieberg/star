@@ -5,6 +5,7 @@ import { initStars } from '../bodies/stars';
 import initShaders from './shaders';
 import initControls from './controls';
 import { TD } from '../../variables';
+import initEvents from './events';
 
 export function deleteThree(obj) {
 	if (obj) {
@@ -40,5 +41,6 @@ export default function init3d(win) {
 	initCamera();
 	initControls();
 	initStars();
+	initEvents();
 	animate();
 }

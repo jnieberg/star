@@ -15,7 +15,7 @@ function getPlanetName(star, index) {
 function getPlanetSize(star, index) {
 	MISC.rnd = seedrandom(`planet_size_${star.id}_${index}`);
 	const starSize = getStarSize(star);
-	return starSize * (MISC.rnd() * 0.1 + 0.005);
+	return starSize * (MISC.rnd() * 0.02 + 0.005);
 }
 
 function getPlanetColor(star, index) {
