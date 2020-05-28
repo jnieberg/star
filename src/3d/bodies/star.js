@@ -1,7 +1,7 @@
 import seedrandom from 'seedrandom';
 import { getPlanetInfo, drawPlanet } from './planets';
 import { toCelcius } from '../../misc/temperature';
-import getName from '../../name-generator/name';
+import getName from '../../misc/name';
 import { TD, MISC } from '../../variables';
 import * as THREE from 'three';
 import { deleteThree } from '../init/init';
@@ -56,7 +56,7 @@ function getStarPlanets(star) {
 }
 
 function getStarPlanetsString(star) {
-	return star.planets.map(planet => `  ${planet.id}. ${planet.name} / ${toCelcius(planet.temperature.min)} ${toCelcius(planet.temperature.max)}`);
+	return star.planets.map(planet => `  ${planet.id}. ${planet.name}`);
 }
 
 export function getStarName(star) {
@@ -103,12 +103,12 @@ export function getStarInfo(star) {
 }
 
 export function getStarInfoString(star) {
-	const planets = star.planets && star.planets.length ? [ 'Planets:', ...getStarPlanetsString(star) ] : [];
+	const planets = star.planets && star.planets.length ? `Planets: ${star.planets.length}` : '';
 	return [
 		star.name,
-		getStarColor(star) + ' ' + getStarSizeName(star),
-		'Temperature: ' + toCelcius(star.temperature),
-		...planets
+		`${getStarColor(star)} ${getStarSizeName(star)}`,
+		`Temperature: ${toCelcius(star.temperature)}`,
+		planets
 	];
 }
 
@@ -121,6 +121,11 @@ export default function drawStar() {
 		TD.colorHelper.setHSL(star.hue, 1.0, star.brightness);
 		const material = new THREE.MeshBasicMaterial({ color: TD.colorHelper });
 		TD.star.sphere = new THREE.Mesh(geometry, material);
+		MISC.rnd = seedrandom(`star_rotation_${star.id}`);
+		TD.star.sphere.position.set(0, 0, 0);
+		TD.star.sphere.rotation.x = Math.PI * MISC.rnd() * 2;
+		TD.star.sphere.rotation.y = Math.PI * MISC.rnd() * 2;
+		TD.star.sphere.rotation.z = Math.PI * MISC.rnd() * 2;
 		const flareMaterial = new THREE.SpriteMaterial({
 			map: TD.stars.texture,
 			color: TD.colorHelper,

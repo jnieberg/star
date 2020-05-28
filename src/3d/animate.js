@@ -1,10 +1,11 @@
 import { TD, EVENT } from '../variables';
-import drawStars from './bodies/stars';
-import raycast from './raycaster';
-import { updatePlanets } from './bodies/planets';
+import drawStars, { getStar } from './bodies/stars';
+import { getPlanets } from './bodies/planets';
 
 function render() {
-	raycast(TD.stars.object);
+	drawStars();
+	getStar();
+	getPlanets();
 	EVENT.controls.update(TD.clock.getDelta());
 	TD.renderer.render(TD.scene, TD.camera.object);
 }
@@ -12,6 +13,4 @@ function render() {
 export default function animate() {
 	requestAnimationFrame(animate);
 	render();
-	drawStars();
-	updatePlanets();
 };

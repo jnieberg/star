@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { TD, MISC } from '../../variables';
 import { deleteThree } from '../init/init';
 import { getStarData } from './star';
+import raycastStar from '../raycast/raycastStar';
 
 function listStarArea(x, y, z) {
 	MISC.rnd = seedrandom(`stars_${x}_${y}_${z}`);
@@ -26,7 +27,7 @@ function updateStars() {
 		TD.stars.geometry.setAttribute('position', new THREE.Float32BufferAttribute(TD.stars.positions, 3));
 		TD.stars.geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars.colors, 3)); // .setUsage(THREE.DynamicDrawUsage)
 		TD.stars.geometry.setAttribute('size', new THREE.Float32BufferAttribute(TD.stars.sizes, 1));
-		// TD.stars.geometry.verticesNeedUpdate = true;
+		TD.stars.geometry.verticesNeedUpdate = false;
 		TD.stars.geometry.computeBoundingSphere();
 		deleteThree(TD.stars.object);
 		TD.stars.object = new THREE.Points(TD.stars.geometry, TD.stars.material);
@@ -83,5 +84,11 @@ export default function drawStars() {
 		}
 		createStars();
 		updateStars();
+	}
+}
+
+export function getStar() {
+	if (TD.stars && TD.stars.object) {
+		raycastStar(TD.stars.object);
 	}
 }

@@ -33,9 +33,12 @@ export const TD = {
 		sphere: undefined,
 		flare: undefined,
 		light: undefined,
-		label: undefined,
 		planets: []
 	},
+	planet: {
+		this: undefined
+	},
+	label: undefined
 };
 
 export const EVENT = {
@@ -63,9 +66,9 @@ export const NAME_LETTERS = {
 		'qu', 'sl', 'sn', 'sm', 'tr', 'vl', 'vr', 'wr'
 	],
 	consM: [
-		'bb', 'dd', 'ff', 'kk', 'll', 'lp', 'lv', 'mm', 'nn', 'np', 'pp', 'rr', 'ss', 'tt'
+		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'mm', 'nn', 'np', 'pp', 'rr', 'ss', 'tt'
 	],
 	consME: [
-		'lf', 'lk', 'ls', 'mb', 'mp', 'ng', 'nk', 'rg', 'rk', 'rp', 'rs', 'rst', 'rt'
+		'ch', 'ck', 'gh', 'lf', 'lk', 'ls', 'mb', 'mp', 'ng', 'nk', 'rg', 'rk', 'rp', 'rs', 'rst', 'rt', 'tch'
 	]
 };

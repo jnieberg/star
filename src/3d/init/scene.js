@@ -12,5 +12,4 @@ export default function initScene(win) {
 	win.appendChild(TD.renderer.domElement);
 
 	TD.raycaster = new THREE.Raycaster();
-	TD.raycaster.params.Points.threshold = 0.2 * TD.scale;
 }

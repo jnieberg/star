@@ -46,7 +46,8 @@ const FirstPersonControls = function(object, domElementA) {
 	this.acceleration = false;
 
 	// internals
-	this.speedFactor = 1.0;
+	this.speedFactorStar = 1.0;
+	this.speedFactorPlanet = 1.0;
 
 	this.autoSpeedFactor = 0.0;
 
@@ -254,9 +255,9 @@ const FirstPersonControls = function(object, domElementA) {
 			if (this.moveDown) {
 				this.accU = this.acceleration ? this.accU - actualMoveSpeed * 0.05 : -actualMoveSpeed;
 			}
-			this.object.translateZ(this.accF * this.speedFactor);
-			this.object.translateX(this.accL * this.speedFactor);
-			this.object.translateY(this.accU * this.speedFactor);
+			this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
+			this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
+			this.object.translateY(this.accU * this.speedFactorStar * this.speedFactorPlanet);
 			this.accF = this.accF * 0.99;
 			this.accL = this.accL * 0.99;
 			this.accU = this.accU * 0.99;
@@ -273,25 +274,29 @@ const FirstPersonControls = function(object, domElementA) {
 				verticalLookRatio = Math.PI / (this.verticalMax - this.verticalMin);
 			}
 
-			lon = lon - this.mouseX * actualLookSpeed;
+			// lon = lon - this.mouseX * actualLookSpeed;
+			// if (this.lookVertical) {
+			// 	lat = lat - this.mouseY * actualLookSpeed * verticalLookRatio;
+			// }
+
+			// lat = Math.max(-85, Math.min(85, lat));
+
+			// let phi = MathUtils.degToRad(90 - lat);
+			// const theta = MathUtils.degToRad(lon);
+
+			// if (this.constrainVertical) {
+			// 	phi = MathUtils.mapLinear(phi, 0, Math.PI, this.verticalMin, this.verticalMax);
+			// }
+
+			// const position = this.object.position;
+
+			// targetPosition.setFromSphericalCoords(1, phi, theta).add(position);
+
+			// this.object.lookAt(targetPosition);
 			if (this.lookVertical) {
-				lat = lat - this.mouseY * actualLookSpeed * verticalLookRatio;
+				this.object.rotateX(-this.mouseY * actualLookSpeed * verticalLookRatio * 0.02);
 			}
-
-			lat = Math.max(-85, Math.min(85, lat));
-
-			let phi = MathUtils.degToRad(90 - lat);
-			const theta = MathUtils.degToRad(lon);
-
-			if (this.constrainVertical) {
-				phi = MathUtils.mapLinear(phi, 0, Math.PI, this.verticalMin, this.verticalMax);
-			}
-
-			const position = this.object.position;
-
-			targetPosition.setFromSphericalCoords(1, phi, theta).add(position);
-
-			this.object.lookAt(targetPosition);
+			this.object.rotateY(-this.mouseX * actualLookSpeed * 0.02);
 		};
 	}());
 
