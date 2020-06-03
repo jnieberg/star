@@ -126,13 +126,7 @@
 		"no-undefined": "off",
 		"no-unused-vars": "warn",
 		"no-use-before-define": "error",
-		"callback-return": [
-			"warn",
-			[
-				"callback",
-				"next"
-			]
-		],
+		"callback-return": "off",
 		"global-require": "error",
 		"handle-callback-err": "warn",
 		"no-mixed-requires": "warn",

@@ -19,4 +19,5 @@ export function cameraLookDir() {
 export default function initCamera() {
 	TD.camera.object = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, TD.camera.near, TD.camera.far * TD.scale);
 	loadCamera();
+	TD.scene.add(TD.camera.object);
 }

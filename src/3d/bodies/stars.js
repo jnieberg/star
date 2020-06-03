@@ -36,10 +36,9 @@ function updateStars() {
 }
 
 export function initStars() {
-	TD.stars.texture = new THREE.TextureLoader().load('/sun.png');
 	TD.stars.geometry = new THREE.BufferGeometry();
 	const uniforms = {
-		texture: { type: 't', value: TD.stars.texture },
+		texture: { type: 't', value: TD.texture.stars },
 		fogColor: { type: 'c', value: TD.scene.fog.color },
 		fogNear: { type: 'f', value: TD.scene.fog.near },
 		fogFar: { type: 'f', value: TD.scene.fog.far }
@@ -51,7 +50,7 @@ export function initStars() {
 		vertexShader: vertexShader,
 		fragmentShader: fragmentShader,
 		blending: THREE.AdditiveBlending,
-		depthTest: true,
+		depthTest: false,
 		vertexColors: true,
 		fog: true
 	});

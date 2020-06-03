@@ -22,11 +22,11 @@ export default function initShaders(win) {
 
         #ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT
-              float depth = gl_FragDepthEXT / gl_FragCoord.w;
+              float depth = 500.0 * gl_FragDepthEXT / gl_FragCoord.w;
           #else
-              float depth = gl_FragCoord.z / gl_FragCoord.w;
-          #endif
-          float fogFactor = smoothstep( fogNear, fogFar, depth );
+              float depth = 500.0 * gl_FragCoord.z / gl_FragCoord.w;
+					#endif
+          float fogFactor = smoothstep( fogFar, 0.0, depth );
           gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
         #endif
 

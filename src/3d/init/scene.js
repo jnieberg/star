@@ -5,8 +5,14 @@ export default function initScene(win) {
 	TD.scene = new THREE.Scene();
 	TD.scene.fog = new THREE.Fog(0x000000, TD.camera.fade * TD.scale, TD.camera.far * TD.scale);
 	TD.renderer = new THREE.WebGLRenderer({
+		precision: 'highp',
+		powerPreference: 'high-performance',
+		stencil: false,
+		alpha: true,
 		antialias: true,
+		physicallyCorrectLights: true
 	});
+	TD.renderer.autoClear = false;
 	TD.renderer.setPixelRatio(window.devicePixelRatio);
 	TD.renderer.setSize(window.innerWidth, window.innerHeight);
 	win.appendChild(TD.renderer.domElement);

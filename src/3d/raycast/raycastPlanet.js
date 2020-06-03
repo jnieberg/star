@@ -2,7 +2,7 @@ import { EVENT, TD } from '../../variables';
 import setLabel from '../label/label';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
-import { getPlanetInfoString } from '../bodies/planets';
+import { getPlanetInfoString, drawPlanet } from '../bodies/planet';
 import * as THREE from 'three';
 
 function raycastPlanetEvents(intersect) {
@@ -11,14 +11,13 @@ function raycastPlanetEvents(intersect) {
 		const planet = mesh.obj;
 		if (planet && (!TD.planet.this || TD.planet.this.id !== planet.id || !TD.label)) {
 			TD.planet.this = planet;
-			// drawPlanet();
 			const position = new THREE.Vector3();
-			TD.scene.updateMatrixWorld(true);
 			position.setFromMatrixPosition(mesh.matrixWorld);
 			TD.planet.this.x = position.x;
 			TD.planet.this.y = position.y;
 			TD.planet.this.z = position.z;
-			setLabel(getPlanetInfoString(TD.planet.this), position.x, position.y, position.z);
+			setLabel(getPlanetInfoString(TD.planet.this));
+			drawPlanet(TD.planet.this);
 		}
 	}
 }

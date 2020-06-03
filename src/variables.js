@@ -19,6 +19,11 @@ export const TD = {
 	scene: undefined,
 	renderer: undefined,
 	raycaster: undefined,
+	texture: {
+		stars: undefined,
+		star: undefined,
+		ring: undefined
+	},
 	stars: {
 		list: [],
 		object: undefined,
@@ -36,18 +41,53 @@ export const TD = {
 		planets: []
 	},
 	planet: {
-		this: undefined
+		this: undefined,
+		sphere: undefined,
+		atmosphere: undefined
 	},
 	label: undefined
 };
 
 export const EVENT = {
 	controls: undefined,
-	mouse: new THREE.Vector2()
+	mouse: new THREE.Vector2(),
+	mouse2d: new THREE.Vector2()
 };
 
 export const MISC = {
 	rnd: seedrandom('foo')
+};
+
+export const STAR = {
+	color: {
+		hue:  {
+			Purple: 0.9,
+			Blue: 0.77,
+			Green: 0.5,
+			Yellow: 0.2,
+			Orange: 0.15,
+			Red: 0.05
+		},
+		brightness: {
+			'White': 1,
+			'Bright': 0.9,
+			'': 0.7,
+			'Dark': 0.3
+		}
+	},
+	temperature: {
+		Red: { min: 500, max: 3700 },
+		Orange: { min: 3700, max: 5200 },
+		Yellow: { min: 5200, max: 6000 },
+		White: { min: 6000, max: 7500 },
+		Green: { min: 7500, max: 10000 },
+		Blue: { min: 10000, max: 30000 },
+		Purple: { min: 30000, max: 40000 },
+	}
+};
+
+export const ASYNC = {
+	render: undefined
 };
 
 export const NAME_LETTERS = {
