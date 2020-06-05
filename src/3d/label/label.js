@@ -68,6 +68,7 @@ export default function setLabel(textA) {
 			});
 			TD.label = new THREE.Sprite(labelMaterial);
 			TD.label.scale.set(0.0012 * (offsetX + width), 0.0012 * (offsetY + height));
+			TD.label.renderOrder = 999;
 			TD.label.onBeforeRender = renderer => renderer.clearDepth();
 			TD.camera.object.add(TD.label);
 		}

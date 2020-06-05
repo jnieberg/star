@@ -9,7 +9,7 @@ import initTextures from './texture';
 
 export function deleteThree(obj) {
 	if (obj) {
-		while (obj.children.length > 0) {
+		while (obj.children && obj.children.length > 0) {
 			deleteThree(obj.children[0]);
 		}
 		if (obj.geometry) {

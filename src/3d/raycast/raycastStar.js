@@ -22,7 +22,7 @@ function raycastStarEvents(intersect) {
 export default function raycastStar(obj) {
 	if (obj) {
 		const distance = 10;
-		const intersect = raycastFound(obj, distance, 0.2);
+		const intersect = raycastFound(obj, distance, 0.075);
 		if (!TD.planet.this) {
 			if (intersect) {
 				raycastStarEvents(intersect);

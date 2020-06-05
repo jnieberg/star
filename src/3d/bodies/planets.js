@@ -21,6 +21,7 @@ export default function drawPlanets(star) {
 				size: planet.size * 0.001 * TD.scale,
 				detail: 16,
 				color: planet.color,
+				emissive: planet.atmosphere.color,
 				rotate: Math.PI * MISC.rnd() * 2,
 				distance: planet.distance * 0.001 * TD.scale,
 				parent: TD.star.sphere
@@ -36,20 +37,31 @@ export default function drawPlanets(star) {
 			if (planet.ring) {
 				MISC.rnd = seedrandom(`ring_rotation_${TD.star.this.id}_${planet.id}`);
 				TD.colorHelper.setRGB(planet.ring.color.r, planet.ring.color.g, planet.ring.color.b);
-				const ringGeometry = new THREE.PlaneBufferGeometry(planet.ring.size * 0.001 * TD.scale, planet.ring.size * 0.001 * TD.scale);
-				const ringMaterial = new THREE.MeshStandardMaterial({
-					map: TD.texture.ring,
+				const ringGeometry = new THREE.RingBufferGeometry(planet.ring.size * 0.0006 * TD.scale, planet.ring.size * 0.001 * TD.scale, 12);
+				// ringGeometry.verticesNeedUpdate = true;
+				// ringGeometry.elementsNeedUpdate = true;
+				// ringGeometry.morphTargetsNeedUpdate = true;
+				// ringGeometry.uvsNeedUpdate = true;
+				// ringGeometry.normalsNeedUpdate = true;
+				// ringGeometry.colorsNeedUpdate = true;
+				// ringGeometry.tangentsNeedUpdate = true;
+				const ringMaterial = new THREE.MeshLambertMaterial({
+					map: TD.texture.planet.ring,
 					side: THREE.DoubleSide,
 					color: TD.colorHelper,
+					emissive: TD.colorHelper,
+					emissiveIntensity: 0.5,
 					opacity: planet.ring.color.a,
 					transparent: true,
 					blending: THREE.NormalBlending
 				});
 				const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+				ringMesh.renderOrder = 1;
 				ringMesh.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+				ringMesh.castShadow = true;
+				ringMesh.receiveShadow = true;
 				TD.star.planets[index].add(ringMesh);
 			}
-			// TD.star.sphere.add(TD.star.planets[index]);
 		}
 	}
 }

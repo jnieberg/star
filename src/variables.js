@@ -16,13 +16,20 @@ export const TD = {
 	},
 	clock: undefined,
 	colorHelper: new THREE.Color(),
+	colorHelper2: new THREE.Color(),
 	scene: undefined,
 	renderer: undefined,
 	raycaster: undefined,
 	texture: {
-		stars: undefined,
-		star: undefined,
-		ring: undefined
+		star: {
+			small: undefined,
+			large: undefined,
+			surface: undefined
+		},
+		planet: {
+			surface: [],
+			ring: undefined
+		}
 	},
 	stars: {
 		list: [],
@@ -38,6 +45,7 @@ export const TD = {
 		sphere: undefined,
 		flare: undefined,
 		light: undefined,
+		pointLight: undefined,
 		planets: []
 	},
 	planet: {
@@ -84,6 +92,10 @@ export const STAR = {
 		Blue: { min: 10000, max: 30000 },
 		Purple: { min: 30000, max: 40000 },
 	}
+};
+
+export const PLANET = {
+	surfaceMax: 16
 };
 
 export const ASYNC = {

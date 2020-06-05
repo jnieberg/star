@@ -1,13 +1,15 @@
 import seedrandom from 'seedrandom';
 import getName from '../../misc/name';
 import { getStarTemperature, getStarSize } from './star';
-import { MISC, TD } from '../../variables';
+import { MISC, TD, PLANET } from '../../variables';
 import raycastPlanet from '../raycast/raycastPlanet';
 import { toCelcius } from '../../misc/temperature';
 import getSize from '../../misc/size';
 import * as THREE from 'three';
 import createSphere from '../tools/createObject';
 import { deleteThree } from '../init/init';
+import THREEx from '../../lib/threex';
+import getColorString from '../../misc/color';
 
 function getPlanetName(star, index) {
 	MISC.rnd = seedrandom(`planet_${star.id}_${index}`);
@@ -49,9 +51,8 @@ function getPlanetTemperature(star, index) {
 
 function getPlanetAtmosphere(star, index) {
 	MISC.rnd = seedrandom(`planet_atmosphere_${star.id}_${index}`);
-	const size = getPlanetSize(star, index);
 	return {
-		size: size + MISC.rnd() * size * 0.2,
+		size: MISC.rnd() * 0.2,
 		color: {
 			r: MISC.rnd(),
 			g: MISC.rnd(),
@@ -61,12 +62,17 @@ function getPlanetAtmosphere(star, index) {
 	};
 }
 
+function getPlanetSurface(star, index) {
+	MISC.rnd = seedrandom(`planet_surface_${star.id}_${index}`);
+	return Math.floor(MISC.rnd() * PLANET.surfaceMax);
+}
+
 function getPlanetRing(star, index) {
 	MISC.rnd = seedrandom(`planet_ring_${star.id}_${index}`);
 	const size = getPlanetSize(star, index);
 	 if (size > 0.01 && MISC.rnd() < 0.5) {
 		return {
-			size: size + 0.2 + MISC.rnd() * size * 3,
+			size: size * 2 + MISC.rnd() * size * 3,
 			color: {
 				r: MISC.rnd(),
 				g: MISC.rnd(),
@@ -93,7 +99,8 @@ export function getPlanetInfo(star, index) {
 		size: getPlanetSize(star, index),
 		color: getPlanetColor(star, index),
 		atmosphere: getPlanetAtmosphere(star, index),
-		ring: getPlanetRing(star, index)
+		ring: getPlanetRing(star, index),
+		surface: getPlanetSurface(star, index)
 	};
 }
 
@@ -130,6 +137,7 @@ export function drawPlanet(planet) {
 		deleteThree(TD.planet.sphere);
 		deleteThree(TD.planet.atmosphere);
 		TD.planet.sphere = createSphere({
+			texture: TD.texture.planet.surface[planet.surface],
 			size: planet.size * 0.001 * TD.scale,
 			detail: 64,
 			color: planet.color,
@@ -137,22 +145,29 @@ export function drawPlanet(planet) {
 			distance: planet.distance * 0.001 * TD.scale,
 			parent: TD.star.sphere
 		});
-		TD.planet.atmosphere = createSphere({
-			size: planet.atmosphere.size * 0.001 * TD.scale,
-			detail: 64,
-			color: planet.atmosphere.color,
-			rotate,
-			distance: planet.distance * 0.001 * TD.scale,
-			parent: TD.star.sphere
+		// TD.planet.atmosphere = createSphere({
+		// 	size: planet.atmosphere.size * 0.001 * TD.scale,
+		// 	detail: 64,
+		// 	color: planet.atmosphere.color,
+		// 	emissive: planet.atmosphere.color,
+		// 	rotate,
+		// 	distance: planet.distance * 0.001 * TD.scale,
+		// 	parent: TD.star.sphere
+		// });
+		const color = getColorString(planet.atmosphere.color);
+		TD.planet.atmosphere = new THREEx.GeometricGlowMesh(TD.planet.sphere, {
+			size: planet.atmosphere.size,
+			color,
+			opacity: planet.atmosphere.color.a
 		});
+		// TD.planet.sphere.add(TD.planet.atmosphere);
+		TD.star.light.visible = true;
+		TD.star.light.target = TD.planet.sphere;
+		TD.star.light.target.updateMatrixWorld();
 
-		// const geometry = new THREE.SphereGeometry(size, 64, 64);
-		// TD.colorHelper.setRGB(planet.color.r, planet.color.g, planet.color.b);
-		// const material = new THREE.MeshStandardMaterial({ color: TD.colorHelper });
-		// planet.sphere = new THREE.Mesh(geometry, material);
-		// planet.sphere.position.set(0, 0, 0);
-		// planet.sphere.rotation.y = Math.PI * MISC.rnd() * 2;
-		// planet.sphere.translateX(planet.distance * 0.001 * TD.scale);
-		// TD.star.sphere.add(planet.sphere);
+		// const spotLightHelper = new THREE.SpotLightHelper(TD.star.light);
+		// TD.scene.add(spotLightHelper);
+		TD.star.light.updateMatrix();
+		TD.star.light.updateMatrixWorld();
 	}
 }

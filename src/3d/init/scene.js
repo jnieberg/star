@@ -7,12 +7,15 @@ export default function initScene(win) {
 	TD.renderer = new THREE.WebGLRenderer({
 		precision: 'highp',
 		powerPreference: 'high-performance',
-		stencil: false,
+		// stencil: false,
 		alpha: true,
 		antialias: true,
 		physicallyCorrectLights: true
 	});
-	TD.renderer.autoClear = false;
+	TD.renderer.autoClear = true;
+	TD.renderer.shadowMap.enabled = true;
+	TD.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	TD.renderer.shadowMap.needsUpdate = true;
 	TD.renderer.setPixelRatio(window.devicePixelRatio);
 	TD.renderer.setSize(window.innerWidth, window.innerHeight);
 	win.appendChild(TD.renderer.domElement);
