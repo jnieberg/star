@@ -32,32 +32,28 @@ export default function drawPlanets(star) {
 			trajectoryMesh.rotation.x = Math.PI * 0.5;
 			trajectoryMesh.scale.set(planet.distance * 0.001 * TD.scale, planet.distance * 0.001 * TD.scale, planet.distance * 0.001 * TD.scale);
 			trajectoryMesh.position.set(-planet.distance * 0.001 * TD.scale, 0, 0);
+			trajectoryMesh.castShadow = false;
+			trajectoryMesh.receiveShadow = false;
+			trajectoryMesh.renderOrder = 2;
 			TD.star.planets[index].add(trajectoryMesh);
 			TD.star.planets[index].obj = planet;
 			if (planet.ring) {
-				MISC.rnd = seedrandom(`ring_rotation_${TD.star.this.id}_${planet.id}`);
 				TD.colorHelper.setRGB(planet.ring.color.r, planet.ring.color.g, planet.ring.color.b);
-				const ringGeometry = new THREE.RingBufferGeometry(planet.ring.size * 0.0006 * TD.scale, planet.ring.size * 0.001 * TD.scale, 12);
-				// ringGeometry.verticesNeedUpdate = true;
-				// ringGeometry.elementsNeedUpdate = true;
-				// ringGeometry.morphTargetsNeedUpdate = true;
-				// ringGeometry.uvsNeedUpdate = true;
-				// ringGeometry.normalsNeedUpdate = true;
-				// ringGeometry.colorsNeedUpdate = true;
-				// ringGeometry.tangentsNeedUpdate = true;
-				const ringMaterial = new THREE.MeshLambertMaterial({
+				const ringGeometry = new THREE.RingGeometry(planet.ring.size * 0.0006 * TD.scale, planet.ring.size * 0.001 * TD.scale, 12);
+				const ringMaterial = new THREE.MeshStandardMaterial({
 					map: TD.texture.planet.ring,
-					side: THREE.DoubleSide,
 					color: TD.colorHelper,
-					emissive: TD.colorHelper,
-					emissiveIntensity: 0.5,
 					opacity: planet.ring.color.a,
+					side: THREE.DoubleSide,
 					transparent: true,
-					blending: THREE.NormalBlending
+					blending: THREE.NormalBlending,
+					needsUpdate: true
 				});
 				const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-				ringMesh.renderOrder = 1;
+				// ringMesh.renderOrder = 1;
+				MISC.rnd = seedrandom(`ring_rotation_${TD.star.this.id}_${planet.id}`);
 				ringMesh.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+				// ringMesh.rotation.set(Math.PI * MISC.rnd() * 0.5, Math.PI * MISC.rnd() * 0.5, Math.PI * MISC.rnd() * 0.5); //TEST
 				ringMesh.castShadow = true;
 				ringMesh.receiveShadow = true;
 				TD.star.planets[index].add(ringMesh);

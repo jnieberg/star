@@ -9,17 +9,10 @@ export default function createSphere({ texture, size, detail, color: colorA, emi
 	TD.colorHelper2.setRGB(emissive.r, emissive.g, emissive.b);
 
 	const geometry = new THREE.SphereGeometry(size, detail, detail);
-	// geometry.verticesNeedUpdate = true;
-	// geometry.elementsNeedUpdate = true;
-	// geometry.morphTargetsNeedUpdate = true;
-	// geometry.uvsNeedUpdate = true;
-	// geometry.normalsNeedUpdate = true;
-	// geometry.colorsNeedUpdate = true;
-	// geometry.tangentsNeedUpdate = true;
 	const params = transparent ?
-		{ map: texture || null, color: 0x000000, emissive: TD.colorHelper2, emissiveIntensity: 0.25, transparent: true, blending: THREE.AdditiveBlending, side: THREE.BackSide, needsUpdate: true } :
-		{ map: texture || null, color: TD.colorHelper, emissive: TD.colorHelper2, emissiveIntensity: 0.5, side: THREE.FrontSide, needsUpdate: true };
-	const material = new THREE.MeshLambertMaterial(params);
+		{ map: texture || null, color: 0x000000, emissive: TD.colorHelper2, emissiveIntensity: 0.25, transparent: true, blending: THREE.AdditiveBlending, side: THREE.BackSide, needsUpdate: true, shininess: 0 } :
+		{ map: texture || null, color: TD.colorHelper, emissive: TD.colorHelper2, emissiveIntensity: 0.25, side: THREE.FrontSide, needsUpdate: true, shininess: 0 };
+	const material = new THREE.MeshPhongMaterial(params);
 	if (material.map) {
 		material.map.minFilter = THREE.LinearFilter;
 	}
@@ -27,7 +20,7 @@ export default function createSphere({ texture, size, detail, color: colorA, emi
 	const mesh = new THREE.Mesh(geometry, material);
 	mesh.rotation.y = rotate;
 	if (transparent) {
-		const material2 = new THREE.MeshLambertMaterial({ color: TD.colorHelper, opacity: color.a, transparent: true, blending: THREE.AdditiveBlending, side: THREE.FrontSide, needsUpdate: true });
+		const material2 = new THREE.MeshPhongMaterial({ color: TD.colorHelper, opacity: color.a, transparent: true, blending: THREE.AdditiveBlending, side: THREE.FrontSide, needsUpdate: true, shininess: 0 });
 		material2.needsUpdate = true;
 		const mesh2 = new THREE.Mesh(geometry, material2);
 		mesh.add(mesh2);
@@ -36,6 +29,13 @@ export default function createSphere({ texture, size, detail, color: colorA, emi
 	}
 	mesh.receiveShadow = true;
 	mesh.translateX(distance);
+	// geometry.verticesNeedUpdate = true;
+	// geometry.elementsNeedUpdate = true;
+	// geometry.morphTargetsNeedUpdate = true;
+	// geometry.uvsNeedUpdate = true;
+	// geometry.normalsNeedUpdate = true;
+	// geometry.colorsNeedUpdate = true;
+	// geometry.tangentsNeedUpdate = true;
 	parent.add(mesh);
 	return mesh;
 }

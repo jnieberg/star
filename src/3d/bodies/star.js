@@ -157,8 +157,8 @@ export default function drawStar(star) {
 		TD.star.sphere.rotation.x = Math.PI * MISC.rnd() * 2;
 		TD.star.sphere.rotation.y = Math.PI * MISC.rnd() * 2;
 		TD.star.sphere.rotation.z = Math.PI * MISC.rnd() * 2;
-		TD.star.sphere.castShadow = true;
-		TD.star.sphere.receiveShadow = true;
+		TD.star.sphere.castShadow = false;
+		TD.star.sphere.receiveShadow = false;
 
 
 		const material2 = new THREE.MeshBasicMaterial({
@@ -200,20 +200,27 @@ export default function drawStar(star) {
 		TD.star.flare.receiveShadow = false;
 		TD.star.sphere.add(TD.star.flare);
 
-		TD.star.pointLight = new THREE.PointLight(TD.colorHelper, 1, TD.camera.far * 0.1 * TD.scale);
+		TD.star.pointLight = new THREE.PointLight(TD.colorHelper, 2, TD.camera.far * 0.1 * TD.scale);
 		TD.star.pointLight.castShadow = false;
+		TD.star.pointLight.receiveShadow = false;
 		TD.star.sphere.add(TD.star.pointLight);
 
-		TD.star.light = new THREE.SpotLight(TD.colorHelper);
-		TD.star.light.updateMatrix();
-		TD.star.light.updateMatrixWorld();
+		TD.star.light = new THREE.DirectionalLight(TD.colorHelper, 5);
 		TD.star.light.castShadow = true;
-		TD.star.light.angle = Math.PI / 8;
+		TD.star.light.angle = Math.PI / 16;
+		TD.star.light.penumbra = 0.5;
+		TD.star.light.power = 10;
+		TD.star.light.shadow.bias = 0;
 		TD.star.light.shadow.mapSize.width = 1024;
 		TD.star.light.shadow.mapSize.height = 1024;
-		TD.star.light.shadow.camera.near = TD.camera.near * 3 * TD.scale;
+		TD.star.light.shadow.radius = 2;
+		TD.star.light.shadow.camera.left = -30;
+		TD.star.light.shadow.camera.right = 30;
+		TD.star.light.shadow.camera.top = 30;
+		TD.star.light.shadow.camera.bottom = -30;
+		TD.star.light.shadow.camera.near = size;// TD.camera.near * TD.scale;
 		TD.star.light.shadow.camera.far = TD.camera.far * 0.1 * TD.scale;
-		TD.star.light.shadow.camera.fov = 35;
+		TD.star.light.shadow.camera.fov = 32;
 		TD.star.sphere.add(TD.star.light);
 		TD.scene.add(TD.star.light.target);
 		TD.star.light.visible = false;

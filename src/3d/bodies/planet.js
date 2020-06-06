@@ -77,7 +77,7 @@ function getPlanetRing(star, index) {
 				r: MISC.rnd(),
 				g: MISC.rnd(),
 				b: MISC.rnd(),
-				a: MISC.rnd() * 0.5 + 0.25
+				a: MISC.rnd() * 0.5 + 0.5
 			}
 		};
 	}
@@ -165,8 +165,7 @@ export function drawPlanet(planet) {
 		TD.star.light.target = TD.planet.sphere;
 		TD.star.light.target.updateMatrixWorld();
 
-		// const spotLightHelper = new THREE.SpotLightHelper(TD.star.light);
-		// TD.scene.add(spotLightHelper);
+		// const spotLightHelper = new THREE.SpotLightHelper(TD.star.light); TD.scene.add(spotLightHelper); // TEST
 		TD.star.light.updateMatrix();
 		TD.star.light.updateMatrixWorld();
 	}

@@ -1,5 +1,5 @@
 import { EVENT, TD } from '../../variables';
-import setLabel from '../label/label';
+import setLabel, { hideLabel, showLabel } from '../label/label';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
 import { getPlanetInfoString, drawPlanet } from '../bodies/planet';
@@ -9,14 +9,18 @@ function raycastPlanetEvents(intersect) {
 	const mesh = intersect.object;
 	if (mesh) {
 		const planet = mesh.obj;
-		if (planet && (!TD.planet.this || TD.planet.this.id !== planet.id || !TD.label)) {
+		if (planet && (!TD.planet.this || TD.planet.this.id !== planet.id || !TD.label || !TD.label.visible)) {
+			const updateLabel = TD.planet.this !== planet;
 			TD.planet.this = planet;
 			const position = new THREE.Vector3();
 			position.setFromMatrixPosition(mesh.matrixWorld);
 			TD.planet.this.x = position.x;
 			TD.planet.this.y = position.y;
 			TD.planet.this.z = position.z;
-			setLabel(getPlanetInfoString(TD.planet.this));
+			if (updateLabel) {
+				setLabel(getPlanetInfoString(TD.planet.this));
+			}
+			showLabel();
 			drawPlanet(TD.planet.this);
 		}
 	}
@@ -28,8 +32,8 @@ export default function raycastPlanet(obj) {
 		const intersect = raycastFound(obj, distance, 2, true);
 		if (intersect) {
 			raycastPlanetEvents(intersect);
-		} else if (TD.planet && TD.planet.this && TD.label) {
-			setLabel();
+		} else if (TD.planet && TD.planet.this && TD.label && TD.label.visible) {
+			hideLabel();
 		}
 		if (TD.planet && TD.planet.this) {
 			const distanceCam = distanceToCamera(TD.planet.this.x, TD.planet.this.y, TD.planet.this.z);

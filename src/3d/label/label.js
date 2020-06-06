@@ -10,6 +10,18 @@ export function eventLabel() {
 	}
 }
 
+export function showLabel() {
+	if (TD.label) {
+		TD.label.visible = true;
+	}
+}
+
+export function hideLabel() {
+	if (TD.label) {
+		TD.label.visible = false;
+	}
+}
+
 export default function setLabel(textA) {
 	deleteThree(TD.label);
 	TD.label = undefined;
