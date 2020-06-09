@@ -3,40 +3,27 @@ import * as THREE from 'three';
 const THREEx = {};
 
 THREEx.createAtmosphereMaterial = function() {
-	const vertexShader	= [
-		'varying vec3	vVertexWorldPosition;',
-		'varying vec3	vVertexNormal;',
-
-		'varying vec4	vFragColor;',
-
-		'void main(){',
-		'	vVertexNormal	= normalize(normalMatrix * normal);',
-
-		'	vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;',
-
-		'	// set gl_Position',
-		'	gl_Position	= projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-		'}',
-
-	].join('\n');
-	const fragmentShader	= [
-		'uniform vec3	glowColor;',
-		'uniform float	coeficient;',
-		'uniform float	power;',
-
-		'varying vec3	vVertexNormal;',
-		'varying vec3	vVertexWorldPosition;',
-
-		'varying vec4	vFragColor;',
-
-		'void main(){',
-		'	vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;',
-		'	vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
-		'	viewCameraToVertex	= normalize(viewCameraToVertex);',
-		'	float intensity		= pow(coeficient + dot(vVertexNormal, viewCameraToVertex), power);',
-		'	gl_FragColor		= vec4(glowColor, intensity);',
-		'}',
-	].join('\n');
+	const vertexShader	= `
+	varying vec3	vVertexWorldPosition;
+	varying vec3	vVertexNormal;
+	void main() {
+		vVertexNormal	= normalize(normalMatrix * normal);
+		vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;
+		gl_Position	= projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+	}`;
+	const fragmentShader	= `
+	uniform vec3	color;
+	uniform float	coeficient;
+	uniform float	power;
+	varying vec3	vVertexNormal;
+	varying vec3	vVertexWorldPosition;
+	void main() {
+		vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;
+		vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;
+		viewCameraToVertex	= normalize(viewCameraToVertex);
+		float intensity		= pow(coeficient + dot(vVertexNormal, viewCameraToVertex), power);
+		gl_FragColor		= vec4(color, intensity);
+	}`;
 
 	// create custom material from the shader code above
 	//   that is within specially labeled script tags
@@ -50,10 +37,10 @@ THREEx.createAtmosphereMaterial = function() {
 				type	: 'f',
 				value	: 2
 			},
-			glowColor	: {
+			color	: {
 				type	: 'c',
 				value	: new THREE.Color('pink')
-			},
+			}
 		},
 		vertexShader	: vertexShader,
 		fragmentShader	: fragmentShader,
@@ -91,31 +78,36 @@ THREEx.dilateGeometry	= function(geometry, length) {
 	});
 };
 
-THREEx.GeometricGlowMesh = function(mesh, { size: sizeA = 0.1, color: colorS = 'rgba(255, 255, 255, 1.0)', power = 2.5, opacity: opacityA = 0.5 } = {}) {
-	const size = sizeA;
-	const opacity = opacityA;
+THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS = 'rgba(255, 255, 255, 1.0)', colorInner: colorInnerS = colorS, power = 2.5, opacity = 0.5 } = {}) {
 	const color = new THREE.Color(colorS);
-	let geometry	= mesh.geometry.clone();
-	THREEx.dilateGeometry(geometry, size * 0.01);
-	let material	= THREEx.createAtmosphereMaterial();
-	material.uniforms.glowColor.value	= color;
-	material.uniforms.coeficient.value = opacity * 0.25 + 1.0;
-	material.uniforms.power.value = power + 1.0;
-	const insideMesh	= new THREE.Mesh(geometry, material);
+	const colorInner = new THREE.Color(colorInnerS);
+	// THREEx.dilateGeometry(geometry, thickness * 0.01);
+	let geometry = new THREE.SphereBufferGeometry(size * 1.01, 64, 64);
+	let material = THREEx.createAtmosphereMaterial();
+	material.uniforms.color.value = colorInner;
+	material.uniforms.coeficient.value = opacity + 0.75;
+	material.uniforms.power.value = power;
+	material.needsUpdate = true;
+	const insideMesh = new THREE.Mesh(geometry, material);
+	// insideMesh.scale.set(size * 1.01, size * 1.01, size * 1.01);
 	insideMesh.castShadow = false;
 	insideMesh.receiveShadow = false;
+	// insideMesh.renderOrder = 1;
 	mesh.add(insideMesh);
 
-	geometry	= mesh.geometry.clone();
-	THREEx.dilateGeometry(geometry, size);
-	material	= THREEx.createAtmosphereMaterial();
-	material.uniforms.glowColor.value	= color;
-	material.uniforms.coeficient.value = opacity * 0.5;
-	material.uniforms.power.value = size + power;
+	// THREEx.dilateGeometry(geometry, thickness * 0.5);
+	geometry = new THREE.SphereBufferGeometry(size * 1.01 + thickness, 64, 64);
+	material = THREEx.createAtmosphereMaterial();
+	material.uniforms.color.value	= color;
+	material.uniforms.coeficient.value = opacity - thickness * 0.01;
+	material.uniforms.power.value = power;
 	material.side	= THREE.BackSide;
+	material.needsUpdate = true;
 	const outsideMesh	= new THREE.Mesh(geometry, material);
+	// outsideMesh.scale.set(size + thickness * 0.5, size + thickness * 0.5, size + thickness * 0.5);
 	outsideMesh.castShadow = false;
 	outsideMesh.receiveShadow = false;
+	// outsideMesh.renderOrder = 1;
 	mesh.add(outsideMesh);
 
 	// expose a few variable

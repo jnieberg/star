@@ -1,4 +1,3 @@
 # Star Leaper
-
-label add to parent star instead of scene
-then rotate planets again
+set scene to 0,0,0
+speed dust effect

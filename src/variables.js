@@ -5,8 +5,8 @@ export const TD = {
 	scale: 10000,
 	camera: {
 		object: undefined,
-		near: 0.001,
-		fade: 100,
+		near: 0.1,
+		fade: 149,
 		far: 150,
 		position: {
 			x: -1,
@@ -42,18 +42,21 @@ export const TD = {
 	},
 	star: {
 		this: undefined,
+		object: undefined,
 		sphere: undefined,
-		flare: undefined,
 		light: undefined,
 		pointLight: undefined,
-		planets: []
+		children: [] // Low quality planets
 	},
-	planet: {
+	planet: { // High quality planet
 		this: undefined,
+		object: undefined,
 		sphere: undefined,
-		atmosphere: undefined
+		atmosphere: undefined,
+		atmosphere2: undefined,
+		children: []
 	},
-	label: undefined
+	label: {}
 };
 
 export const EVENT = {
@@ -105,22 +108,22 @@ export const ASYNC = {
 export const NAME_LETTERS = {
 	vowels: [
 		'a', 'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'i', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'y',
-		'au', 'ay', 'ee', 'ei', 'eu', 'ey', 'ie', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'uy'
+		'au', 'ay', 'ea', 'ee', 'ei', 'eu', 'ey', 'ie', 'iu', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'ui', 'uy'
 	],
 	cons: [
 		'd', 'd', 'd', 'd', 'f', 'g', 'g', 'g', 'k', 'k', 'k', 'l', 'l', 'l', 'l', 'm', 'm', 'm', 'm',
 		'n', 'n', 'n', 'n', 'p', 'p', 'p', 'p', 'r', 'r', 'r', 'r', 's', 's', 's', 's', 't', 't', 't', 't',
-		'st'
+		'sh', 'st'
 	],
 	consSM: [
 		'b', 'b', 'c', 'h', 'h', 'h', 'j', 'j', 'v', 'v', 'w', 'w', 'x', 'z',
 		'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'kl', 'kn', 'kr', 'pl', 'pr',
-		'qu', 'sl', 'sn', 'sm', 'tr', 'vl', 'vr', 'wr'
+		'qu', 'sl', 'sn', 'sm', 'str', 'tr', 'vl', 'vr', 'wr'
 	],
 	consM: [
 		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'mm', 'nn', 'np', 'pp', 'rr', 'ss', 'tt'
 	],
 	consME: [
-		'ch', 'ck', 'gh', 'lf', 'lk', 'ls', 'mb', 'mp', 'ng', 'nk', 'rg', 'rk', 'rp', 'rs', 'rst', 'rt', 'tch'
+		'ch', 'ck', 'gh', 'lf', 'lk', 'ls', 'mb', 'mp', 'ng', 'nk', 'rc', 'rd', 'rg', 'rk', 'rp', 'rs', 'rst', 'rt', 'rth', 'tch', 'th'
 	]
 };

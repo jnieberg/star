@@ -24,4 +24,21 @@ export function getMouse(e) {
 	EVENT.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 }
 
+export function getKeys(e) {
+	switch (e.which) {
+	case 49:
+		TD.camera.object.position.set(0, 0, 0);
+		TD.camera.object.rotation.set(0, 0, 0);
+		EVENT.controls.speedFactorPlanet = 1.0;
+		EVENT.controls.accF = 0;
+		EVENT.controls.accL = 0;
+		EVENT.controls.accU = 0;
+		break;
+	default: break;
+	}
+}
+
 document.addEventListener('mousemove', getMouse, false);
+
+document.addEventListener('keypress', getKeys, false);
+

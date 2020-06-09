@@ -1,6 +1,6 @@
 export default function initShaders(win) {
 	const node = document.createElement('div');
-	node.innerHTML = `<script type="x-shader/x-vertex" id="vertexShader">
+	node.innerHTML = `<script type="x-shader/x-vertex" id="vertexShaderStars">
     attribute float size;
     varying vec3 vColor;
     void main() {
@@ -10,7 +10,7 @@ export default function initShaders(win) {
         gl_Position = projectionMatrix * mvPosition;
     }
 </script>
-<script type="x-shader/x-fragment" id="fragmentShader">
+<script type="x-shader/x-fragment" id="fragmentShaderStars">
     varying vec3 vColor;
     varying vec2 vUv;
     uniform sampler2D texture;

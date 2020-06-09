@@ -1,26 +1,39 @@
 import * as THREE from 'three';
-import { TD } from '../../variables';
+import { TD, MISC } from '../../variables';
+import seedrandom from 'seedrandom';
 
-export default function createSphere({ texture, size, detail, color: colorA, emissive: emissiveA, parent = TD.scene, distance, rotate }) {
-	const transparent = typeof colorA.a !== 'undefined';
-	const color = colorA ? colorA : { r:0, g:0, b:0, a:(colorA && colorA.a) || 1.0 };
-	const emissive = emissiveA ? emissiveA : { r:0, g:0, b:0, a:(emissiveA && emissiveA.a) || 1.0 };
-	TD.colorHelper.setRGB(color.r, color.g, color.b);
-	TD.colorHelper2.setRGB(emissive.r, emissive.g, emissive.b);
-
-	const geometry = new THREE.SphereGeometry(size, detail, detail);
+export default function createSphere({ surface, normal = true, size, detail, color = 0x000000, emissive = 0x000000, parent = TD.scene, distance, rotate }) {
+	const transparent = false; // typeof colorA.a !== 'undefined';
+	const geometry = new THREE.SphereBufferGeometry(size, detail, detail);
+	const texture = TD.texture.planet.surface[surface.texture];
 	const params = transparent ?
-		{ map: texture || null, color: 0x000000, emissive: TD.colorHelper2, emissiveIntensity: 0.25, transparent: true, blending: THREE.AdditiveBlending, side: THREE.BackSide, needsUpdate: true, shininess: 0 } :
-		{ map: texture || null, color: TD.colorHelper, emissive: TD.colorHelper2, emissiveIntensity: 0.25, side: THREE.FrontSide, needsUpdate: true, shininess: 0 };
+		{
+			map: texture || null,
+			color: 0x000000,
+			emissive, emissiveIntensity: 0.25,
+			transparent: true,
+			blending: THREE.AdditiveBlending,
+			side: THREE.BackSide, shininess: 0
+		} :
+		{
+			map: texture || null,
+			bumpMap: (normal && texture) || null,
+			bumpScale: (normal && 0.001) || null,
+			color,
+			emissive,
+			emissiveIntensity: 0.25,
+			side: THREE.FrontSide,
+			shininess: 0
+		};
 	const material = new THREE.MeshPhongMaterial(params);
-	if (material.map) {
-		material.map.minFilter = THREE.LinearFilter;
-	}
+	// if (material.map) {
+	// 	material.map.minFilter = THREE.LinearFilter;
+	// }
 	material.needsUpdate = true;
 	const mesh = new THREE.Mesh(geometry, material);
-	mesh.rotation.y = rotate;
+	mesh.rotation.y = rotate || 0;
 	if (transparent) {
-		const material2 = new THREE.MeshPhongMaterial({ color: TD.colorHelper, opacity: color.a, transparent: true, blending: THREE.AdditiveBlending, side: THREE.FrontSide, needsUpdate: true, shininess: 0 });
+		const material2 = new THREE.MeshPhongMaterial({ color, opacity: color.a, transparent: true, blending: THREE.AdditiveBlending, side: THREE.FrontSide, shininess: 0 });
 		material2.needsUpdate = true;
 		const mesh2 = new THREE.Mesh(geometry, material2);
 		mesh.add(mesh2);
@@ -28,7 +41,7 @@ export default function createSphere({ texture, size, detail, color: colorA, emi
 		mesh.castShadow = true;
 	}
 	mesh.receiveShadow = true;
-	mesh.translateX(distance);
+	mesh.translateX(distance || 0);
 	// geometry.verticesNeedUpdate = true;
 	// geometry.elementsNeedUpdate = true;
 	// geometry.morphTargetsNeedUpdate = true;
@@ -36,6 +49,19 @@ export default function createSphere({ texture, size, detail, color: colorA, emi
 	// geometry.normalsNeedUpdate = true;
 	// geometry.colorsNeedUpdate = true;
 	// geometry.tangentsNeedUpdate = true;
+	if (surface && surface.texture2) {
+		const mesh2 = mesh.clone();
+		mesh2.material = mesh.material.clone();
+		mesh2.material.map = TD.texture.planet.surface[surface.texture2];
+		mesh2.material.bumpMap = TD.texture.planet.surface[surface.texture2];
+		mesh2.material.transparent = true;
+		mesh2.material.opacity = surface.opacity;
+		mesh2.material.blending = THREE.NormalBlending;
+		mesh2.material.needsUpdate = true;
+		mesh2.castShadow = true;
+		mesh2.receiveShadow = true;
+		mesh.add(mesh2);
+	}
 	parent.add(mesh);
 	return mesh;
 }

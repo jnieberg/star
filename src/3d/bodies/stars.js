@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { TD, MISC } from '../../variables';
 import { deleteThree } from '../init/init';
 import { getStarData } from './star';
-import raycastStar from '../raycast/raycastStar';
+import raycastStars from '../raycast/raycastStars';
 
 function listStarArea(x, y, z) {
 	MISC.rnd = seedrandom(`stars_${x}_${y}_${z}`);
@@ -43,8 +43,8 @@ export function initStars() {
 		fogNear: { type: 'f', value: TD.scene.fog.near },
 		fogFar: { type: 'f', value: TD.scene.fog.far }
 	};
-	const vertexShader = document.getElementById('vertexShader').text;
-	const fragmentShader = document.getElementById('fragmentShader').text;
+	const vertexShader = document.getElementById('vertexShaderStars').text;
+	const fragmentShader = document.getElementById('fragmentShaderStars').text;
 	TD.stars.material = new THREE.ShaderMaterial({
 		uniforms: uniforms,
 		vertexShader: vertexShader,
@@ -86,8 +86,8 @@ export default function drawStars() {
 	}
 }
 
-export function getStar() {
+export function getStars() {
 	if (TD.stars && TD.stars.object) {
-		raycastStar(TD.stars.object);
+		raycastStars(TD.stars.object);
 	}
 }

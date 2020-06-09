@@ -66,11 +66,6 @@ const FirstPersonControls = function(object, domElementA) {
 	this.accL = 0;
 	this.accU = 0;
 
-	// private variables
-
-	// let lat = 0;
-	// let lon = 0;
-
 	const lookDirection = new Vector3();
 	const spherical = new Spherical();
 	const target = new Vector3();
@@ -184,9 +179,6 @@ const FirstPersonControls = function(object, domElementA) {
 
 		lookDirection.set(0, 0, -1).applyQuaternion(quaternion);
 		spherical.setFromVector3(lookDirection);
-
-		// lat = 90 - MathUtils.radToDeg(spherical.phi);
-		// lon = MathUtils.radToDeg(spherical.theta);
 	}
 
 	function contextmenu(event) {
@@ -214,8 +206,6 @@ const FirstPersonControls = function(object, domElementA) {
 	};
 
 	this.update = (function() {
-		// const targetPosition = new Vector3();
-
 		return function update(delta) {
 			if (this.enabled === false) {
 				return;
@@ -274,25 +264,6 @@ const FirstPersonControls = function(object, domElementA) {
 				verticalLookRatio = Math.PI / (this.verticalMax - this.verticalMin);
 			}
 
-			// lon = lon - this.mouseX * actualLookSpeed;
-			// if (this.lookVertical) {
-			// 	lat = lat - this.mouseY * actualLookSpeed * verticalLookRatio;
-			// }
-
-			// lat = Math.max(-85, Math.min(85, lat));
-
-			// let phi = MathUtils.degToRad(90 - lat);
-			// const theta = MathUtils.degToRad(lon);
-
-			// if (this.constrainVertical) {
-			// 	phi = MathUtils.mapLinear(phi, 0, Math.PI, this.verticalMin, this.verticalMax);
-			// }
-
-			// const position = this.object.position;
-
-			// targetPosition.setFromSphericalCoords(1, phi, theta).add(position);
-
-			// this.object.lookAt(targetPosition);
 			if (this.lookVertical) {
 				this.object.rotateX(-this.mouseY * actualLookSpeed * verticalLookRatio * 0.02);
 			}

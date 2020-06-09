@@ -1,7 +1,8 @@
 import { TD, EVENT } from '../variables';
-import drawStars, { getStar } from './bodies/stars';
-import { getPlanets } from './bodies/planet';
+import drawStars, { getStars } from './bodies/stars';
+import { getPlanets } from './bodies/planets';
 import { eventLabel } from './label/label';
+import { getStar } from './bodies/star';
 
 function render() {
 	TD.renderer.render(TD.scene, TD.camera.object);
@@ -11,6 +12,7 @@ export function loop() {
 	setInterval(() => {
 		drawStars();
 		getStar();
+		getStars();
 		getPlanets();
 	}, 100);
 }
