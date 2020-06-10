@@ -14,11 +14,12 @@ export function loop() {
 		getStar();
 		getStars();
 		getPlanets();
-	}, 100);
+	});
 }
 
 export default function animate() {
 	EVENT.controls.update(TD.clock.getDelta());
+	// loop();
 	eventLabel();
 	requestAnimationFrame(animate);
 	render();

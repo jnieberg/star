@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { TD, MISC } from '../../variables';
-import seedrandom from 'seedrandom';
+import { TD } from '../../variables';
 
 export default function createSphere({ surface, normal = true, size, detail, color = 0x000000, emissive = 0x000000, parent = TD.scene, distance, rotate }) {
 	const transparent = false; // typeof colorA.a !== 'undefined';

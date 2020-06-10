@@ -4,11 +4,20 @@ import * as THREE from 'three';
 import createSphere from '../tools/createObject';
 import { deleteThree } from '../init/init';
 import raycastPlanet from '../raycast/raycastPlanet';
+import { drawPlanetRotation } from './planet';
 
 export function getPlanets() {
 	if (TD.star && TD.star.this && TD.star.this.children && TD.star.children) {
-		// setPlanetRotation();
+		for (let index = 0; index < TD.star.children.length; index++) {
+			drawPlanetRotation(TD.star, TD.star.children[index].this, TD.star.children[index]);
+		}
 		raycastPlanet(TD.star.children);
+	}
+	if (TD.planet && TD.planet.object) {
+		drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object);
+		for (let index = 0; index < TD.planet.children.length; index++) {
+			// drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object, index);
+		}
 	}
 }
 
@@ -38,7 +47,7 @@ export default function drawPlanets(star, planet) {
 				parent: bodyO.object
 			});
 			MISC.rnd = seedrandom(planet ? `planet_rotation_${star.id}_${planet.id}_${c}` : `planet_rotation_${star.id}_${c}`);
-			bodyO.children[c].rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+			// bodyO.children[c].rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
 
 
 			// Planet trajectory
