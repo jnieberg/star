@@ -155,7 +155,9 @@ export default function drawStar(star) {
 		const geometry = new THREE.SphereGeometry(size * 0.1, 32, 32);
 		const material = new THREE.MeshBasicMaterial({
 			color: TD.colorHelper,
-			side: THREE.BackSide
+			side: THREE.BackSide,
+			transparent: true,
+			alphaTest: 0.5,
 		});
 		TD.star.sphere = new THREE.Mesh(geometry, material);
 		TD.star.sphere.renderOrder = 1;
@@ -167,7 +169,9 @@ export default function drawStar(star) {
 		const material2 = new THREE.MeshBasicMaterial({
 			color: TD.colorHelper2,
 			blending: THREE.AdditiveBlending,
-			side: THREE.FrontSide
+			side: THREE.FrontSide,
+			transparent: true,
+			alphaTest: 0.5,
 		});
 		const starInner = new THREE.Mesh(geometry, material2);
 		starInner.renderOrder = 1;
@@ -178,10 +182,12 @@ export default function drawStar(star) {
 		// Star inside
 		const material3 = new THREE.MeshBasicMaterial({
 			map: TD.texture.star.surface,
-			color: TD.colorHelper
+			color: TD.colorHelper,
+			transparent: true,
+			alphaTest: 0.5,
 		});
 		const starInner3 = new THREE.Mesh(geometry, material3);
-		starInner3.scale.set(0.98, 0.98, 0.98);
+		starInner3.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
 		starInner3.castShadow = false;
 		starInner3.receiveShadow = false;
 		TD.star.object.add(starInner3);
@@ -193,6 +199,8 @@ export default function drawStar(star) {
 			color: TD.colorHelper2,
 			opacity: 1,
 			blending: THREE.AdditiveBlending,
+			transparent: true,
+			alphaTest: 0.5,
 			// depthTest: false
 		});
 		const starFlare = new THREE.Sprite(flareMaterial);
@@ -207,22 +215,24 @@ export default function drawStar(star) {
 		TD.star.object.add(TD.star.pointLight);
 
 		// Star spot light
-		TD.star.light = new THREE.DirectionalLight(TD.colorHelper, 5);
+		TD.star.light = new THREE.DirectionalLight(TD.colorHelper);
 		TD.star.light.castShadow = true;
 		TD.star.light.angle = Math.PI / 32;
 		TD.star.light.penumbra = 0.1;
-		TD.star.light.power = 10;
-		TD.star.light.shadow.bias = 0;// 0.0001;
+		TD.star.light.power = 2;
+		TD.star.light.shadow.bias = 0;// -0.001;
 		TD.star.light.shadow.mapSize.width = 2048;
 		TD.star.light.shadow.mapSize.height = 2048;
-		TD.star.light.shadow.radius = 2;
-		TD.star.light.shadow.camera.left = -10;
-		TD.star.light.shadow.camera.right = 10;
-		TD.star.light.shadow.camera.top = 10;
-		TD.star.light.shadow.camera.bottom = -10;
-		TD.star.light.shadow.camera.near = 0.001 * TD.scale;
-		TD.star.light.shadow.camera.far = TD.camera.far * 0.01 * TD.scale;
-		TD.star.light.shadow.camera.fov = 32;
+		TD.star.light.shadow.radius = 1;
+		TD.star.light.shadow.camera.left = -20;
+		TD.star.light.shadow.camera.right = 20;
+		TD.star.light.shadow.camera.top = 20;
+		TD.star.light.shadow.camera.bottom = -20;
+		TD.star.light.shadow.camera.near = TD.camera.near * TD.scale;
+		TD.star.light.shadow.camera.far = TD.camera.far * 0.1 * TD.scale;
+		TD.star.light.shadow.camera.fov = 35;
+		TD.star.light.shadow.camera.aspect = window.innerWidth / window.innerHeight;
+
 		TD.scene.add(TD.star.light.target);
 		TD.star.object.add(TD.star.light);
 		TD.star.light.visible = false;

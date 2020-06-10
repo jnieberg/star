@@ -1,5 +1,5 @@
 import { EVENT, TD } from '../../variables';
-import setLabel, { hideLabel } from '../label/label';
+import setLabel, { hideLabel, showLabel } from '../label/label';
 import drawStar, { getStarInfo, getStarInfoString } from '../bodies/star';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
@@ -9,7 +9,7 @@ function raycastStarsEvents(intersect) {
 	const index = intersect.index;
 	if (index) {
 		const star = TD.stars.list[index];
-		if (star && !(TD.star.this && TD.star.this.id === star.id)) {
+		if (star && (!TD.star.this || TD.star.this.id !== star.id)) {
 			if (TD.star.this && TD.star.this.id !== star.id) {
 				EVENT.controls.speedFactorPlanet = 1.0;
 			}
@@ -22,6 +22,8 @@ function raycastStarsEvents(intersect) {
 	}
 	if (intersect.distance <= distanceNear * TD.scale) {
 		hideLabel('stars');
+	} else {
+		showLabel('stars');
 	}
 }
 

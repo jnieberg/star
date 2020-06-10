@@ -11,13 +11,13 @@ export function getPlanets() {
 		for (let index = 0; index < TD.star.children.length; index++) {
 			drawPlanetRotation(TD.star, TD.star.children[index].this, TD.star.children[index]);
 		}
-		raycastPlanet(TD.star.children);
-	}
-	if (TD.planet && TD.planet.object) {
-		drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object);
-		for (let index = 0; index < TD.planet.children.length; index++) {
-			// drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object, index);
+		if (TD.star && TD.planet && TD.planet.this && TD.planet.object) {
+			drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object);
+			for (let index = 0; index < TD.planet.children.length; index++) {
+				// drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object, index);
+			}
 		}
+		raycastPlanet(TD.star.children);
 	}
 }
 
@@ -29,8 +29,8 @@ export default function drawPlanets(star, planet) {
 			const child = body.children[c];
 			deleteThree(bodyO.children[c]);
 			TD.colorHelper.setRGB(child.color.r, child.color.g, child.color.b);
-			TD.colorHelper2.setHSL(0, 0, 0);
-			if (child.atmosphere) {
+			TD.colorHelper2.setRGB(0, 0, 0);
+			if (child.atmosphere && !planet) {
 				TD.colorHelper2.setHSL(child.atmosphere.color.hue, 1.0, 0.5);
 			}
 
@@ -42,10 +42,13 @@ export default function drawPlanets(star, planet) {
 				detail: 64,
 				color: TD.colorHelper,
 				emissive: TD.colorHelper2,
+				emissiveIntensity: 0.15,
 				rotate: Math.PI * MISC.rnd() * 2,
 				distance: child.distance * 0.001 * TD.scale,
 				parent: bodyO.object
 			});
+			bodyO.children[c].castShadow = true;
+			bodyO.children[c].receiveShadow = true;
 			MISC.rnd = seedrandom(planet ? `planet_rotation_${star.id}_${planet.id}_${c}` : `planet_rotation_${star.id}_${c}`);
 			// bodyO.children[c].rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
 
@@ -70,24 +73,38 @@ export default function drawPlanets(star, planet) {
 			// Planet ring
 			if (child.ring) {
 				TD.colorHelper.setRGB(child.ring.color.r, child.ring.color.g, child.ring.color.b);
-				const ringGeometry = new THREE.RingGeometry(child.ring.size * 0.0006 * TD.scale, child.ring.size * 0.001 * TD.scale, 12);
-				const ringMaterial = new THREE.MeshStandardMaterial({
+				const ringGeometry = new THREE.RingBufferGeometry(child.ring.size * 0.0006 * TD.scale, child.ring.size * 0.001 * TD.scale, 12);
+				const ringMaterial = new THREE.MeshLambertMaterial({
+					depthPacking: THREE.RGBADepthPacking,
 					map: TD.texture.planet.ring,
 					color: TD.colorHelper,
 					emissive: TD.colorHelper,
 					emissiveIntensity: 0.15,
 					opacity: child.ring.color.a,
 					side: THREE.DoubleSide,
+					blending: THREE.NormalBlending,
 					transparent: true,
-					blending: THREE.NormalBlending
+					alphaTest: 0.5,
+					needsUpdate: true
 				});
 				const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-				ringMesh.renderOrder = 2;
+				ringMesh.customDepthMaterial = new THREE.MeshDepthMaterial({
+					depthPacking: THREE.RGBADepthPacking,
+					map: TD.texture.planet.ring,
+					alphaTest: 0.5
+				});
+				// ringMesh.renderOrder = 2;
 				ringMesh.rotateX(Math.PI * 0.5);
+				// ringMesh.translateZ(0.01);
 				// ringMesh.rotation.set(Math.PI * MISC.rnd() * 0.2, Math.PI * MISC.rnd() * 0.2, Math.PI * MISC.rnd() * 0.2); // TEST
 				ringMesh.castShadow = true;
 				ringMesh.receiveShadow = true;
 				bodyO.children[c].add(ringMesh);
+				// const ringMesh2 = ringMesh.clone();
+				// ringMesh2.material = ringMesh.material.clone();
+				// ringMesh2.material.side = THREE.BackSide;
+				// ringMesh2.translateZ(-0.01);
+				// bodyO.children[c].add(ringMesh2);
 			}
 			bodyO.children[c].this = child;
 			// if (!planet) {

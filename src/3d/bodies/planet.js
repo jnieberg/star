@@ -62,17 +62,25 @@ function getPlanetTemperature(star, index, moon = -1) {
 
 function getPlanetAtmosphere(star, index, moon = -1) {
 	if (moon === -1) {
-		MISC.rnd = seedrandom(`planet_atmosphere_${star.id}_${index}_${moon}`);
+		const planetSize = getPlanetSize(star, index);
+		MISC.rnd = () => 1;// seedrandom(`planet_atmosphere_${star.id}_${index}_${moon}`);
 		if (MISC.rnd() > 0.1) {
 			return {
-				size: MISC.rnd() * 0.01,
+				size: MISC.rnd() * planetSize * 0.1,
 				color: {
 					hue: MISC.rnd(),
-					a: MISC.rnd() * 0.8
+					a: MISC.rnd()
 				}
 			};
 		}
 	}
+	return {
+		size: 0,
+		color: {
+			hue: 0,
+			a: 0
+		}
+	};
 }
 
 function getPlanetAtmosphereString(planet) {
@@ -118,18 +126,6 @@ function getPlanetRing(star, index, moon = -1) {
 	}
 }
 
-export function getPlanetRotationSpeed(star, index, moon = -1) {
-	MISC.rnd = seedrandom(`planet_rotation_speed_${star.id}_${index}_${moon}`);
-	return MISC.rnd();
-}
-
-export function getPlanetStarRotationSpeed(star, index, moon = -1) {
-	const starTemp = moon === -1 ? getStarTemperature(star) : getPlanetTemperature(star, index).max;
-	const planetDis = getPlanetDistanceFromStar(star, index, moon);
-	MISC.rnd = seedrandom(`planet_star_rotation_speed_${star.id}_${index}_${moon}`);
-	return starTemp / ((MISC.rnd() * (planetDis * 2) + (planetDis * 1.5)) * 10000);
-}
-
 function getPlanetMoons(star, index) {
 	const size = getPlanetSize(star, index); // 0.02 + 0.002
 	MISC.rnd = seedrandom(`planet_moons_${star.id}_${index}`);
@@ -159,7 +155,7 @@ export function getPlanetInfo(star, index, moon = -1) {
 }
 
 function getPlanetMoonsString(planet) {
-	return planet.children.map(moon => `  ${moon.id + 1}. ${moon.name} ${moon.size}`);
+	return planet.children.map(moon => `  ${moon.id + 1}. ${moon.name}`);
 }
 
 export function getPlanetInfoString(planet) {
@@ -172,6 +168,18 @@ export function getPlanetInfoString(planet) {
 		// planet.ring ? 'Has rings' : undefined,
 		...children
 	];
+}
+
+export function getPlanetRotationSpeed(star, index, moon = -1) {
+	MISC.rnd = seedrandom(`planet_rotation_speed_${star.id}_${index}_${moon}`);
+	return MISC.rnd() / 100.0;
+}
+
+export function getPlanetStarRotationSpeed(star, index, moon = -1) {
+	const starTemp = moon === -1 ? getStarTemperature(star) : getPlanetTemperature(star, index).max;
+	const planetDis = getPlanetDistanceFromStar(star, index, moon);
+	MISC.rnd = seedrandom(`planet_star_rotation_speed_${star.id}_${index}_${moon}`);
+	return starTemp / ((MISC.rnd() * (planetDis * 2) + (planetDis * 1.5)) * 100000);
 }
 
 export function drawPlanetRotation(star, planet, planetO, moon = -1) {

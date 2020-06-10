@@ -11,9 +11,9 @@ export default function initControls() {
 }
 
 export function to3DCoordinate(x, y) {
-	const width = 2.5 * TD.camera.near * x;
-	const height = 1.4 * TD.camera.near * y;
-	return new THREE.Vector3(width, height, -2.0 * TD.camera.near);
+	const width = 2.5 * TD.camera.near * x * TD.scale;
+	const height = 1.4 * TD.camera.near * y * TD.scale;
+	return new THREE.Vector3(width, height, -2.0 * TD.camera.near * TD.scale);
 }
 
 export function getMouse(e) {

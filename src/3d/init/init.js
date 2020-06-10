@@ -29,13 +29,14 @@ export function deleteThree(obj) {
 }
 
 export default function init3d(win) {
-	initShaders(win);
-	initScene(win);
-	initCamera();
-	initTextures();
-	initControls();
-	initStars();
-	initEvents();
-	loop();
-	animate();
+	initTextures(() => {
+		initShaders(win);
+		initScene(win);
+		initCamera();
+		initControls();
+		initStars();
+		initEvents();
+		loop();
+		animate();
+	});
 }

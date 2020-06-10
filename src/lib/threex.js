@@ -85,29 +85,32 @@ THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS
 	let geometry = new THREE.SphereBufferGeometry(size * 1.01, 64, 64);
 	let material = THREEx.createAtmosphereMaterial();
 	material.uniforms.color.value = colorInner;
-	material.uniforms.coeficient.value = opacity + 0.75;
-	material.uniforms.power.value = power;
+	material.uniforms.coeficient.value = opacity * 0.5 + 0.75 - size * 0.1;
+	material.uniforms.power.value = power + 0.5;
+	material.side	= THREE.FrontSide;
+	material.alphaTest = 0.5;
 	material.needsUpdate = true;
 	const insideMesh = new THREE.Mesh(geometry, material);
 	// insideMesh.scale.set(size * 1.01, size * 1.01, size * 1.01);
 	insideMesh.castShadow = false;
 	insideMesh.receiveShadow = false;
-	// insideMesh.renderOrder = 1;
+	insideMesh.renderOrder = 1;
 	mesh.add(insideMesh);
 
 	// THREEx.dilateGeometry(geometry, thickness * 0.5);
 	geometry = new THREE.SphereBufferGeometry(size * 1.01 + thickness, 64, 64);
 	material = THREEx.createAtmosphereMaterial();
 	material.uniforms.color.value	= color;
-	material.uniforms.coeficient.value = opacity - thickness * 0.01;
+	material.uniforms.coeficient.value = opacity * 0.5 - thickness * 0.01;
 	material.uniforms.power.value = power;
 	material.side	= THREE.BackSide;
+	material.alphaTest = 0.5;
 	material.needsUpdate = true;
 	const outsideMesh	= new THREE.Mesh(geometry, material);
 	// outsideMesh.scale.set(size + thickness * 0.5, size + thickness * 0.5, size + thickness * 0.5);
 	outsideMesh.castShadow = false;
 	outsideMesh.receiveShadow = false;
-	// outsideMesh.renderOrder = 1;
+	outsideMesh.renderOrder = 1;
 	mesh.add(outsideMesh);
 
 	// expose a few variable

@@ -2,11 +2,15 @@ import seedrandom from 'seedrandom';
 import * as THREE from 'three';
 
 export const TD = {
+	stargrid: {
+		size: 100,
+		radius: 2
+	},
 	scale: 10000,
 	camera: {
 		object: undefined,
-		near: 0.1,
-		fade: 149,
+		near: 0.00001,
+		fade: 125,
 		far: 150,
 		position: {
 			x: -1,
@@ -21,6 +25,8 @@ export const TD = {
 	renderer: undefined,
 	raycaster: undefined,
 	texture: {
+		manager: undefined,
+		list: [],
 		star: {
 			small: undefined,
 			large: undefined,
