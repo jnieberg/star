@@ -9,6 +9,7 @@ function raycastStarsEvents(intersect) {
 	const index = intersect.index;
 	if (index) {
 		const star = TD.stars.list[index];
+
 		if (star && (!TD.star.this || TD.star.this.id !== star.id)) {
 			if (TD.star.this && TD.star.this.id !== star.id) {
 				EVENT.controls.speedFactorPlanet = 1.0;
@@ -37,12 +38,12 @@ export default function raycastStars(obj) {
 			hideLabel('stars');
 		}
 		if (TD.star && TD.star.this) {
-			const distanceCam = distanceToCamera(TD.star.this.x * 100 * TD.scale, TD.star.this.y * 100 * TD.scale, TD.star.this.z * 100 * TD.scale);
-			if (distanceCam >= distance * TD.scale) {
+			const distanceCam = distanceToCamera(TD.star.this.x, TD.star.this.y, TD.star.this.z);
+			if (distanceCam >= distance) {
 				TD.star.this = undefined;
 				EVENT.controls.speedFactorStar = 1.0;
 			} else {
-				EVENT.controls.speedFactorStar = distanceCam / (distance * 2 * TD.scale);
+				EVENT.controls.speedFactorStar = distanceCam / (distance * 2);
 			}
 		}
 	}

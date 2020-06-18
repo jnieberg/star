@@ -11,7 +11,7 @@
 		"react-dom": "^16.13.1",
 		"react-scripts": "3.4.1",
 		"seedrandom": "^3.0.5",
-		"three": "^0.115.0",
+		"three": "^0.117.1",
 		"three-text2d": "^0.6.0"
 	},
 	"scripts": {

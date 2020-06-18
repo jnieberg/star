@@ -27,22 +27,36 @@ function getPlanetSize(star, index, moon = -1) {
 	return starSize * (MISC.rnd() * 0.02 + 0.002);
 }
 
-function getPlanetColor(star, index, moon = -1) {
-	MISC.rnd = seedrandom(`planet_color_${star.id}_${index}_${moon}`);
+function getPlanetColor(star, index, moon = -1, seed = '') {
+	MISC.rnd = seedrandom(`planet_color${seed}_${star.id}_${index}_${moon}`);
 	return { r: MISC.rnd(), g: MISC.rnd(), b: MISC.rnd() };
 }
 
+function getPlanetSurface(star, index, moon = -1, seed = '') {
+	MISC.rnd = seedrandom(`planet_surface${seed}_${star.id}_${index}_${moon}`);
+	return Math.floor(MISC.rnd() * MISC.planet.surfaceMax);
+}
+
+function getPlanetOuterOpacity(star, index, moon = -1) {
+	MISC.rnd = seedrandom(`planet_outer_opacity_${star.id}_${index}_${moon}`);
+	return MISC.rnd();
+}
+
 function getPlanetDistanceFromStar(star, index, moon = -1) {
-	if (moon > -1) {
-		const planetSize = getPlanetSize(star, index) * 0.5;
-		MISC.rnd = seedrandom(`planet_distance_${star.id}_${index}_${moon}`);
-		const moonNumber = moon + 1;
-		return planetSize * (MISC.rnd() + 2) + (Math.pow(moonNumber + 1 + MISC.rnd() * 0.5, 3)) * 0.005;
-	}
-	const starSize = getStarSize(star) * 0.2;
+	let scale = 0.5;
+	let size = getStarSize(star) * 0.2;
 	MISC.rnd = seedrandom(`planet_distance_${star.id}_${index}_${moon}`);
-	const planetNumber = index + 1;
-	return starSize * (MISC.rnd() + 2) + (Math.pow(planetNumber + 1 + MISC.rnd() * 0.5, 4)) * 0.02;
+	let number = index + 1;
+	if (moon > -1) {
+		size = getPlanetSize(star, index);
+		scale = 0.05;
+		MISC.rnd = seedrandom(`planet_distance_${star.id}_${index}_${moon}`);
+		number = moon;
+
+		// return (size * 2) * (number * number * 0.5 + 1 + MISC.rnd() * 0.5);
+	}
+	// return starSize * (MISC.rnd() + 2) + (Math.pow(number + 1 + MISC.rnd() * 0.5, 4)) * 0.02;
+	return size + ((number * number * ((MISC.rnd() * 0.25) + 1) + 3 + MISC.rnd() * 0.5)) * scale;
 }
 
 function getPlanetTemperature(star, index, moon = -1) {
@@ -61,51 +75,46 @@ function getPlanetTemperature(star, index, moon = -1) {
 }
 
 function getPlanetAtmosphere(star, index, moon = -1) {
+	let atmosphere = {
+		size: 0,
+		color: {
+			hue: 0,
+			saturation: 0,
+			lightness: 0,
+			a: 0
+		}
+	};
 	if (moon === -1) {
 		const planetSize = getPlanetSize(star, index);
-		MISC.rnd = () => 1;// seedrandom(`planet_atmosphere_${star.id}_${index}_${moon}`);
+		MISC.rnd = seedrandom(`planet_atmosphere_${star.id}_${index}_${moon}`);
 		if (MISC.rnd() > 0.1) {
-			return {
+			atmosphere = {
 				size: MISC.rnd() * planetSize * 0.1,
 				color: {
 					hue: MISC.rnd(),
+					saturation: MISC.rnd() * 0.5 + 0.25,
+					lightness: MISC.rnd() * 0.5 + 0.25,
 					a: MISC.rnd()
 				}
 			};
 		}
 	}
-	return {
-		size: 0,
-		color: {
-			hue: 0,
-			a: 0
-		}
-	};
+	return atmosphere;
 }
 
-function getPlanetAtmosphereString(planet) {
-	const atmosphere = getPlanetAtmosphere(planet);
+function getPlanetAtmosphereString(star, index, moon = -1) {
+	const atmosphere = getPlanetAtmosphere(TD.star, index, moon);
 	const atmosphereThickness = atmosphere.color.a;
-	const atmosphereColor = atmosphere.color.hue;
 	if (atmosphereThickness === 0) {
 		return 'None';
 	} else if (atmosphereThickness < 0.2) {
-		return 'Thin';
+		return 'Very thin';
 	} else if (atmosphereThickness < 0.4) {
-		return 'Medium';
+		return 'Thin';
 	} else if (atmosphereThickness < 0.6) {
-		return 'Dense';
+		return 'Normal';
 	}
-	return 'Very dense';
-}
-
-function getPlanetSurface(star, index, moon = -1) {
-	MISC.rnd = seedrandom(`planet_surface_${star.id}_${index}_${moon}`);
-	return {
-		texture: Math.floor(MISC.rnd() * PLANET.surfaceMax),
-		texture2: Math.floor(MISC.rnd() * PLANET.surfaceMax),
-		blend: MISC.rnd()
-	};
+	return 'Dense';
 }
 
 function getPlanetRing(star, index, moon = -1) {
@@ -127,9 +136,9 @@ function getPlanetRing(star, index, moon = -1) {
 }
 
 function getPlanetMoons(star, index) {
-	const size = getPlanetSize(star, index); // 0.02 + 0.002
+	const size = getPlanetSize(star, index);
 	MISC.rnd = seedrandom(`planet_moons_${star.id}_${index}`);
-	const moonMax = Math.floor(MISC.rnd() * size * 100);
+	const moonMax = Math.floor(MISC.rnd() * size * 50);
 	const children = [];
 	for (let moon = 0; moon < moonMax; moon++) {
 		// eslint-disable-next-line no-use-before-define
@@ -147,9 +156,14 @@ export function getPlanetInfo(star, index, moon = -1) {
 		distance: getPlanetDistanceFromStar(star, index, moon),
 		size: getPlanetSize(star, index, moon),
 		color: getPlanetColor(star, index, moon),
+		surface: getPlanetSurface(star, index, moon),
 		atmosphere: getPlanetAtmosphere(star, index, moon),
 		ring: getPlanetRing(star, index, moon),
-		surface: getPlanetSurface(star, index, moon),
+		outer: {
+			color: getPlanetColor(star, index, moon, '_outer'),
+			surface: getPlanetSurface(star, index, moon, '_outer'),
+			opacity: getPlanetOuterOpacity(star, index, moon)
+		},
 		children: moon === -1 ? getPlanetMoons(star, index) : undefined
 	};
 }
@@ -193,7 +207,7 @@ export function drawPlanetRotation(star, planet, planetO, moon = -1) {
 	bodyO.translateX(body.distance * 0.001 * TD.scale);
 	MISC.rnd = seedrandom(`planet_rotation_${star.this.id}_${planet.id}_${moon}`);
 	bodyO.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
-	bodyO.rotateY(getTime() * 100 * getPlanetRotationSpeed(star.this, planet.id, moon));
+	bodyO.rotateY(getTime() * TD.stargrid.size * getPlanetRotationSpeed(star.this, planet.id, moon));
 }
 
 export function drawPlanet(planet) {
@@ -207,24 +221,40 @@ export function drawPlanet(planet) {
 		star.object.add(TD.planet.object);
 
 		// Planet sphere
-		TD.colorHelper.setRGB(planet.color.r, planet.color.g, planet.color.b);
+		MISC.colorHelper.setRGB(planet.color.r, planet.color.g, planet.color.b);
+		MISC.colorHelper2.setRGB(planet.outer.color.r, planet.outer.color.g, planet.outer.color.b);
 		TD.planet.sphere = createSphere({
+			color: MISC.colorHelper,
 			surface: planet.surface,
 			size: planet.size * 0.001 * TD.scale,
 			detail: 64,
-			color: TD.colorHelper,
 			// rotate,
 			// distance: planet.distance * 0.001 * TD.scale,
 			parent: TD.planet.object
 		});
+		TD.planet.sphereOut = createSphere({
+			color: MISC.colorHelper2,
+			surface: planet.outer.surface,
+			size: (planet.size * 0.001 + 0.0000002) * TD.scale,
+			detail: 64,
+			parent: TD.planet.sphere
+		});
+		MISC.rnd = seedrandom(`planet_outer_rotation_${star.this.id}_${planet.id}`);
+		TD.planet.sphereOut.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+		TD.planet.sphereOut.castShadow = false;
+		TD.planet.sphereOut.receiveShadow = false;
+		TD.planet.sphereOut.material.opacity = planet.outer.opacity;
+		TD.planet.sphereOut.material.blending = THREE.NormalBlending;
+		TD.planet.sphereOut.material.transparent = true;
+		TD.planet.sphereOut.material.alphaTest = 0;
 
 		// Planet atmosphere
 		if (planet.atmosphere) {
-			TD.colorHelper.setHSL(planet.atmosphere.color.hue, 1.0, 0.5);
+			MISC.colorHelper.setHSL(planet.atmosphere.color.hue, planet.atmosphere.color.saturation, planet.atmosphere.color.lightness);
 			TD.planet.atmosphere = new THREEx.GeometricGlowMesh(TD.planet.sphere, {
-				size: planet.size * 0.001 * TD.scale,
-				thickness: planet.atmosphere.size * 0.001 * TD.scale,
-				color: TD.colorHelper,
+				size: (planet.size * 0.001 + 0.0000004) * TD.scale,
+				thickness: (planet.atmosphere.size * 0.001 + 0.0000004) * TD.scale,
+				color: MISC.colorHelper,
 				opacity: planet.atmosphere.color.a
 			});
 		}
@@ -232,10 +262,10 @@ export function drawPlanet(planet) {
 		// Update star spotlight
 		star.light.visible = true;
 		star.light.target = TD.planet.object;
-		star.light.target.updateMatrixWorld();
-		// const spotLightHelper = new THREE.SpotLightHelper(starO.light); TD.scene.add(spotLightHelper); // TEST
-		star.light.updateMatrix();
-		star.light.updateMatrixWorld();
+		// star.light.target.updateMatrixWorld();
+		// TD.scene.add(new THREE.CameraHelper(star.light.shadow.camera)); // TEST
+		// star.light.updateMatrix();
+		// star.light.updateMatrixWorld();
 
 		// Draw moons of planet
 		TD.planet = drawPlanets(star.this, planet);

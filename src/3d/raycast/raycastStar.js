@@ -21,8 +21,8 @@ export default function raycastStar(obj) {
 	if (obj) {
 		const distance = 0.1;
 		const intersect = raycastFound(obj, distance, 2);
-		const distanceCam = distanceToCamera(TD.star.this.x * 100 * TD.scale, TD.star.this.y * 100 * TD.scale, TD.star.this.z * 100 * TD.scale);
-		if (distanceCam < distance * TD.scale) {
+		const distanceCam = distanceToCamera(TD.star.this.x, TD.star.this.y, TD.star.this.z);
+		if (distanceCam < distance) {
 			hideLabel('stars');
 			if (intersect) {
 				raycastStarEvents(intersect);

@@ -1,8 +1,7 @@
-import animate, { loop } from '../animate';
+import animate, { interval } from '../animate';
 import initCamera from './camera';
 import initScene from './scene';
 import { initStars } from '../bodies/stars';
-import initShaders from './shaders';
 import initControls from './controls';
 import initEvents from './events';
 import initTextures from './texture';
@@ -30,13 +29,12 @@ export function deleteThree(obj) {
 
 export default function init3d(win) {
 	initTextures(() => {
-		initShaders(win);
 		initScene(win);
 		initCamera();
 		initControls();
 		initStars();
 		initEvents();
-		loop();
+		interval();
 		animate();
 	});
 }

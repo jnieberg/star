@@ -1,9 +1,11 @@
 import { TD } from '../../variables';
 
 export default function distanceToCamera(x, y, z) {
-	const cx = TD.camera.object.position.x;
-	const cy = TD.camera.object.position.y;
-	const cz = TD.camera.object.position.z;
-	const distance = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz));
-	return distance;
+	let pos = TD.camera.object.position;
+	pos = {
+		x: pos.x / TD.scale,
+		y: pos.y / TD.scale,
+		z: pos.z / TD.scale
+	};
+	return Math.sqrt((x - pos.x) * (x - pos.x) + (y - pos.y) * (y - pos.y) + (z - pos.z) * (z - pos.z));
 }
