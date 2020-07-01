@@ -21,7 +21,7 @@ export function getRealCoordinate(x, y, z) {
 function getStarData(cx, cy, cz, index) {
 	return {
 		id: `${cx}_${cy}_${cz}_${index}`,
-		size: Math.pow(10, MISC.rnd() * 2 + 1) * 0.01,
+		size: (MISC.rnd() * 4 + 1),
 		hue: MISC.rnd(),
 		brightness: MISC.rnd() * 0.9 + 0.1,
 		cx, cy, cz,

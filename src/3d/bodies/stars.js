@@ -10,7 +10,7 @@ function updateStars(off) {
 	if (TD.stars) {
 		for (const i of Object.keys(TD.stars)) {
 			if (!TD.stars[i].object) {
-				TD.stars[i].geometry = new THREE.BufferGeometry(); ;
+				TD.stars[i].geometry = new THREE.BufferGeometry();
 				TD.stars[i].geometry.setAttribute('position', new THREE.Float32BufferAttribute(TD.stars[i].positions, 3));
 				TD.stars[i].geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars[i].colors, 3)); // .setUsage(THREE.DynamicDrawUsage)
 				TD.stars[i].geometry.setAttribute('size', new THREE.Float32BufferAttribute(TD.stars[i].sizes, 1));
