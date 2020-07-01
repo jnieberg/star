@@ -10,7 +10,7 @@
 		"three-text2d": "^0.6.0"
 	},
 	"scripts": {
-		"start": "nodemon index",
+		"start": "node server.js",
 		"dev": "node index"
 	},
 	"type": "module",
