@@ -24,7 +24,7 @@ const watching = compiler.watch({
 	console.log(stats);
 });
 
-const myApp = express();
+const app = express();
 const mimetype = {
 	'.html': 'text/html',
 	'.js': 'text/javascript',
@@ -59,37 +59,21 @@ function open(resp, urlA) {
 	});
 }
 
-myApp.use(bodyParser.urlencoded({
+app.use(bodyParser.urlencoded({
 	extended: true
 }));
-myApp.use(bodyParser.json());
+app.use(bodyParser.json());
 
 process.env.TZ = 'Europe/Amsterdam';
 
-myApp.get('/', (req, resp) => {
+app.get('/', (req, resp) => {
 	open(resp, 'public/index.html');
 });
 
-// myApp.get('/liststars', (req, resp) => {
-// 	let qs = querystring.parse(req.url.replace(/^.*?\?/, ''));
-// 	qs = {
-// 		posx: Number(qs.x),
-// 		posy: Number(qs.y),
-// 		posz: Number(qs.z),
-// 		radius: Number(qs.radius),
-// 		size: Number(qs.size),
-// 		scale: Number(qs.scale)
-// 	};
-// 	resp.writeHead(200, {
-// 		'Content-Type': 'application/json'
-// 	});
-// 	resp.end(JSON.stringify(starList(qs)));
-// });
-
-myApp.get(/^\/(dist|public)\/.+$/, (req, resp) => {
+app.get(/^\/(dist|public)\/.+$/, (req, resp) => {
 	const url = req.url.substring(1);
 	open(resp, url);
 });
 
-const httpServer = http.createServer(myApp);
+const httpServer = http.createServer(app);
 httpServer.listen(process.env.PORT || 8000);
