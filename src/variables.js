@@ -4,15 +4,15 @@ import * as THREE from 'three';
 export const TD = {
 	stargrid: {
 		size: 100,
-		radius: 2,
+		radius: 6,
 		density: 0.0005
 	},
 	scale: 10000,
 	camera: {
 		object: undefined,
 		near: 0.000001,
-		fade: 150,
-		far: 200,
+		fade: 500,
+		far: 600,
 		coordinate: {
 			x: undefined,
 			y: undefined,

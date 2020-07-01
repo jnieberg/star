@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { TD, MISC } from '../../variables';
 
+export function resetCamera() {
+	TD.camera.coordinate = { x: undefined, y: undefined, z: undefined };
+	TD.camera.object.position.set(TD.stargrid.size * TD.scale * 0.5, TD.stargrid.size * TD.scale * 0.5, TD.stargrid.size * TD.scale * 0.5);
+	TD.camera.object.rotation.set(0, 0, 0);
+}
+
 export function saveCamera() {
 	localStorage.setItem('camera', JSON.stringify({
 		coordinate: TD.camera.coordinate,
@@ -17,6 +23,8 @@ function loadCamera() {
 		TD.camera.object.position.set(item.position.x, item.position.y, item.position.z);
 		TD.camera.object.rotation.set(item.rotation._x, item.rotation._y, item.rotation._z);
 		MISC.reload = true;
+	} else {
+		resetCamera();
 	}
 }
 

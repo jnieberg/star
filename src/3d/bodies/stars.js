@@ -82,7 +82,6 @@ export default function drawStars() {
 		const pos = TD.camera.coordinate;
 		starList({ posx: pos.x, posy: pos.y, posz: pos.z }, () => {
 			const off = setCameraPosition();
-			console.log(off, pos);
 			updateStars(off);
 		});
 	}

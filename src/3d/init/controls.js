@@ -2,6 +2,7 @@ import { TD, EVENT } from '../../variables';
 import * as THREE from 'three';
 import { hideLabel } from '../label/label';
 import { deleteThree } from './init';
+import { resetCamera } from './camera';
 
 const FirstPersonControls = function(object, domElementA) {
 	let domElement = domElementA;
@@ -308,9 +309,7 @@ export function getMouse(e) {
 export function getKeys(e) {
 	switch (e.which) {
 	case 49: // 1
-		TD.camera.coordinate = { x: undefined, y: undefined, z: undefined };
-		TD.camera.object.position.set(0, 0, 0);
-		TD.camera.object.rotation.set(0, 0, 0);
+		resetCamera();
 		EVENT.controls.speedFactorPlanet = 1.0;
 		EVENT.controls.accF = 0;
 		EVENT.controls.accL = 0;
