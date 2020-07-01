@@ -1,3 +1,3 @@
 export default function getTime() {
-	return new Date().getTime() / 100000;
+	return 1;// new Date().getTime() / 100000;
 }

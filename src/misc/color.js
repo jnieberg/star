@@ -1,3 +1,17 @@
+import { MISC } from '../variables';
+
+export default function setColor(helperNumber, a1, a2, a3, palette) {
+	var helper = helperNumber === 1 ? MISC.colorHelper : helperNumber === 2 ? MISC.colorHelper2 : helperNumber === 3 ? MISC.colorHelper3 : null;
+	if (helper) {
+		if (palette === 'hsl') {
+			helper.setHSL(a1, a2, a3);
+		} else {
+			helper.setRGB(a1, a2, a3);
+		}
+		helper.convertSRGBToLinear();
+	}
+}
+
 export function getColorMix(r1, g1, b1, r2, g2, b2, a) {
 	const a1 = 1.0 - a;
 	const color = {

@@ -27,9 +27,9 @@ export function deleteThree(obj) {
 	}
 }
 
-export default function init3d(win) {
+export default function init3d() {
 	initTextures(() => {
-		initScene(win);
+		initScene();
 		initCamera();
 		initControls();
 		initStars();

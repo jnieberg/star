@@ -4,14 +4,15 @@ import * as THREE from 'three';
 export const TD = {
 	stargrid: {
 		size: 100,
-		radius: 2
+		radius: 2,
+		density: 0.0005
 	},
-	scale: 100000,
+	scale: 10000,
 	camera: {
 		object: undefined,
 		near: 0.000001,
-		fade: 125,
-		far: 150,
+		fade: 150,
+		far: 200,
 		coordinate: {
 			x: undefined,
 			y: undefined,
@@ -34,16 +35,11 @@ export const TD = {
 			ring: undefined
 		}
 	},
-	stars: {
-		list: [],
-		object: undefined,
-		material: undefined,
-		geometry: undefined,
-		positions: [],
-		sizes: [],
-		colors: [],
-		async: { }
+	material: {
+		stars: undefined,
+		grid: undefined
 	},
+	stars: {},
 	star: {
 		this: undefined,
 		object: undefined,
@@ -78,7 +74,8 @@ export const MISC = {
 	reload: false,
 	planet: {
 		surfaceMax: 18
-	}
+	},
+	loading: false
 };
 
 export const STAR = {

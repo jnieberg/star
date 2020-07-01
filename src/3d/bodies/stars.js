@@ -1,59 +1,59 @@
-import seedrandom from 'seedrandom';
 import * as THREE from 'three';
 import { TD, MISC, SHADER } from '../../variables';
 import { deleteThree } from '../init/init';
-import { getStarData, getStarPosition } from './star';
 import raycastStars from '../raycast/raycastStars';
 import { getCoordinateOffset, setCameraPosition, updateCoordinatesByOffset } from '../init/camera';
+import starList, { getRealCoordinate } from '../tools/starList';
+import { hideLabel } from '../label/label';
 
-function listStarArea(x, y, z) {
-	const size = TD.stargrid.size * TD.stargrid.size * TD.stargrid.size;
-	MISC.rnd = seedrandom(`stars_${x}_${y}_${z}`);
-	const quantity = Math.floor(MISC.rnd() * 0.0005 * size) + 0.0005 * size;
-	for (let s = 0; s < quantity; s++) {
-		TD.stars.list.push(getStarData(x, y, z, s));
-	}
-}
-
-function createStars() {
-	TD.stars.list.forEach(star => {
-		const pos = getStarPosition(star);
-		TD.stars.positions.push(pos.x, pos.y, pos.z);
-		// star.x + (star.cx - TD.camera.coordinate.x) * TD.stargrid.size * TD.scale,
-		// star.y + (star.cy - TD.camera.coordinate.y) * TD.stargrid.size * TD.scale,
-		// star.z + (star.cz - TD.camera.coordinate.z) * TD.stargrid.size * TD.scale);
-		MISC.colorHelper.setHSL(star.hue, 1.0, star.brightness);
-		TD.stars.colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
-		TD.stars.sizes.push(star.size * TD.scale);
-	});
-}
-
-function updateStars() {
-	if (TD.stars.positions.length) {
-		TD.stars.geometry.setAttribute('position', new THREE.Float32BufferAttribute(TD.stars.positions, 3));
-		TD.stars.geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars.colors, 3)); // .setUsage(THREE.DynamicDrawUsage)
-		TD.stars.geometry.setAttribute('size', new THREE.Float32BufferAttribute(TD.stars.sizes, 1));
-		// TD.stars.geometry.verticesNeedUpdate = false;
-		TD.stars.geometry.computeBoundingSphere();
-		deleteThree(TD.stars.object);
-		TD.stars.object = new THREE.Points(TD.stars.geometry, TD.stars.material);
-		TD.stars.object.castShadow = false;
-		TD.stars.object.receiveShadow = false;
-		TD.scene.add(TD.stars.object);
+function updateStars(off) {
+	if (TD.stars) {
+		for (const i of Object.keys(TD.stars)) {
+			if (!TD.stars[i].object) {
+				TD.stars[i].geometry = new THREE.BufferGeometry(); ;
+				TD.stars[i].geometry.setAttribute('position', new THREE.Float32BufferAttribute(TD.stars[i].positions, 3));
+				TD.stars[i].geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars[i].colors, 3)); // .setUsage(THREE.DynamicDrawUsage)
+				TD.stars[i].geometry.setAttribute('size', new THREE.Float32BufferAttribute(TD.stars[i].sizes, 1));
+				TD.stars[i].geometry.verticesNeedUpdate = false;
+				TD.stars[i].geometry.computeBoundingSphere();
+				// deleteThree(TD.stars[i].object);
+				TD.stars[i].object = new THREE.Points(TD.stars[i].geometry, TD.material.stars);
+				TD.stars[i].object.castShadow = false;
+				TD.stars[i].object.receiveShadow = false;
+				TD.stars[i].object.matrixAutoUpdate = true;
+				const coor = getRealCoordinate(TD.stars[i].x, TD.stars[i].y, TD.stars[i].z);
+				const points = [
+					new THREE.Vector3(coor.x, coor.y, coor.z),
+					new THREE.Vector3(coor.x, coor.y + TD.stargrid.size * TD.scale, coor.z),
+					new THREE.Vector3(coor.x + TD.stargrid.size * TD.scale, coor.y + TD.stargrid.size * TD.scale, coor.z),
+					new THREE.Vector3(coor.x + TD.stargrid.size * TD.scale, coor.y + TD.stargrid.size * TD.scale, coor.z + TD.stargrid.size * TD.scale),
+				];
+				TD.stars[i].grid = {};
+				TD.stars[i].grid.geometry = new THREE.BufferGeometry().setFromPoints(points);
+				TD.stars[i].grid.object = new THREE.Line(TD.stars[i].grid.geometry, TD.material.grid);
+				TD.stars[i].grid.object.castShadow = false;
+				TD.stars[i].grid.object.receiveShadow = false;
+				TD.stars[i].grid.object.matrixAutoUpdate = false;
+				TD.stars[i].grid.object.renderOrder = -1;
+				TD.stars[i].object.add(TD.stars[i].grid.object);
+				TD.scene.add(TD.stars[i].object);
+			} else {
+				TD.stars[i].object.translateX(off.x * TD.stargrid.size * TD.scale);
+				TD.stars[i].object.translateY(off.y * TD.stargrid.size * TD.scale);
+				TD.stars[i].object.translateZ(off.z * TD.stargrid.size * TD.scale);
+			}
+		}
 	}
 }
 
 export function initStars() {
-	TD.stars.geometry = new THREE.BufferGeometry();
 	const uniforms = {
 		texture: { type: 't', value: TD.texture.star.small },
 		fogColor: { type: 'c', value: TD.scene.fog.color },
 		fogNear: { type: 'f', value: TD.camera.fade * TD.scale },
 		fogFar: { type: 'f', value: TD.camera.far * TD.scale }
 	};
-	// const vertexShader = document.getElementById('vertexShaderStars').text;
-	// const fragmentShader = document.getElementById('fragmentShaderStars').text;
-	TD.stars.material = new THREE.ShaderMaterial({
+	TD.material.stars = new THREE.ShaderMaterial({
 		uniforms: uniforms,
 		vertexShader: SHADER.stars.vertex,
 		fragmentShader: SHADER.stars.fragment,
@@ -61,6 +61,12 @@ export function initStars() {
 		depthTest: false,
 		vertexColors: true,
 		fog: true
+	});
+	TD.material.grid = new THREE.LineBasicMaterial({
+		color: 0x0044ff,
+		blending: THREE.AdditiveBlending,
+		opacity: 0.25,
+		depthTest: false
 	});
 }
 
@@ -70,39 +76,26 @@ function newStarsCanBeRendered(force) {
 }
 
 export default function drawStars() {
-	if (MISC.reload || newStarsCanBeRendered()) {
-		TD.stars.list = [];
-		TD.stars.positions = [];
-		TD.stars.colors = [];
-		TD.stars.sizes = [];
+	if ((MISC.reload || newStarsCanBeRendered())) {
 		MISC.reload = false;
-		// TD.camera.coordinate = {
-		// 	x: Math.round(TD.camera.object.position.x / (TD.stargrid.size * TD.scale)),
-		//  	y: Math.round(TD.camera.object.position.y / (TD.stargrid.size * TD.scale)),
-		//  	z: Math.round(TD.camera.object.position.z / (TD.stargrid.size * TD.scale))
-		// };
 		updateCoordinatesByOffset();
-		setCameraPosition();
-
 		const pos = TD.camera.coordinate;
-		// 	x: Math.round(TD.camera.object.position.x / (TD.stargrid.size * TD.scale)),
-		// 	y: Math.round(TD.camera.object.position.y / (TD.stargrid.size * TD.scale)),
-		// 	z: Math.round(TD.camera.object.position.z / (TD.stargrid.size * TD.scale))
-		// };
-		for (let z = pos.z - TD.stargrid.radius; z <= pos.z + TD.stargrid.radius; z++) {
-			for (let y = pos.y - TD.stargrid.radius; y <= pos.y + TD.stargrid.radius; y++) {
-				for (let x = pos.x - TD.stargrid.radius; x <= pos.x + TD.stargrid.radius; x++) {
-					listStarArea(x, y, z);
-				}
-			}
-		}
-		createStars();
-		updateStars();
+		starList({ posx: pos.x, posy: pos.y, posz: pos.z }, () => {
+			const off = setCameraPosition();
+			console.log(off, pos);
+			updateStars(off);
+		});
 	}
 }
 
 export function getStars() {
-	if (TD.stars && TD.stars.object) {
-		raycastStars(TD.stars.object);
+	let result = false;
+	for (const i of Object.keys(TD.stars)) {
+		if (!result && TD.stars[i]) {
+			result = raycastStars(TD.stars[i]);
+		}
+	}
+	if (!result) {
+		hideLabel('stars');
 	}
 }

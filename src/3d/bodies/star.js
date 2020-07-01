@@ -7,6 +7,8 @@ import * as THREE from 'three';
 import { deleteThree } from '../init/init';
 import drawPlanets from './planets';
 import raycastStar from '../raycast/raycastStar';
+import setColor from '../../misc/color';
+import { getStarPosition } from '../tools/starList';
 
 export function getStarSize(star) {
 	return star.size;
@@ -100,30 +102,6 @@ export function getStarName(star) {
 	return getName(3, 3, 999);
 }
 
-export function getStarPosition(star) {
-	return {
-		// x: star.cx * TD.stargrid.size + star.x,
-		// y: star.cy * TD.stargrid.size + star.y,
-		// z: star.cz * TD.stargrid.size + star.z
-		x: (star.x + (star.cx - TD.camera.coordinate.x) * TD.stargrid.size) * TD.scale,
-		y: (star.y + (star.cy - TD.camera.coordinate.y) * TD.stargrid.size) * TD.scale,
-		z: (star.z + (star.cz - TD.camera.coordinate.z) * TD.stargrid.size) * TD.scale
-	};
-}
-
-export function getStarData(cx, cy, cz, index) {
-	return {
-		id: `${cx}_${cy}_${cz}_${index}`,
-		size: (MISC.rnd() * 4 + 1),
-		hue: MISC.rnd(),
-		brightness: MISC.rnd() * 0.9 + 0.1,
-		cx, cy, cz,
-		x: MISC.rnd() * TD.stargrid.size,
-		y: MISC.rnd() * TD.stargrid.size,
-		z: MISC.rnd() * TD.stargrid.size
-	};
-}
-
 export function getStarInfo(star) {
 	return {
 		...star,
@@ -154,8 +132,10 @@ export default function drawStar(star) {
 		const size = star.size * 0.002 * TD.scale;
 		deleteThree(TD.star.object);
 		const hue2 = star.hue - 0.05 > 0 ? star.hue - 0.05 : 0;
-		MISC.colorHelper.setHSL(star.hue, 1.0, star.brightness);
-		MISC.colorHelper2.setHSL(hue2, 1.0, star.brightness - 0.35);
+		setColor(1, star.hue, 1.0, star.brightness, 'hsl');
+		setColor(2, hue2, 1.0, star.brightness - 0.35, 'hsl');
+		// MISC.colorHelper.setHSL(star.hue, 1.0, star.brightness);
+		// MISC.colorHelper2.setHSL(hue2, 1.0, star.brightness - 0.35);
 		MISC.rnd = seedrandom(`star_rotation_${star.id}`);
 
 		// Star pivot
@@ -230,23 +210,24 @@ export default function drawStar(star) {
 		// Star spot light
 		TD.star.light = new THREE.DirectionalLight(MISC.colorHelper);
 		TD.star.light.intensity = 5;
-		TD.star.light.power = 10;
-		TD.star.light.decay = 1;
+		TD.star.light.power = 20;
+		TD.star.light.decay = 0;
+		TD.star.light.distance = TD.camera.far * 0.0001 * TD.scale;
+		TD.star.light.angle = Math.PI / 4;
+		TD.star.light.penumbra = 0.1;
+		const grid = 0.002;
+		TD.star.light.shadow.bias = 0.00000001;// -TD.camera.near * 0.0001 * TD.scale;
 		TD.star.light.shadow.mapSize.width = 1024 * 2;
 		TD.star.light.shadow.mapSize.height = 1024 * 2;
-		const grid = 0.001;
+		// TD.star.light.shadow.camera.fov = 30;
+		// TD.star.light.shadow.camera.aspect = 1;
 		TD.star.light.shadow.camera.left = -grid * TD.scale;
 		TD.star.light.shadow.camera.right = grid * TD.scale;
 		TD.star.light.shadow.camera.top = grid * TD.scale;
 		TD.star.light.shadow.camera.bottom = -grid * TD.scale;
-		TD.star.light.shadow.camera.near = 0;
-		TD.star.light.shadow.camera.far = TD.camera.far * 0.001 * TD.scale;
-		TD.star.light.distance = TD.camera.far * 0.001 * TD.scale;
-		TD.star.light.angle = Math.PI / 32;
-		TD.star.light.penumbra = size * 0.1;
-		TD.star.light.shadow.bias = TD.camera.near * 0.0001 * TD.scale;
+		TD.star.light.shadow.camera.near = 0.00000001;// TD.camera.near * TD.scale;
+		TD.star.light.shadow.camera.far = TD.camera.far * 0.0001 * TD.scale;
 		TD.star.light.castShadow = true;
-		// TD.star.light.position.set(pos.x, pos.y, pos.z);
 		TD.star.light.visible = false;
 
 		// TD.star.object.add(TD.star.light.target);
@@ -260,8 +241,8 @@ export default function drawStar(star) {
 
 		// Add star to scene
 		TD.scene.add(TD.star.object);
-		TD.star.light.updateMatrix();
-		TD.star.light.updateMatrixWorld();
+		// TD.star.light.updateMatrix();
+		// TD.star.light.updateMatrixWorld();
 		TD.star.sphere.this = star;
 	}
 }

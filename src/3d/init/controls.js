@@ -1,5 +1,7 @@
 import { TD, EVENT } from '../../variables';
 import * as THREE from 'three';
+import { hideLabel } from '../label/label';
+import { deleteThree } from './init';
 
 const FirstPersonControls = function(object, domElementA) {
 	let domElement = domElementA;
@@ -305,7 +307,7 @@ export function getMouse(e) {
 
 export function getKeys(e) {
 	switch (e.which) {
-	case 49:
+	case 49: // 1
 		TD.camera.coordinate = { x: undefined, y: undefined, z: undefined };
 		TD.camera.object.position.set(0, 0, 0);
 		TD.camera.object.rotation.set(0, 0, 0);
@@ -313,6 +315,12 @@ export function getKeys(e) {
 		EVENT.controls.accF = 0;
 		EVENT.controls.accL = 0;
 		EVENT.controls.accU = 0;
+		hideLabel('star');
+		hideLabel('planet');
+		for (const i of Object.keys(TD.stars)) {
+			deleteThree(TD.stars[i].object);
+		}
+		TD.stars = {};
 		break;
 	default: break;
 	}

@@ -58,7 +58,7 @@ export default function raycastPlanet(obj) {
 			if (range >= distance) {
 				TD.planet.this = undefined;
 				EVENT.controls.speedFactorPlanet = 1.0;
-			} else {
+			} else if (range > -1) {
 				const intersect = raycastFound(obj, 0.1, 2);
 				if (planet) {
 					raycastPlanetEvents(intersect, planet.this);

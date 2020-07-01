@@ -1,0 +1,3 @@
+[submodule "public/planet/procedural"]
+	path = public/planet/procedural
+	url = git@github.com:colordodge/ProceduralPlanet.git

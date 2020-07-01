@@ -11,8 +11,8 @@ export function saveCamera() {
 
 function loadCamera() {
 	let item = localStorage.getItem('camera');
-	if (item) {
-		item = JSON.parse(item);
+	item = JSON.parse(item);
+	if (item && item.coordinate && item.position && item.rotation) {
 		TD.camera.coordinate = item.coordinate;
 		TD.camera.object.position.set(item.position.x, item.position.y, item.position.z);
 		TD.camera.object.rotation.set(item.rotation._x, item.rotation._y, item.rotation._z);
@@ -20,16 +20,7 @@ function loadCamera() {
 	}
 }
 
-export function setCameraPosition() {
-	const grid = TD.stargrid.size * TD.scale;
-	TD.camera.object.position.set(
-		(TD.camera.object.position.x + grid) % grid,
-		(TD.camera.object.position.y + grid) % grid,
-		(TD.camera.object.position.z + grid) % grid
-	);
-}
-
-export function getCameraPosition() {
+function getCameraPosition() {
 	return {
 		x: TD.camera.object.position.x / TD.scale + (TD.camera.coordinate.x || 0) * TD.stargrid.size,
 		y: TD.camera.object.position.y / TD.scale + (TD.camera.coordinate.y || 0) * TD.stargrid.size,
@@ -37,12 +28,28 @@ export function getCameraPosition() {
 	};
 }
 
-export function getCameraCoordinate() {
+function getCameraCoordinate() {
 	const camera = getCameraPosition();
 	return {
 		x: Math.floor(camera.x / TD.stargrid.size),
 		y: Math.floor(camera.y / TD.stargrid.size),
 		z: Math.floor(camera.z / TD.stargrid.size)
+	};
+}
+
+export function setCameraPosition() {
+	const grid = TD.stargrid.size * TD.scale;
+	const coordOld = getCameraCoordinate();
+	TD.camera.object.position.set(
+		(TD.camera.object.position.x + grid) % grid,
+		(TD.camera.object.position.y + grid) % grid,
+		(TD.camera.object.position.z + grid) % grid
+	);
+	const coord = getCameraCoordinate();
+	return {
+		x: coord.x - coordOld.x,
+		y: coord.y - coordOld.y,
+		z: coord.z - coordOld.z
 	};
 }
 
@@ -66,9 +73,6 @@ export function cameraLookDir() {
 	const vector = new THREE.Vector3(0, 0, -1);
 	vector.applyEuler(TD.camera.object.rotation, TD.camera.object.eulerOrder);
 	return vector;
-}
-
-export function eventCamera() {
 }
 
 export default function initCamera() {

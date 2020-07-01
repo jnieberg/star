@@ -1,7 +1,8 @@
 import seedrandom from 'seedrandom';
 import getName from '../../misc/name';
 import { getStarTemperature, getStarSize } from './star';
-import { MISC, TD, PLANET } from '../../variables';
+import { MISC, TD } from '../../variables';
+import setColor from '../../misc/color';
 import { toCelcius } from '../../misc/temperature';
 import getSize from '../../misc/size';
 import createSphere from '../tools/createObject';
@@ -10,6 +11,7 @@ import THREEx from '../../lib/threex';
 import getTime from '../../misc/time';
 import * as THREE from 'three';
 import drawPlanets from './planets';
+import { Vector3 } from 'three';
 
 function getPlanetName(star, index, moon = -1) {
 	MISC.rnd = seedrandom(`planet_${star.id}_${index}_${moon}`);
@@ -121,14 +123,15 @@ function getPlanetRing(star, index, moon = -1) {
 	if (moon === -1) {
 		const size = getPlanetSize(star, index, moon);
 		MISC.rnd = seedrandom(`planet_ring_${star.id}_${index}_${moon}`);
-	 if (size > 0.01 && MISC.rnd() < 0.5) {
+	 	if (size > 0.01 && MISC.rnd() < 0.5) {
 			return {
+				thickness: MISC.rnd(),
 				size: size * 2 + MISC.rnd() * size * 3,
 				color: {
 					r: MISC.rnd(),
 					g: MISC.rnd(),
 					b: MISC.rnd(),
-					a: MISC.rnd() * 0.5 + 0.5
+					a: MISC.rnd() * 0.75 + 0.25
 				}
 			};
 		}
@@ -203,7 +206,7 @@ export function drawPlanetRotation(star, planet, planetO, moon = -1) {
 	bodyO.rotation.set(0, 0, 0);
 
 	MISC.rnd = seedrandom(`planet_star_rotation_${star.this.id}_${planet.id}_${moon}`);
-	bodyO.rotateY(getTime() * getPlanetStarRotationSpeed(star.this, planet.id, moon));
+	bodyO.rotateY((getTime() * getPlanetStarRotationSpeed(star.this, planet.id, moon)) + Math.PI * MISC.rnd() * 2);
 	bodyO.translateX(body.distance * 0.001 * TD.scale);
 	MISC.rnd = seedrandom(`planet_rotation_${star.this.id}_${planet.id}_${moon}`);
 	bodyO.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
@@ -212,17 +215,18 @@ export function drawPlanetRotation(star, planet, planetO, moon = -1) {
 
 export function drawPlanet(planet) {
 	if (planet) {
-		const star = TD.star;
 		deleteThree(TD.planet.object);
 
 		// Planet pivot
 		TD.planet.object = new THREE.Object3D();
-		drawPlanetRotation(star, TD.planet.this, TD.planet.object);
-		star.object.add(TD.planet.object);
+		drawPlanetRotation(TD.star, TD.planet.this, TD.planet.object);
+		TD.star.object.add(TD.planet.object);
 
 		// Planet sphere
-		MISC.colorHelper.setRGB(planet.color.r, planet.color.g, planet.color.b);
-		MISC.colorHelper2.setRGB(planet.outer.color.r, planet.outer.color.g, planet.outer.color.b);
+		setColor(1, planet.color.r, planet.color.g, planet.color.b);
+		setColor(2, planet.outer.color.r, planet.outer.color.g, planet.outer.color.b);
+		// MISC.colorHelper.setRGB(planet.color.r, planet.color.g, planet.color.b); MISC.colorHelper.convertSRGBToLinear();
+		// MISC.colorHelper2.setRGB(planet.outer.color.r, planet.outer.color.g, planet.outer.color.b); MISC.colorHelper2.convertSRGBToLinear();
 		TD.planet.sphere = createSphere({
 			color: MISC.colorHelper,
 			surface: planet.surface,
@@ -239,7 +243,7 @@ export function drawPlanet(planet) {
 			detail: 64,
 			parent: TD.planet.sphere
 		});
-		MISC.rnd = seedrandom(`planet_outer_rotation_${star.this.id}_${planet.id}`);
+		MISC.rnd = seedrandom(`planet_outer_rotation_${TD.star.this.id}_${planet.id}`);
 		TD.planet.sphereOut.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
 		TD.planet.sphereOut.castShadow = false;
 		TD.planet.sphereOut.receiveShadow = false;
@@ -250,7 +254,8 @@ export function drawPlanet(planet) {
 
 		// Planet atmosphere
 		if (planet.atmosphere) {
-			MISC.colorHelper.setHSL(planet.atmosphere.color.hue, planet.atmosphere.color.saturation, planet.atmosphere.color.lightness);
+			setColor(1, planet.atmosphere.color.hue, planet.atmosphere.color.saturation, planet.atmosphere.color.lightness, 'hsl');
+			// MISC.colorHelper.setHSL(planet.atmosphere.color.hue, planet.atmosphere.color.saturation, planet.atmosphere.color.lightness);
 			TD.planet.atmosphere = new THREEx.GeometricGlowMesh(TD.planet.sphere, {
 				size: (planet.size * 0.001 + 0.0000004) * TD.scale,
 				thickness: (planet.atmosphere.size * 0.001 + 0.0000004) * TD.scale,
@@ -260,15 +265,21 @@ export function drawPlanet(planet) {
 		}
 
 		// Update star spotlight
-		star.light.visible = true;
-		star.light.target = TD.planet.object;
-		// star.light.target.updateMatrixWorld();
-		// TD.scene.add(new THREE.CameraHelper(star.light.shadow.camera)); // TEST
-		// star.light.updateMatrix();
-		// star.light.updateMatrixWorld();
+		TD.star.light.target = TD.planet.object;
+		// TD.star.light.target.updateMatrix();
+		// TD.star.light.target.updateMatrixWorld();
+		// const vector = new THREE.Vector3(TD.planet.object.position.x, TD.planet.object.position.y, TD.planet.object.position.z);
+		// TD.planet.object.updateMatrix();
+		// TD.planet.object.getWorldPosition(vector);
+		// TD.star.light.lookAt(vector);
+		// TD.star.light.position.set(TD.planet.object.position.x * 0.8, TD.planet.object.position.y * 0.8, TD.planet.object.position.z * 0.8);
+		// TD.star.light.updateMatrix();
+		// TD.star.light.updateMatrixWorld();
+		TD.star.light.visible = true;
+		// TD.scene.add(new THREE.CameraHelper(TD.star.light.shadow.camera)); // TEST
 
 		// Draw moons of planet
-		TD.planet = drawPlanets(star.this, planet);
+		TD.planet = drawPlanets(TD.star.this, planet);
 		TD.planet.sphere.this = planet;
 	}
 }

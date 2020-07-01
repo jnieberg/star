@@ -1,4 +1,4 @@
-import { TD, PLANET, MISC } from '../../variables';
+import { TD, MISC } from '../../variables';
 import * as THREE from 'three';
 
 function loadTexture(filename, detail = true) {
@@ -11,6 +11,7 @@ function loadTexture(filename, detail = true) {
 			// texture.magFilter = THREE.LinearFilter;
 			texture.minFilter = THREE.LinearFilter;
 			texture.anisotropy = 16;
+			texture.encoding = THREE.sRGBEncoding;
 		}
 	});
 	return texture;
@@ -26,11 +27,11 @@ export default function initTextures(callback = () => {}) {
 		callback();
 	};
 
-	TD.texture.star.small = loadTexture('/star/star3.png', false);
-	TD.texture.star.large = loadTexture('/star/star.png');
-	TD.texture.star.surface = loadTexture('/star/surface2.jpg');
-	TD.texture.planet.ring = loadTexture('/planet/ring.png');
+	TD.texture.star.small = loadTexture('/public/star/star3.png', false);
+	TD.texture.star.large = loadTexture('/public/star/star.png');
+	TD.texture.star.surface = loadTexture('/public/star/surface2.jpg');
+	TD.texture.planet.ring = loadTexture('/public/planet/ring.png');
 	for (let s = 0; s < MISC.planet.surfaceMax; s++) {
-		TD.texture.planet.surface.push(loadTexture(`/planet/surface${s}.jpg`));
+		TD.texture.planet.surface.push(loadTexture(`/public/planet/surface${s}.jpg`));
 	}
 }
