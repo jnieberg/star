@@ -31,7 +31,7 @@ export default function initTextures(callback = () => {}) {
 	TD.texture.star.large = loadTexture('/public/star/star.png');
 	TD.texture.star.surface = loadTexture('/public/star/surface2.jpg');
 	TD.texture.planet.ring = loadTexture('/public/planet/ring.png');
-	for (let s = 0; s < MISC.planet.surfaceMax; s++) {
-		TD.texture.planet.surface.push(loadTexture(`/public/planet/surface${s}.jpg`));
-	}
+	// for (let s = 0; s < MISC.planet.surfaceMax; s++) {
+	// 	TD.texture.planet.surface.push(loadTexture(`/public/planet/surface${s}.jpg`));
+	// }
 }

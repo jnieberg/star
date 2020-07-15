@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { SHADER, TD } from '../variables';
+import Thing from '../object/Thing';
+import SphereGeometry from '../object/geometry/SphereGeometry';
 
 const THREEx = {};
 
@@ -29,7 +31,7 @@ THREEx.createAtmosphereMaterial = function() {
 		fragmentShader: SHADER.glow2.fragment,
 		blending: THREE.NormalBlending,
 		transparent: true,
-		depthWrite: false,
+		depthWrite: false
 	});
 	return material;
 };
@@ -38,46 +40,44 @@ THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS
 	const color = new THREE.Color(colorS);
 	const colorInner = new THREE.Color(colorInnerS);
 	// THREEx.dilateGeometry(geometry, thickness * 0.01);
-	let geometry = new THREE.SphereBufferGeometry(size, 64, 64); // + 0.0000001
-	let material = THREEx.createAtmosphereMaterial();
-	material.uniforms.color.value = colorInner;
-	material.uniforms.coeficient.value = opacity * 0.5 + 0.75 - size * 0.01;
-	material.uniforms.power.value = power + 0.5;
-	material.uniforms.glowColor.value = colorInner;
-	material.uniforms.c.value = opacity * 0.5 + 0.75 - size * 0.1;
-	material.uniforms.p.value = power + 0.5;
-	material.side = THREE.FrontSide;
-	material.alphaTest = 0.5;
-	material.needsUpdate = true;
-	const insideMesh = new THREE.Mesh(geometry, material);
-	// insideMesh.scale.set(size * 1.01, size * 1.01, size * 1.01);
-	insideMesh.castShadow = false;
-	insideMesh.receiveShadow = false;
+	// let geometry = new THREE.SphereBufferGeometry(size, 64, 64); // + 0.0000001
+	const inside = new Thing('glowInside')
+		.geometry(new SphereGeometry(size))
+		.material(THREEx.createAtmosphereMaterial(), {
+			'uniforms.color.value': colorInner,
+			'uniforms.coeficient.value': opacity * 0.5 + 0.75 - size * 0.01,
+			'uniforms.power.value': power + 0.5,
+			'uniforms.glowColor.value': colorInner,
+			'side': THREE.FrontSide
+		})
+		.mesh({
+			castShadow: false,
+			receiveShadow: false,
+		})
+		.add(mesh);
 	// insideMesh.renderOrder = 1;
-	mesh.add(insideMesh);
+	// mesh.add(insideMesh);
 
 	// THREEx.dilateGeometry(geometry, thickness * 0.5);
-	geometry = new THREE.SphereBufferGeometry(size + thickness, 64, 64);
-	material = THREEx.createAtmosphereMaterial();
-	material.uniforms.color.value = color;
-	material.uniforms.coeficient.value = opacity * 0.5 - thickness * 0.01;
-	material.uniforms.power.value = power;
-	material.uniforms.glowColor.value = color;
-	material.uniforms.c.value = opacity * 0.5 - thickness * 0.01;
-	material.uniforms.p.value = power;
-	material.side = THREE.BackSide;
-	// material.alphaTest = 0.5;
-	material.needsUpdate = true;
-	const outsideMesh = new THREE.Mesh(geometry, material);
-	// outsideMesh.scale.set(size + thickness * 0.5, size + thickness * 0.5, size + thickness * 0.5);
-	outsideMesh.castShadow = false;
-	outsideMesh.receiveShadow = false;
-	// outsideMesh.renderOrder = 1;
-	mesh.add(outsideMesh);
+	// inside.geometry = new THREE.SphereBufferGeometry(size + thickness, 64, 64);
+	const outside = new Thing('glowOutside')
+		.geometry(new SphereGeometry(size + thickness))
+		.material(THREEx.createAtmosphereMaterial(), {
+			'uniforms.color.value' : color,
+			'uniforms.coeficient.value' : opacity * 0.5 - thickness * 0.01,
+			'uniforms.power.value' : power,
+			'uniforms.glowColor.value' : color,
+			'side': THREE.BackSide,
+		})
+		.mesh({
+			castShadow: false,
+			receiveShadow: false,
+		})
+		.add(mesh);
 
 	// expose a few variable
-	this.inside = insideMesh;
-	this.outside = outsideMesh;
+	// this.inside = insideMesh;
+	// this.outside = outsideMesh;
 };
 
 export default THREEx;

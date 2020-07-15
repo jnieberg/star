@@ -2,13 +2,13 @@ import { EVENT, TD } from '../../variables';
 import setLabel, { hideLabel, showLabel } from '../label/label';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
-import { getPlanetInfoString, drawPlanet } from '../bodies/planet';
+import { getPlanetInfoString, drawPlanet } from '../bodies/planet/planet';
 import * as THREE from 'three';
 
 function raycastPlanetEvents(intersect, planet) {
 	if (TD.planet.this !== planet) {
 		TD.planet.this = planet;
-		drawPlanet(TD.planet.this);
+		drawPlanet(TD.planet);
 	}
 	if (intersect && intersect.object) {
 		if (planet && (!TD.planet.this || TD.planet.this.id !== planet.id || !TD.label.planet || !TD.label.planet.visible)) {
@@ -53,7 +53,7 @@ export default function raycastPlanet(obj) {
 	if (obj) {
 		if (TD.star) {
 			const planets = TD.star.children;
-			const distance = 0.1;
+			const distance = 0.01;
 			const { range, planet } = getClosestPlanet(planets);
 			if (range >= distance) {
 				TD.planet.this = undefined;

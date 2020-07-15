@@ -2,3 +2,9 @@ body {
 	background: black;
   margin: 0;
 }
+
+#biomeCanvas {
+	display: none;
+	position: absolute;
+	top: 0;
+}

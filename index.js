@@ -6,15 +6,37 @@ import path from 'path';
 import webpack from 'webpack';
 
 const __dirname = path.resolve();
+
+fs.readdir('dist', (err, files) => {
+	if (err) {
+		throw err;
+	}
+	for (const file of files) {
+		if (file.indexOf('.worker.js') > 0) {
+			fs.unlinkSync(path.join('dist', file));
+		}
+	}
+});
+
 const compiler = webpack({
 	mode: 'development',
+	devtool: 'inline-source-map',
 	watch: true,
 	entry: './src/index.js',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 		filename: 'bundle.js'
 	},
-	stats: 'errors-only'
+	stats: 'errors-only',
+	module: {
+		rules: [
+			{ test: /\.(glsl|frag|vert)$/, loader: 'raw-loader', exclude: /node_modules/ },
+			{ test: /\.(glsl|frag|vert)$/, loader: 'glslify-loader', exclude: /node_modules/ },
+			{ test: /node_modules/, loader: 'ify-loader' },
+			{ test: /\.json$/, loader: 'json-loader' },
+			{ test: /\.worker\.js$/, use: { loader: 'worker-loader' } }
+		]
+	}
 });
 const watching = compiler.watch({
 	// Example watchOptions
@@ -49,12 +71,12 @@ const mimetype = {
 function open(resp, urlA) {
 	const url = urlA.replace(/^.*(\..*?)$/, '$1') === urlA ? `${urlA}.js` : urlA;
 	const ext = url.replace(/^.*(\..+?)$/, '$1');
-	console.log(url);
 	const mime = mimetype[ext] || 'text/html';
 	fs.readFile(url, (error, data) => {
 		resp.writeHead(200, {
 			'Content-Type': mime
 		});
+		console.log(url);
 		resp.end(data);
 	});
 }
@@ -70,7 +92,7 @@ app.get('/', (req, resp) => {
 	open(resp, 'public/index.html');
 });
 
-app.get(/^\/(dist|public)\/.+$/, (req, resp) => {
+app.get(/^\/(dist|public|src)\/.+$/, (req, resp) => {
 	const url = req.url.substring(1);
 	open(resp, url);
 });

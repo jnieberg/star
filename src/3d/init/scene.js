@@ -1,25 +1,11 @@
 import * as THREE from 'three';
-import { TD, SHADER } from '../../variables';
+import { TD } from '../../variables';
+
 
 export default function initScene() {
 	// Scene
 	TD.scene = new THREE.Scene();
 	TD.scene.fog = new THREE.Fog(0x000000, TD.camera.fade * TD.scale, TD.camera.far * TD.scale);
-
-	// Shadowmap
-	// let shader = THREE.ShaderChunk.shadowmap_pars_fragment;
-	// shader = shader.replace(
-	// 	'#ifdef USE_SHADOWMAP',
-	// 	`#ifdef USE_SHADOWMAP
-	// 	${SHADER.pcss.fragment}`
-	// );
-	// shader = shader.replace(
-	// 	'#if defined( SHADOWMAP_TYPE_PCF )',
-	// 	`${SHADER.pcss.shadow}
-	// 	#if defined( SHADOWMAP_TYPE_PCF )`
-	// );
-	// // eslint-disable-next-line camelcase
-	// THREE.ShaderChunk.shadowmap_pars_fragment = shader;
 
 	// WebGL Renderer
 	TD.renderer = new THREE.WebGLRenderer({

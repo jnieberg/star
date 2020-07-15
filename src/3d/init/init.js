@@ -1,10 +1,11 @@
 import animate, { interval } from '../animate';
 import initCamera from './camera';
 import initScene from './scene';
-import { initStars } from '../bodies/stars';
+import { initStars } from '../bodies/star/stars';
 import initControls from './controls';
 import initEvents from './events';
 import initTextures from './texture';
+import { MISC } from '../../variables';
 
 export function deleteThree(obj) {
 	if (obj) {
@@ -16,7 +17,11 @@ export function deleteThree(obj) {
 		};
 
 		if (obj.material) {
-			obj.material.dispose();
+			if (Array.isArray(obj.material)) {
+				obj.material.map(material => material.dispose());
+			} else {
+				obj.material.dispose();
+			}
 		}
 		if (obj.texture) {
 			obj.texture.dispose();
@@ -34,7 +39,6 @@ export default function init3d() {
 		initControls();
 		initStars();
 		initEvents();
-		interval();
 		animate();
 	});
 }

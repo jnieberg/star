@@ -1,18 +1,19 @@
 import seedrandom from 'seedrandom';
 import * as THREE from 'three';
+import ThingList from './object/ThingList';
 
 export const TD = {
 	stargrid: {
 		size: 100,
-		radius: 6,
+		radius: 2,
 		density: 0.0005
 	},
 	scale: 10000,
 	camera: {
 		object: undefined,
 		near: 0.000001,
-		fade: 500,
-		far: 600,
+		fade: 150,
+		far: 200,
 		coordinate: {
 			x: undefined,
 			y: undefined,
@@ -67,6 +68,8 @@ export const EVENT = {
 };
 
 export const MISC = {
+	timer: 0,
+	things: new ThingList(),
 	rnd: seedrandom('foo'),
 	colorHelper: new THREE.Color(),
 	colorHelper2: new THREE.Color(),
@@ -75,7 +78,8 @@ export const MISC = {
 	planet: {
 		surfaceMax: 18
 	},
-	loading: false
+	loading: false,
+	worker: undefined
 };
 
 export const STAR = {
@@ -109,7 +113,7 @@ export const STAR = {
 export const NAME_LETTERS = {
 	vowelsSME: [
 		'a', 'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'i', 'o', 'o', 'o', 'o', 'u', 'u', 'u',
-		'au', 'ea', 'ee', 'ei', 'eu', 'ie', 'iu', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'ui'
+		'au', 'ea', 'ee', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'ui'
 	],
 	vowelsE: [
 		'ay', 'ey', 'uy', 'y'
@@ -128,7 +132,7 @@ export const NAME_LETTERS = {
 		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'mm', 'nn', 'np', 'pp', 'pt', 'rr', 'ss', 'tt'
 	],
 	consME: [
-		'ch', 'ck', 'gh', 'lf', 'lk', 'ls', 'mb', 'mp', 'nc', 'ng', 'nk', 'rc', 'rch', 'rd', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'tch'
+		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'lk', 'ls', 'lt', 'mb', 'md', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'nt', 'rc', 'rch', 'rd', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'tch'
 	]
 };
 

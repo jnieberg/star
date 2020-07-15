@@ -1,6 +1,6 @@
 import { EVENT, TD } from '../../variables';
 import setLabel, { hideLabel, showLabel } from '../label/label';
-import drawStar, { getStarInfo, getStarInfoString } from '../bodies/star';
+import drawStar, { getStarInfo, getStarInfoString } from '../bodies/star/star';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
 
