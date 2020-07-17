@@ -1,11 +1,10 @@
-import animate, { interval } from '../animate';
+import animate from '../animate';
 import initCamera from './camera';
 import initScene from './scene';
 import { initStars } from '../bodies/star/stars';
 import initControls from './controls';
 import initEvents from './events';
 import initTextures from './texture';
-import { MISC } from '../../variables';
 
 export function deleteThree(obj) {
 	if (obj) {

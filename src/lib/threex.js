@@ -39,9 +39,7 @@ THREEx.createAtmosphereMaterial = function() {
 THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS = 'rgba(255, 255, 255, 1.0)', colorInner: colorInnerS = colorS, power = 2.5, opacity = 0.5 } = {}) {
 	const color = new THREE.Color(colorS);
 	const colorInner = new THREE.Color(colorInnerS);
-	// THREEx.dilateGeometry(geometry, thickness * 0.01);
-	// let geometry = new THREE.SphereBufferGeometry(size, 64, 64); // + 0.0000001
-	const inside = new Thing('glowInside')
+	new Thing('glowInside')
 		.geometry(new SphereGeometry(size))
 		.material(THREEx.createAtmosphereMaterial(), {
 			'uniforms.color.value': colorInner,
@@ -53,14 +51,11 @@ THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS
 		.mesh({
 			castShadow: false,
 			receiveShadow: false,
+			renderOrder: 1 // Needed to be visible
 		})
 		.add(mesh);
-	// insideMesh.renderOrder = 1;
-	// mesh.add(insideMesh);
 
-	// THREEx.dilateGeometry(geometry, thickness * 0.5);
-	// inside.geometry = new THREE.SphereBufferGeometry(size + thickness, 64, 64);
-	const outside = new Thing('glowOutside')
+	new Thing('glowOutside')
 		.geometry(new SphereGeometry(size + thickness))
 		.material(THREEx.createAtmosphereMaterial(), {
 			'uniforms.color.value' : color,
@@ -72,12 +67,9 @@ THREEx.GeometricGlowMesh = function(mesh, { size, thickness = 0.1, color: colorS
 		.mesh({
 			castShadow: false,
 			receiveShadow: false,
+			renderOrder: 1
 		})
 		.add(mesh);
-
-	// expose a few variable
-	// this.inside = insideMesh;
-	// this.outside = outsideMesh;
 };
 
 export default THREEx;

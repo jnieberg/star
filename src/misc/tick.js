@@ -3,7 +3,7 @@ import { TD } from '../variables';
 
 export default function tick() {
 	return new Promise((resolve, reject) => {
-		setTimeout(() => {
+		wait(() => {
 			resolve();
 		});
 	});

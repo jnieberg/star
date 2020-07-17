@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import vertShader from '../shaders/texture.vert';
-import fragShader from '../shaders/cloudMap.frag';
+import vertShader from '../../../../shaders/texture.vert';
+import fragShader from '../../../../shaders/cloudMap.frag';
 
 import Map from './Map.js';
 
 class CloudMap extends Map {
-	constructor() {
+	constructor(resolution) {
 		super();
 		this.setup();
-		super.setup();
+		super.setup(resolution);
 	}
 
 	setup() {
@@ -33,7 +33,7 @@ class CloudMap extends Map {
 		}
 	}
 
-	render(props) {
+	render(props, callback) {
 		// props.seed
 		// props.resolution
 		// props.res1
@@ -51,7 +51,7 @@ class CloudMap extends Map {
 			this.mats[i].needsUpdate = true;
 		}
 
-		super.render(props);
+		super.render(props, callback);
 	}
 }
 

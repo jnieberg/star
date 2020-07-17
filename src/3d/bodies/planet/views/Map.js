@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { TD } from '../../../../variables';
+import wait from '../../../tools/wait';
 
 class Map {
-	constructor(canvas) {
-		this.canvas = canvas;
+	constructor(resolution) {
+		this.resolution = resolution;
 	}
 
 	setup() {
@@ -15,14 +16,14 @@ class Map {
 		this.geos = [];
 
 		for (let i = 0; i < 6; i++) {
-			const tempRes = 1000;
-			this.textures[i] = new THREE.WebGLRenderTarget(tempRes, tempRes, {
-				minFilter: THREE.LinearFilter,
+			this.textures[i] = new THREE.WebGLRenderTarget(this.resolution, this.resolution, {
 				// magFilter: THREE.LinearFilter,
+				precision: 'highp',
+				powerPreference: 'high-performance',
+				minFilter: THREE.LinearFilter,
 				format: THREE.RGBAFormat,
-				// anisotropy: 16
 			});
-  		this.textureCameras[i] = new THREE.OrthographicCamera(-tempRes / 2, tempRes / 2, tempRes / 2, -tempRes / 2, -100, 100);
+  		this.textureCameras[i] = new THREE.OrthographicCamera(-this.resolution / 2, this.resolution / 2, this.resolution / 2, -this.resolution / 2, -100, 100);
   		this.textureCameras[i].position.z = 10;
 
   		this.textureScenes[i] = new THREE.Scene();
@@ -38,35 +39,54 @@ class Map {
 		}
 	}
 
-	render(props) {
-		const resolution = props.resolution;
-
-		for (let i = 0; i < 6; i++) {
-			// setTimeout(() => {
-			// window.renderQueue.addAction(() => {
+	renderPart(resolution, iA, xA, yA, callback) {
+		const fragments = Math.ceil(resolution / 64);
+		let i = iA || 0;
+		let x = xA || 0;
+		let y = yA || 0;
+		if (i < 6) {
 			this.textures[i].setSize(resolution, resolution);
-			// this.textures[i].needsUpdate = true;
 			this.textureCameras[i].left = -resolution / 2;
 			this.textureCameras[i].right = resolution / 2;
 			this.textureCameras[i].top = resolution / 2;
 			this.textureCameras[i].bottom = -resolution / 2;
 			this.textureCameras[i].updateProjectionMatrix();
-			this.geos[i] = new THREE.PlaneGeometry(resolution, resolution);
+			this.geos[i] = new THREE.PlaneBufferGeometry(resolution, resolution, 1, 1);
 			this.planes[i].geometry = this.geos[i];
-
-			let renderer = TD && TD.renderer;
-			if (self && self.window && self.window.renderer) {
-				renderer = self.window.renderer;
-			}
-			renderer.setRenderTarget(this.textures[i]);
-			renderer.clear();
-			renderer.render(this.textureScenes[i], this.textureCameras[i]);// , this.textures[i], true);
-			renderer.setRenderTarget(null);
-
-			// await tick();
 			this.geos[i].dispose();
-			// }, 100);
+			TD.renderer.autoClear = false;
+			if (y < fragments) {
+				if (x < fragments) {
+					wait(() => {
+						TD.renderer.setRenderTarget(this.textures[i]);
+						TD.renderer.antialias = false;
+						TD.renderer.setScissorTest(true);
+						TD.renderer.setScissor(
+							Math.floor((x * resolution) / fragments),
+							Math.floor((y * resolution) / fragments),
+							Math.floor(resolution / fragments + 1),
+							Math.floor(resolution / fragments + 1)
+						);
+						TD.renderer.render(this.textureScenes[i], this.textureCameras[i]);// , this.textures[i], true);
+						TD.renderer.antialias = true;
+						TD.renderer.setRenderTarget(null);
+						TD.renderer.setScissorTest(false);
+						this.renderPart(resolution, i, ++x, y, callback);
+					});
+				} else {
+					this.renderPart(resolution, i, 0, ++y, callback);
+				}
+			} else {
+				this.renderPart(resolution, ++i, 0, 0, callback);
+			}
+		} else if (callback) {
+			callback();
 		}
+	}
+
+	render(props, callback) {
+		const resolution = props.resolution;
+		this.renderPart(resolution, 0, 0, 0, callback);
 	}
 }
 

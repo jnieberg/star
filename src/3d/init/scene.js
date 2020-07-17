@@ -1,14 +1,17 @@
 import * as THREE from 'three';
 import { TD } from '../../variables';
 
-
 export default function initScene() {
 	// Scene
 	TD.scene = new THREE.Scene();
 	TD.scene.fog = new THREE.Fog(0x000000, TD.camera.fade * TD.scale, TD.camera.far * TD.scale);
 
 	// WebGL Renderer
+	TD.canvas = document.querySelector('#c');
+	// const offscreen = TD.canvas.transferControlToOffscreen();
+	// offscreen.style = {};
 	TD.renderer = new THREE.WebGLRenderer({
+		canvas: TD.canvas,
 		precision: 'highp',
 		powerPreference: 'high-performance',
 		// stencil: false,
@@ -26,8 +29,6 @@ export default function initScene() {
 
 	TD.renderer.setPixelRatio(window.devicePixelRatio);
 	TD.renderer.setSize(window.innerWidth, window.innerHeight);
-
-	document.getElementById('root').appendChild(TD.renderer.domElement);
 
 	TD.raycaster = new THREE.Raycaster();
 }

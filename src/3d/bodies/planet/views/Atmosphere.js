@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import shaderVert from '../shaders/planet.vert';
-import shaderFrag from '../shaders/atmos.frag';
+import shaderVert from '../../../../shaders/planet.vert';
+import shaderFrag from '../../../../shaders/atmos.frag';
 
 class Atmosphere {
 	constructor() {

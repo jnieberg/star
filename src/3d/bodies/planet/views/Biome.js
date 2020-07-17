@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { Color } from 'three';
 
 class Biome {
-	constructor(canvas) {
-		this.canvas = canvas || document.createElement('canvas');
+	constructor() {
+		this.canvas = document.createElement('canvas');
 		this.canvas.id = 'biomeCanvas';
-		this.canvas.width = 512;
-		this.canvas.height = 512;
+		this.canvas.width = 256;
+		this.canvas.height = 256;
 		this.width = this.canvas.width;
 		this.height = this.canvas.height;
 		this.ctx = this.canvas.getContext('2d');

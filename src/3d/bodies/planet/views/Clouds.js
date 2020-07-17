@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import CloudMap from './CloudMap.js';
+import { TD } from '../../../../variables.js';
 
 class Clouds {
-	constructor({ size }) {
+	constructor({ size, resolution }) {
 		this.view = new THREE.Object3D();
 
 		this.materials = [];
@@ -12,7 +13,7 @@ class Clouds {
 		this.clouds = 1.0;
 
 
-		this.resolution = 1024;
+		this.resolution = resolution;
 		this.size = size * 1.001;
 
 
@@ -44,13 +45,13 @@ class Clouds {
 	}
 
 	setup() {
-		this.cloudMap = new CloudMap();
+		this.cloudMap = new CloudMap(this.resolution);
 		this.cloudMaps = this.cloudMap.maps;
 
 		for (let i = 0; i < 6; i++) {
 			const material = new THREE.MeshStandardMaterial({
 				color: this.color,
-				transparent: true,
+				transparent: true
 			});
 			this.materials[i] = material;
 		}
@@ -85,7 +86,6 @@ class Clouds {
 			resMix: this.randRange(size.min, size.max),
 			mixScale: this.randRange(size.min, size.max)
 		});
-
 		this.updateMaterial();
 	}
 

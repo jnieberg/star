@@ -40,7 +40,7 @@ export default function drawPlanets(star, planet) {
 	if (body.children) {
 		for (let c = 0; c < body.children.length; c++) {
 			((body, bodyO, c) => {
-				// setTimeout(() => {
+				// wait(() => {
 				const child = body.children[c];
 
 				deleteThree(bodyO.children[c]);
@@ -68,18 +68,22 @@ export default function drawPlanets(star, planet) {
 				// Planet sphere
 				MISC.rnd = seedrandom(isMoon ? `planet_star_rotation_${star.id}_${planet.id}_${c}` : `planet_star_rotation_${star.id}_${c}`);
 
-				bodyO.children[c] = createSphere({
-					// surface: child.surface,
-					size: child.size * 0.00099 * TD.scale,
-					detail: 16,
-					color: isMoon ? MISC.colorHelper : 0xffffff,
-					rotate: Math.PI * MISC.rnd() * 2,
-					distance: child.distance * 0.001 * TD.scale,
-					parent: bodyO.object
+				// bodyO.children[c] = createSphere({
+				// 	size: child.size * 0.00097 * TD.scale,
+				// 	detail: 16,
+				// 	color: isMoon ? MISC.colorHelper : 0xffffff,
+				// 	rotate: Math.PI * MISC.rnd() * 2,
+				// 	distance: child.distance * 0.001 * TD.scale,
+				// 	parent: bodyO.object
+				// });
+				const planetLow = new Planet({
+					rnd: isMoon ? `planet_${star.id}_${planet.id}_${c}` : `planet_${star.id}_${c}`,
+					size: child.size * 0.00097 * TD.scale,
+					resolution: 32
 				});
-				// bodyO.children[c] = bodyO.children[c].view;
-				// bodyO.children[c].rotation.y = Math.PI * MISC.rnd() * 2 || 0;
-				// bodyO.children[c].translateX(child.distance * 0.001 * TD.scale || 0);
+				bodyO.children[c] = planetLow.view;
+				bodyO.children[c].rotation.y = Math.PI * MISC.rnd() * 2 || 0;
+				bodyO.children[c].translateX(child.distance * 0.001 * TD.scale || 0);
 				bodyO.object.add(bodyO.children[c]);
 
 				// New Planet

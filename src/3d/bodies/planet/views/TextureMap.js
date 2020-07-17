@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import vertShader from '../shaders/texture.vert';
-import fragShader from '../shaders/textureMap.frag';
+import vertShader from '../../../../shaders/texture.vert';
+import fragShader from '../../../../shaders/textureMap.frag';
 import Map from './Map.js';
 
 class TextureMap extends Map {
-	constructor(canvas) {
-		super(canvas);
+	constructor(resolution) {
+		super();
 		this.setup();
-		super.setup();
+		super.setup(resolution);
 	}
 
 	setup() {
@@ -28,13 +28,13 @@ class TextureMap extends Map {
 		}
 	}
 
-	render(props) {
+	render(props, callback) {
 		// props.resolution
 		// props.heightMaps[]
 		// props.moistureMaps[]
 		// props.biomeMap
 
-		const resolution = props.resolution;
+		// const resolution = props.resolution;
 
 		for (let i = 0; i < 6; i++) {
 			this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
@@ -43,7 +43,7 @@ class TextureMap extends Map {
 			this.mats[i].needsUpdate = true;
 		}
 
-		super.render(props);
+		super.render(props, callback);
 	}
 }
 

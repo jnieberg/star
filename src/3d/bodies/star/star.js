@@ -207,7 +207,7 @@ export default function drawStar(star) {
 
 		// Star spot light
 		TD.star.light = new THREE.DirectionalLight(MISC.colorHelper3);
-		TD.star.light.intensity = 5;
+		TD.star.light.intensity = 1;
 		TD.star.light.power = 20;
 		TD.star.light.decay = 0;
 		TD.star.light.distance = TD.camera.far * 0.0001 * TD.scale;

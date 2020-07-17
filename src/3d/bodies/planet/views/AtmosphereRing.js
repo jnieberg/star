@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import vertShader from '../shaders/atmosRing.vert';
-import fragShader from '../shaders/atmosRing.frag';
+import vertShader from '../../../../shaders/atmosRing.vert';
+import fragShader from '../../../../shaders/atmosRing.frag';
 import { TD } from '../../../../variables';
 
 class AtmosphereRing {

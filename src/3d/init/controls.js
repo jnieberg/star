@@ -4,15 +4,13 @@ import { hideLabel } from '../label/label';
 import { deleteThree } from './init';
 import { resetCamera } from './camera';
 
-const FirstPersonControls = function(object, domElementA) {
-	let domElement = domElementA;
-	if (domElement === undefined) {
-		console.warn('THREE.FirstPersonControls: The second parameter "domElement" is now mandatory.');
-		domElement = document;
+const FirstPersonControls = function(object) {
+	if (TD.canvas === undefined) {
+		console.warn('THREE.FirstPersonControls: The second parameter "TD.canvas" is now mandatory.');
+		TD.canvas = document;
 	}
 
 	this.object = object;
-	this.domElement = domElement;
 
 	// API
 
@@ -65,15 +63,15 @@ const FirstPersonControls = function(object, domElementA) {
 
 	//
 
-	if (this.domElement !== document) {
-		this.domElement.setAttribute('tabindex', -1);
+	if (TD.canvas !== document) {
+		TD.canvas.setAttribute('tabindex', -1);
 	}
 
 	//
 
 	this.onMouseDown = function(event) {
-		if (this.domElement !== document) {
-			this.domElement.focus();
+		if (TD.canvas !== document) {
+			TD.canvas.focus();
 		}
 
 		event.preventDefault();
@@ -106,12 +104,12 @@ const FirstPersonControls = function(object, domElementA) {
 	};
 
 	this.onMouseMove = function(event) {
-		// if (this.domElement === document) {
+		// if (TD.canvas === document) {
 		this.mouseX = event.pageX - window.innerWidth / 2;
 		this.mouseY = event.pageY - window.innerHeight / 2;
 		// } else {
-		// 	this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
-		// 	this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
+		// 	this.mouseX = event.pageX - TD.canvas.offsetLeft - this.viewHalfX;
+		// 	this.mouseY = event.pageY - TD.canvas.offsetTop - this.viewHalfY;
 		// }
 	};
 
@@ -203,6 +201,7 @@ const FirstPersonControls = function(object, domElementA) {
 				this.autoSpeedFactor = 0.0;
 			}
 			const actualMoveSpeed = delta * this.movementSpeed;
+			const brakeFactor = Math.pow(0.99, delta + 1.0);
 			if (!this.acceleration) {
 				this.accF = 0;
 				this.accL = 0;
@@ -231,14 +230,14 @@ const FirstPersonControls = function(object, domElementA) {
 			this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateY(this.accU * this.speedFactorStar * this.speedFactorPlanet);
-			this.accF = this.accF * 0.99;
-			this.accL = this.accL * 0.99;
-			this.accU = this.accU * 0.99;
+			this.accF = this.accF * brakeFactor;
+			this.accL = this.accL * brakeFactor;
+			this.accU = this.accU * brakeFactor;
 
 			if (this.rotate) {
 				this.actualLookSpeed = delta * this.lookSpeed;
 			} else {
-				this.actualLookSpeed = this.actualLookSpeed * 0.99;
+				this.actualLookSpeed = this.actualLookSpeed * brakeFactor;
 			}
 			if (!this.activeLook) {
 				this.actualLookSpeed = 0;
@@ -249,7 +248,6 @@ const FirstPersonControls = function(object, domElementA) {
 			if (this.constrainVertical) {
 				verticalLookRatio = Math.PI / (this.verticalMax - this.verticalMin);
 			}
-
 			if (this.lookVertical) {
 				this.object.rotateX(-this.mouseY * this.actualLookSpeed * verticalLookRatio * 0.02);
 			}
@@ -264,19 +262,19 @@ const FirstPersonControls = function(object, domElementA) {
 	const _onKeyUp = bind(this, this.onKeyUp);
 
 	this.dispose = function() {
-		this.domElement.removeEventListener('contextmenu', contextmenu, false);
-		this.domElement.removeEventListener('mousedown', _onMouseDown, false);
-		this.domElement.removeEventListener('mousemove', _onMouseMove, false);
-		this.domElement.removeEventListener('mouseup', _onMouseUp, false);
+		TD.canvas.removeEventListener('contextmenu', contextmenu, false);
+		TD.canvas.removeEventListener('mousedown', _onMouseDown, false);
+		TD.canvas.removeEventListener('mousemove', _onMouseMove, false);
+		TD.canvas.removeEventListener('mouseup', _onMouseUp, false);
 
 		window.removeEventListener('keydown', _onKeyDown, false);
 		window.removeEventListener('keyup', _onKeyUp, false);
 	};
 
-	this.domElement.addEventListener('contextmenu', contextmenu, false);
-	this.domElement.addEventListener('mousemove', _onMouseMove, false);
-	this.domElement.addEventListener('mousedown', _onMouseDown, false);
-	this.domElement.addEventListener('mouseup', _onMouseUp, false);
+	TD.canvas.addEventListener('contextmenu', contextmenu, false);
+	TD.canvas.addEventListener('mousemove', _onMouseMove, false);
+	TD.canvas.addEventListener('mousedown', _onMouseDown, false);
+	TD.canvas.addEventListener('mouseup', _onMouseUp, false);
 
 	window.addEventListener('keydown', _onKeyDown, false);
 	window.addEventListener('keyup', _onKeyUp, false);
@@ -286,7 +284,7 @@ const FirstPersonControls = function(object, domElementA) {
 
 export default function initControls() {
 	TD.clock = new THREE.Clock();
-	EVENT.controls = new FirstPersonControls(TD.camera.object, TD.renderer.domElement);
+	EVENT.controls = new FirstPersonControls(TD.camera.object);
 	EVENT.controls.acceleration = true;
 	EVENT.controls.movementSpeed = 10 * TD.scale;
 	EVENT.controls.lookSpeed = 0.1;

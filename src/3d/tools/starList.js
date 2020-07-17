@@ -48,27 +48,23 @@ export default function starList({ posx, posy, posz }, callback) {
 	for (let z = posz - TD.stargrid.radius; z <= posz + TD.stargrid.radius; z++) {
 		for (let y = posy - TD.stargrid.radius; y <= posy + TD.stargrid.radius; y++) {
 			for (let x = posx - TD.stargrid.radius; x <= posx + TD.stargrid.radius; x++) {
-				((x, y, z) => {
-					setTimeout(() => {
-						if (!TD.stars[`${x}_${y}_${z}`]) {
-							TD.stars[`${x}_${y}_${z}`] = {
-								x, y, z,
-								this: [],
-								positions: [],
-								colors: [],
-								sizes: []
-							};
-							MISC.rnd = seedrandom(`stars_${x}_${y}_${z}`);
-							const quantity = Math.floor(MISC.rnd() * TD.stargrid.density * content) + TD.stargrid.density * content;
-							for (let i = 0; i < quantity; i++) {
-								createStars(x, y, z, i);
-							}
-						}
-						if (--count === 0) {
-							callback();
-						}
-					});
-				})(x, y, z);
+				if (!TD.stars[`${x}_${y}_${z}`]) {
+					TD.stars[`${x}_${y}_${z}`] = {
+						x, y, z,
+						this: [],
+						positions: [],
+						colors: [],
+						sizes: []
+					};
+					MISC.rnd = seedrandom(`stars_${x}_${y}_${z}`);
+					const quantity = Math.floor(MISC.rnd() * TD.stargrid.density * content) + TD.stargrid.density * content;
+					for (let i = 0; i < quantity; i++) {
+						createStars(x, y, z, i);
+					}
+				}
+				if (--count === 0) {
+					callback();
+				}
 			}
 		}
 	}

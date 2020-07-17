@@ -22,6 +22,7 @@ export const TD = {
 	},
 	clock: undefined,
 	scene: undefined,
+	canvas: undefined,
 	renderer: undefined,
 	raycaster: undefined,
 	texture: {
@@ -56,6 +57,7 @@ export const TD = {
 		sphereOut: undefined,
 		atmosphere: undefined,
 		atmosphere2: undefined,
+		detail: 2048,
 		children: []
 	},
 	label: {}
@@ -68,7 +70,7 @@ export const EVENT = {
 };
 
 export const MISC = {
-	timer: 0,
+	timers: [],
 	things: new ThingList(),
 	rnd: seedrandom('foo'),
 	colorHelper: new THREE.Color(),
@@ -119,20 +121,36 @@ export const NAME_LETTERS = {
 		'ay', 'ey', 'uy', 'y'
 	],
 	cons: [
-		'c', 'd', 'd', 'd', 'd', 'f', 'g', 'g', 'g', 'k', 'k', 'k', 'l', 'l', 'l', 'l', 'm', 'm', 'm', 'm',
-		'n', 'n', 'n', 'n', 'p', 'p', 'p', 'p', 'r', 'r', 'r', 'r', 's', 's', 's', 's', 't', 't', 't', 't',
+		'c',
+		'd', 'd', 'd', 'd',
+		'f',
+		'g', 'g', 'g',
+		'k', 'k', 'k',
+		'l', 'l', 'l', 'l',
+		'm', 'm', 'm', 'm',
+		'n', 'n', 'n', 'n',
+		'p', 'p', 'p', 'p',
+		'r', 'r', 'r', 'r',
+		's', 's', 's', 's',
+		't', 't', 't', 't',
 		'sh', 'st', 'th'
 	],
 	consSM: [
-		'b', 'b', 'b', 'b', 'h', 'h', 'h', 'h', 'j', 'j', 'j', 'v', 'v', 'w', 'w', 'w', 'x', 'z',
+		'b', 'b', 'b', 'b',
+		'h', 'h', 'h', 'h',
+		'j', 'j', 'j',
+		'v', 'v',
+		'w', 'w', 'w',
+		'x',
+		'z',
 		'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'kl', 'kn', 'kr', 'pl', 'pr',
 		'qu', 'sl', 'sn', 'sm', 'str', 'tr', 'vl', 'vr', 'wr'
 	],
 	consM: [
-		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'mm', 'nn', 'np', 'pp', 'pt', 'rr', 'ss', 'tt'
+		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'md', 'mm', 'nn', 'np', 'pp', 'pt', 'rr', 'ss', 'tt'
 	],
 	consME: [
-		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'lk', 'ls', 'lt', 'mb', 'md', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'nt', 'rc', 'rch', 'rd', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'tch'
+		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'lk', 'ls', 'lt', 'mb', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'nt', 'rc', 'rch', 'rd', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'tch'
 	]
 };
 

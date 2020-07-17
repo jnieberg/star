@@ -20,7 +20,7 @@ export function interval() {
 	getStar();
 	getStars();
 	getPlanets();
-	// }, 100);
+	// });
 }
 
 export default function animate() {

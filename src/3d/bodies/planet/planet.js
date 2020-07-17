@@ -5,15 +5,12 @@ import { MISC, TD } from '../../../variables';
 import setColor from '../../../misc/color';
 import { toCelcius } from '../../../misc/temperature';
 import getSize from '../../../misc/size';
-import createSphere from '../../tools/createObject';
 import { deleteThree } from '../../init/init';
 import THREEx from '../../../lib/threex';
 import getTime from '../../../misc/time';
 import * as THREE from 'three';
 import drawPlanets from './planets';
-import { Vector3 } from 'three';
 import Planet from './views/Planet';
-import initScene from '../../init/scene';
 
 function getPlanetName(star, index, moon = -1) {
 	MISC.rnd = seedrandom(`planet_name_${star.id}_${index}_${moon}`);
@@ -215,6 +212,26 @@ export function drawPlanetRotation(star, planet, planetO, moon = -1) {
 	bodyO.rotateY(getTime() * TD.stargrid.size * getPlanetRotationSpeed(star.this, planet.id, moon));
 }
 
+function drawPlanetGround(planetA, resolutions, iA = 0, last = undefined) {
+	let i = iA;
+	const planet = planetA.this;
+	const resolution = resolutions[i];
+	const planetHigh = new Planet({
+		rnd: `planet_${TD.star.this.id}_${planet.id}`,
+		size: planet.size * 0.00098 * TD.scale + 0.0001 * i,
+		resolution,
+		biome: last && last.biome
+	}, () => {
+		deleteThree(last);
+		planetA.sphere = planetHigh;
+		if (i < resolutions.length - 1) {
+			drawPlanetGround(planetA, resolutions, ++i, planetHigh);
+		}
+	});
+	planetA.object.add(planetHigh.view);
+	return planetHigh;
+}
+
 export function drawPlanet(planetA, moon) {
 	if (planetA) {
 		const planet = planetA.this;
@@ -251,13 +268,8 @@ export function drawPlanet(planetA, moon) {
 		// planetA.sphereOut.material.transparent = true;
 		// planetA.sphereOut.material.alphaTest = 0;
 
-		// // New Planet
-		planetA.sphere = new Planet(TD.canvas, {
-			rnd: `planet_${TD.star.this.id}_${planet.id}`,
-			size: planet.size * 0.001 * TD.scale,
-			detail: 256
-		});
-		planetA.object.add(planetA.sphere.view);
+		// New Planet
+		planetA.sphere = drawPlanetGround(planetA, [ 64, 256, 1024 ]);
 
 		// Planet atmosphere
 		if (planet.atmosphere) {

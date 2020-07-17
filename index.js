@@ -97,5 +97,10 @@ app.get(/^\/(dist|public|src)\/.+$/, (req, resp) => {
 	open(resp, url);
 });
 
+app.get('/*', (req, resp) => {
+	const url = `dist/${req.url.substring(1)}`;
+	open(resp, url);
+});
+
 const httpServer = http.createServer(app);
 httpServer.listen(process.env.PORT || 8000);

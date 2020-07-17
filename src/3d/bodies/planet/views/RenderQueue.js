@@ -1,77 +1,74 @@
-import LoadingBar from 'views/LoadingBar.js'
+import LoadingBar from 'views/LoadingBar.js';
 
 class RenderQueue {
+	constructor() {
+		this.actions = [];
+		this.callbacks = [];
+		this.skipFrame = false;
+		this.lastTime = 0;
 
-  constructor() {
-    this.actions = [];
-    this.callbacks = [];
-    this.skipFrame = false;
-    this.lastTime = 0;
+		this.totalActions = 0;
+		this.loadingBar = new LoadingBar();
+	}
 
-    this.totalActions = 0;
-    this.loadingBar = new LoadingBar();
-  }
+	start() {
+		this.startFrame = true;
+		this.lastTime = Date.now();
+		this.loadingBar.show();
+	}
 
-  start() {
-    this.startFrame = true;
-    this.lastTime = Date.now();
-    this.loadingBar.show();
-  }
+	update() {
+		if (!this.startFrame) {
+			if (this.actions.length > 0) {
+				this.doNextAction();
+			} else {
+				this.checkCallbacks();
+			}
+		} else {
+			this.startFrame = false;
+			// first frame after actions added
+			this.totalActions = this.actions.length;
+		}
+	}
 
-  update() {
-    if (this.startFrame == false) {
-      if (this.actions.length > 0) {
-        this.doNextAction();
-      } else {
-        this.checkCallbacks();
-      }
-    } else {
-      this.startFrame = false;
-      // first frame after actions added
-      this.totalActions = this.actions.length;
-    }
-  }
+	doNextAction() {
+		const thisTime = Date.now();
+		const totalTime = thisTime - this.lastTime;
 
-  doNextAction() {
+		this.lastTime = thisTime;
 
-    let thisTime = Date.now();
-    let totalTime = thisTime - this.lastTime;
+		this.actions[0]();
+		this.actions.shift();
 
-    this.lastTime = thisTime;
+		let progress = this.actions.length / this.totalActions;
+		progress = 1.0 - progress;
+		this.loadingBar.update(progress);
+	}
 
-    this.actions[0]();
-    this.actions.shift();
+	addAction(action) {
+		this.actions.push(action);
+	}
 
-    let progress = this.actions.length / this.totalActions;
-    progress = 1.0 - progress;
-    this.loadingBar.update(progress);
-  }
+	addCallback(callback) {
+		this.callbacks.push(callback);
+	}
 
-  addAction(action) {
-    this.actions.push(action);
-  }
+	checkCallbacks() {
+		if (this.callbacks.length > 0) {
+			this.executeCallbacks();
+		}
+	}
 
-  addCallback(callback) {
-    this.callbacks.push(callback);
-  }
+	executeCallbacks() {
+		for (let i = 0; i < this.callbacks.length; i++) {
+			this.callbacks[i]();
+			// console.log("rendering complete");
+		}
 
-  checkCallbacks() {
-    if (this.callbacks.length > 0) {
-      this.executeCallbacks();
-    }
-  }
+		this.loadingBar.hide();
 
-  executeCallbacks() {
-    for (let i=0; i<this.callbacks.length; i++) {
-      this.callbacks[i]();
-      // console.log("rendering complete");
-    }
-
-    this.loadingBar.hide();
-
-    this.callbacks = [];
-  }
-
+		this.callbacks = [];
+	}
 }
 
 export default RenderQueue;

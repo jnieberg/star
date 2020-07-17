@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import vertShader from '../shaders/texture.vert';
-import fragShader from '../shaders/flowNoiseMap.frag';
+import vertShader from '../../../../shaders/texture.vert';
+import fragShader from '../../../../shaders/flowNoiseMap.frag';
 import Map from './Map.js';
 
 class NoiseMap extends Map {
-	constructor(canvas) {
-		super(canvas);
+	constructor(resolution) {
+		super();
 		this.setup();
-		super.setup();
+		super.setup(resolution);
 	}
 
 	setup() {
@@ -33,7 +33,7 @@ class NoiseMap extends Map {
 		}
 	}
 
-	render(props) {
+	render(props, callback) {
 		// props.seed
 		// props.resolution
 		// props.res1
@@ -54,7 +54,7 @@ class NoiseMap extends Map {
 			this.mats[i].needsUpdate = true;
 		}
 
-		super.render(props);
+		super.render(props, callback);
 	}
 }
 

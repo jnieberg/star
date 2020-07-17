@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 
-import vertShader from '../shaders/texture.vert';
-import fragShader from '../shaders/roughnessMap.frag';
+import vertShader from '../../../../shaders/texture.vert';
+import fragShader from '../../../../shaders/roughnessMap.frag';
 import Map from './Map.js';
 
 class RoughnessMap extends Map {
-	constructor(canvas) {
-		super(canvas);
+	constructor(resolution) {
+		super();
 		this.setup();
-		super.setup();
+		super.setup(resolution);
 	}
 
 	setup() {
@@ -29,7 +29,7 @@ class RoughnessMap extends Map {
 		}
 	}
 
-	render(props) {
+	render(props, callback) {
 		// props.resolution
 		// props.heightMaps[]
 		// props.waterLevel
@@ -40,8 +40,7 @@ class RoughnessMap extends Map {
 			this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
 			this.mats[i].needsUpdate = true;
 		}
-
-		super.render(props);
+		super.render(props, callback);
 	}
 }
 

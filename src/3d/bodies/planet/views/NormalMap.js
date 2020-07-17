@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import vertShader from '../shaders/normalMap.vert';
-import fragShader from '../shaders/normalMap.frag';
+import vertShader from '../../../../shaders/normalMap.vert';
+import fragShader from '../../../../shaders/normalMap.frag';
 import Map from './Map.js';
 
 class NormalMap extends Map {
-	constructor(canvas) {
-		super(canvas);
+	constructor(resolution) {
+		super();
 		this.setup();
-		super.setup();
+		super.setup(resolution);
 	}
 
 	setup() {
@@ -29,7 +29,7 @@ class NormalMap extends Map {
 		}
 	}
 
-	render(props) {
+	render(props, callback) {
 		// props.resolution
 		// props.heightMaps[]
 		// props.textureMaps[]
@@ -43,7 +43,7 @@ class NormalMap extends Map {
 			this.mats[i].needsUpdate = true;
 		}
 
-		super.render(props);
+		super.render(props, callback);
 	}
 }
 
