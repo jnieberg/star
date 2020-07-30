@@ -4,10 +4,10 @@ import fragShader from '../../../../shaders/textureMap.frag';
 import Map from './Map.js';
 
 class TextureMap extends Map {
-	constructor(resolution) {
-		super();
+	constructor(resolution, enabled) {
+		super(resolution, enabled);
 		this.setup();
-		super.setup(resolution);
+		super.setup();
 	}
 
 	setup() {

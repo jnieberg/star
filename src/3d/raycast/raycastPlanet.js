@@ -1,46 +1,46 @@
 import { EVENT, TD } from '../../variables';
-import setLabel, { hideLabel, showLabel } from '../label/label';
+import setLabel, { labelHide, labelShow } from '../label/label';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
-import { getPlanetInfoString, drawPlanet } from '../bodies/planet/planet';
 import * as THREE from 'three';
 
 function raycastPlanetEvents(intersect, planet) {
-	if (TD.planet.this !== planet) {
-		TD.planet.this = planet;
-		drawPlanet(TD.planet);
+	if (TD.planet !== planet) {
+		TD.planet = planet;
+		TD.planet.drawHigh();
 	}
 	if (intersect && intersect.object) {
-		if (planet && (!TD.planet.this || TD.planet.this.id !== planet.id || !TD.label.planet || !TD.label.planet.visible)) {
-			const position = new THREE.Vector3();
-			position.setFromMatrixPosition(intersect.object.matrixWorld);
-			// TD.planet.this.x = position.x + TD.camera.coordinate.x * TD.stargrid.size * TD.scale;
-			// TD.planet.this.y = position.y + TD.camera.coordinate.y * TD.stargrid.size * TD.scale;
-			// TD.planet.this.z = position.z + TD.camera.coordinate.z * TD.stargrid.size * TD.scale;
-			if (intersect.object.this) {
-				setLabel('planet', getPlanetInfoString(intersect.object.this));
-			 }
-			hideLabel('star');
+		labelHide('star');
+		if (planet && (!TD.planet || TD.planet.id !== planet.id || !TD.label.planet || !TD.label.planet.visible)) {
+			const foundPlanet = intersect.object.this || intersect.object.parent.this;
+			if (foundPlanet) {
+				setLabel(foundPlanet.isMoon ? 'moon' : 'planet', foundPlanet.text);
+				labelHide(foundPlanet.isMoon ? 'planet' : 'moon');
+				labelShow(foundPlanet.isMoon ? 'moon' : 'planet');
+				console.log(foundPlanet);
+			}
 		}
-		showLabel('planet');
 	} else {
-		hideLabel('planet');
+		labelHide('planet');
+		labelHide('moon');
 	}
 }
 
 function getClosestPlanet(planets) {
 	let distancePlanet = -1;
 	let closestPlanet = undefined;
-	for (let p = 0; p < planets.length; p++) {
-		const position = new THREE.Vector3();
-		position.setFromMatrixPosition(planets[p].matrixWorld);
-		position.x = position.x / TD.scale;// + TD.camera.coordinate.x;
-		position.y = position.y / TD.scale;// + TD.camera.coordinate.y;
-		position.z = position.z / TD.scale;// + TD.camera.coordinate.z;
-		const distanceThis = distanceToCamera(position.x, position.y, position.z);
-		if (distancePlanet === -1 || distancePlanet > distanceThis) {
-			closestPlanet = planets[p];
-			distancePlanet = distanceThis;
+	for (const planet of planets) {
+		if (planet.object.low && planet.object.low.matrixWorld) {
+			const position = new THREE.Vector3();
+			position.setFromMatrixPosition(planet.object.low.matrixWorld);
+			position.x = position.x / TD.scale;// + TD.camera.coordinate.x;
+			position.y = position.y / TD.scale;// + TD.camera.coordinate.y;
+			position.z = position.z / TD.scale;// + TD.camera.coordinate.z;
+			const distanceThis = distanceToCamera(position.x, position.y, position.z);
+			if (distancePlanet === -1 || distancePlanet > distanceThis) {
+				closestPlanet = planet;
+				distancePlanet = distanceThis;
+			}
 		}
 	}
 	return {
@@ -49,29 +49,21 @@ function getClosestPlanet(planets) {
 	};
 }
 
-export default function raycastPlanet(obj) {
-	if (obj) {
+export default function raycastPlanet(bodies) {
+	if (bodies) {
 		if (TD.star) {
 			const planets = TD.star.children;
 			const distance = 0.01;
 			const { range, planet } = getClosestPlanet(planets);
 			if (range >= distance) {
-				TD.planet.this = undefined;
+				TD.planet = undefined;
 				EVENT.controls.speedFactorPlanet = 1.0;
 			} else if (range > -1) {
+				const obj = bodies.map(body => body.object.low);
 				const intersect = raycastFound(obj, 0.1, 2);
 				if (planet) {
-					raycastPlanetEvents(intersect, planet.this);
+					raycastPlanetEvents(intersect, planet);
 				}
-				// if (TD.planet.this && range < 0.0009) {
-				// 	let opacity = (0.0009 - range) * 5000;
-				// 	if (opacity > 1) {
-				// 		opacity = 1;
-				// 	}
-				// 	console.log(opacity, opacity * TD.planet.this.outer.opacity);
-				// 	TD.planet.sphere.material.opacity = opacity;
-				// 	TD.planet.sphereOut.material.opacity = opacity * TD.planet.this.outer.opacity;
-				// }
 				EVENT.controls.speedFactorPlanet = range * 40.0 < 1.0 ? range * 40.0 : 1.0;
 			}
 		}

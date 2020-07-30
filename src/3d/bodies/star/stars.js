@@ -1,10 +1,19 @@
 import * as THREE from 'three';
+import vertShader from '../../../shaders/stars.vert';
 import { TD, MISC, SHADER } from '../../../variables';
-import { deleteThree } from '../../init/init';
 import raycastStars from '../../raycast/raycastStars';
 import { getCoordinateOffset, setCameraPosition, updateCoordinatesByOffset } from '../../init/camera';
-import starList, { getRealCoordinate } from '../../tools/starList';
-import { hideLabel } from '../../label/label';
+import starList from '../../tools/starList';
+import { labelHide } from '../../label/label';
+import raycastStar from '../../raycast/raycastStar';
+
+export function getRealCoordinate(x, y, z) {
+	return {
+		x: (x - TD.camera.coordinate.x) * TD.stargrid.size * TD.scale,
+		y: (y - TD.camera.coordinate.y) * TD.stargrid.size * TD.scale,
+		z: (z - TD.camera.coordinate.z) * TD.stargrid.size * TD.scale
+	};
+}
 
 function updateStars(off) {
 	if (TD.stars) {
@@ -18,6 +27,7 @@ function updateStars(off) {
 				TD.stars[i].geometry.computeBoundingSphere();
 				// deleteThree(TD.stars[i].object);
 				TD.stars[i].object = new THREE.Points(TD.stars[i].geometry, TD.material.stars);
+				TD.stars[i].object.name = i;
 				TD.stars[i].object.castShadow = false;
 				TD.stars[i].object.receiveShadow = false;
 				TD.stars[i].object.matrixAutoUpdate = true;
@@ -48,14 +58,14 @@ function updateStars(off) {
 
 export function initStars() {
 	const uniforms = {
-		texture: { type: 't', value: TD.texture.star.small },
+		texture2: { type: 't', value: TD.texture.star.small },
 		fogColor: { type: 'c', value: TD.scene.fog.color },
 		fogNear: { type: 'f', value: TD.camera.fade * TD.scale },
 		fogFar: { type: 'f', value: TD.camera.far * TD.scale }
 	};
 	TD.material.stars = new THREE.ShaderMaterial({
 		uniforms: uniforms,
-		vertexShader: SHADER.stars.vertex,
+		vertexShader: vertShader,
 		fragmentShader: SHADER.stars.fragment,
 		blending: THREE.AdditiveBlending,
 		depthTest: false,
@@ -87,14 +97,16 @@ export default function drawStars() {
 	}
 }
 
+export function getStar() {
+	if (TD.star && TD.star.object) {
+		raycastStar(TD.star);
+	}
+}
+
 export function getStars() {
 	let result = false;
-	for (const i of Object.keys(TD.stars)) {
-		if (!result && TD.stars[i]) {
-			result = raycastStars(TD.stars[i]);
-		}
-	}
+	result = raycastStars();
 	if (!result) {
-		hideLabel('stars');
+		labelHide('stars');
 	}
 }

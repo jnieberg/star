@@ -3,10 +3,10 @@ export default class ThingList {
 		this.things = {};
 	}
 
-	add(id, newThing, overwrite = false) {
+	add({ id, thing, overwrite = false }) {
 		if (overwrite || !Boolean(this.things[id])) {
 			this.remove(id);
-			this.things[id] = newThing;
+			this.things[id] = thing;
 		}
 		return this.things[id];
 	}

@@ -7,17 +7,6 @@ import webpack from 'webpack';
 
 const __dirname = path.resolve();
 
-fs.readdir('dist', (err, files) => {
-	if (err) {
-		throw err;
-	}
-	for (const file of files) {
-		if (file.indexOf('.worker.js') > 0) {
-			fs.unlinkSync(path.join('dist', file));
-		}
-	}
-});
-
 const compiler = webpack({
 	mode: 'development',
 	devtool: 'inline-source-map',
@@ -33,8 +22,7 @@ const compiler = webpack({
 			{ test: /\.(glsl|frag|vert)$/, loader: 'raw-loader', exclude: /node_modules/ },
 			{ test: /\.(glsl|frag|vert)$/, loader: 'glslify-loader', exclude: /node_modules/ },
 			{ test: /node_modules/, loader: 'ify-loader' },
-			{ test: /\.json$/, loader: 'json-loader' },
-			{ test: /\.worker\.js$/, use: { loader: 'worker-loader' } }
+			{ test: /\.json$/, loader: 'json-loader' }
 		]
 	}
 });

@@ -1,5 +1,5 @@
 import { EVENT, TD } from '../../variables';
-import { showLabel, hideLabel } from '../label/label';
+import { labelShow, labelHide } from '../label/label';
 import raycastFound from './raycastFound';
 import distanceToCamera from '../tools/distanceToCamera';
 
@@ -8,26 +8,26 @@ function raycastStarEvents(intersect) {
 	if (mesh) {
 		const star = mesh.this;
 		if (star && !TD.label.star) {
-			if (TD.star.this && TD.star.this.id !== star.id) {
+			if (TD.star && TD.star.id !== star.id) {
 				EVENT.controls.speedFactorPlanet = 1.0;
 			}
 		}
-		hideLabel('stars');
-		showLabel('star');
+		labelHide('stars');
+		labelShow('star');
 	}
 }
 
-export default function raycastStar(obj) {
-	if (obj) {
+export default function raycastStar(star) {
+	if (star) {
 		const distance = 0.1;
-		const intersect = raycastFound(obj, distance, 2);
-		const distanceCam = distanceToCamera(TD.star.this.x, TD.star.this.y, TD.star.this.z);
+		const intersect = raycastFound(star.object.high, distance, 0);
+		const distanceCam = distanceToCamera(star.position.x, star.position.y, star.position.z);
 		if (distanceCam < distance) {
-			hideLabel('stars');
+			labelHide('stars');
 			if (intersect) {
 				raycastStarEvents(intersect);
-			} else if (TD.star && TD.star.this && TD.label.star && TD.label.star.visible) {
-				hideLabel('star');
+			} else if (TD.star && TD.label.star && TD.label.star.visible) {
+				labelHide('star');
 			}
 		}
 	}

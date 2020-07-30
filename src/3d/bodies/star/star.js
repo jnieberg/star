@@ -1,252 +1,313 @@
-import seedrandom from 'seedrandom';
-import { getPlanetInfo } from '../planet/planet';
+import Body from '../planet/Body';
 import { toCelcius } from '../../../misc/temperature';
-import getName from '../../../misc/name';
+import Word from '../../../misc/Word';
 import { TD, MISC, STAR } from '../../../variables';
 import * as THREE from 'three';
 import { deleteThree } from '../../init/init';
-import drawPlanets from '../planet/planets';
-import raycastStar from '../../raycast/raycastStar';
 import setColor from '../../../misc/color';
-import { getStarPosition } from '../../tools/starList';
+import random from '../../../misc/random';
+import Atmosphere from '../planet/Atmosphere';
+import { toSize } from '../../../misc/size';
 
-export function getStarSize(star) {
-	return star.size;
-}
-
-function getStarSizeName(star) {
-	let size = 'Hypergiant';
-	if (star.size < 1) {
-		size = 'Dwarf';
-	} else if (star.size < 3) {
-		size = 'Star';
-	} else if (star.size < 4) {
-		size = 'Giant';
-	} else if (star.size < 4.5) {
-		size = 'Supergiant';
+export default class Star {
+	constructor({ x, y, z, index }) {
+		this.isStar = true;
+		this.index = index;
+		this.coordinate = { x, y, z };
+		this.position = this.getPosition();
+		this.universe = this.getUniverse();
+		this.id = {
+			text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
+			toString: () => `${this.coordinate.x},${this.coordinate.y},${this.coordinate.z},${index}`
+		};
+		this.size = this.getSize();
+		this.color = this.getColor();
+		this.object = {
+			low: undefined,
+			high: undefined
+		};
 	}
 
-	return size;
-}
+	random(seed) {
+		MISC.rnd = random(`${seed}_${this.id}`);
+	}
 
-function getStarColor(star) {
-	let brightString = '';
-	let hueString = 'Red';
-	for (const col in STAR.color.brightness) {
-		if (STAR.color.brightness.hasOwnProperty(col)) {
-			const brightness = STAR.color.brightness[col];
-			if (star.brightness < brightness) {
-				brightString = col;
+	get name() {
+		this.random('star_name');
+		return new Word({
+			words: 3,
+			syllables: 3,
+			numberSuffixLength: 999
+		});
+	}
+
+	getSize() {
+		const size = MISC.rnd() * 5 + 0.1;
+		const sizeString =
+		size < 1 ?
+			'Dwarf' :
+			size < 3 ?
+				'Star' :
+				size < 4 ?
+					'Giant' :
+					size < 4.5 ?
+						'Supergiant' :
+						'Hypergiant';
+		return {
+			valueOf: () => size,
+			text: sizeString
+		};
+	}
+
+	getPosition() {
+		return {
+			x: MISC.rnd() * TD.stargrid.size,
+			y: MISC.rnd() * TD.stargrid.size,
+			z: MISC.rnd() * TD.stargrid.size
+		};
+	}
+
+	get camera() {
+		return TD.camera.coordinate;
+	}
+
+	getUniverse() {
+		return {
+			x: (this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size) * TD.scale,
+			y: (this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size) * TD.scale,
+			z: (this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * TD.stargrid.size) * TD.scale
+		};
+	}
+
+	getColor() {
+		const hue = MISC.rnd();
+		const brightness = MISC.rnd() * 0.9 + 0.1;
+		let brightString = '';
+		let hueString = 'Red';
+		for (const col in STAR.color.brightness) {
+			if (STAR.color.brightness.hasOwnProperty(col)) {
+				const b = STAR.color.brightness[col];
+				if (brightness < b) {
+					brightString = col;
+				}
 			}
 		}
-	}
-	for (const col in STAR.color.hue) {
-		if (STAR.color.hue.hasOwnProperty(col)) {
-			const hue = STAR.color.hue[col];
-			if (star.hue < hue) {
-				hueString = col;
+		for (const col in STAR.color.hue) {
+			if (STAR.color.hue.hasOwnProperty(col)) {
+				const h = STAR.color.hue[col];
+				if (hue < h) {
+					hueString = col;
+				}
 			}
 		}
+		return {
+			hue: {
+				valueOf: () => hue,
+				text: hueString
+			},
+			brightness: {
+				valueOf: () => brightness,
+				text: brightString
+			},
+			text: `${brightString} ${brightString === 'White' ? brightString : hueString}`.replace(/^ | $|(White).*$/g, '$1')
+		};
 	}
-	return {
-		brightness: brightString,
-		hue: brightString === 'White' ? brightString : hueString
-	};
-}
 
-function getStarColorString(star) {
-	const color = getStarColor(star);
-	return `${color.brightness} ${color.hue}`.replace(/^ | $|(White).*$/g, '$1');
-}
-
-// Star temperature in Kelvin
-export function getStarTemperature(star) {
-	MISC.rnd = seedrandom(`star_temperature_${star.id}`);
-	const color = getStarColor(star);
-
-	for (const tempColor in STAR.temperature) {
-		if (STAR.temperature.hasOwnProperty(tempColor)) {
-			if (tempColor === color.hue) {
-				const temp = STAR.temperature[tempColor];
-				const tempBright = temp.min + (temp.max - temp.min) * 0.75;
-				const tempDark = temp.max - (temp.max - temp.min) * 0.75;
-				switch (color.brightness) {
-				case 'Bright':
-					return Math.floor(MISC.rnd() * (temp.max - tempBright)) + tempBright;
-				case 'Dark':
-					return Math.floor(MISC.rnd() * (tempDark - temp.min)) + temp.min;
-				case '':
-					return Math.floor(MISC.rnd() * (tempBright - tempDark)) + tempDark;
-				default:
-					return Math.floor(MISC.rnd() * (temp.max - temp.min)) + temp.min;
+	// Star temperature in Kelvin
+	get temperature() {
+		this.random('star_temperature');
+		for (const tempColor in STAR.temperature) {
+			if (STAR.temperature.hasOwnProperty(tempColor)) {
+				if (tempColor === this.color.hue.text) {
+					const temp = STAR.temperature[tempColor];
+					const tempBright = temp.min + (temp.max - temp.min) * 0.75;
+					const tempDark = temp.max - (temp.max - temp.min) * 0.75;
+					let temperature = 0;
+					switch (this.color.brightness.text) {
+					case 'Bright':
+						temperature = Math.floor(MISC.rnd() * (temp.max - tempBright)) + tempBright;
+					case 'Dark':
+						temperature = Math.floor(MISC.rnd() * (tempDark - temp.min)) + temp.min;
+					case '':
+						temperature = Math.floor(MISC.rnd() * (tempBright - tempDark)) + tempDark;
+					default:
+						temperature = Math.floor(MISC.rnd() * (temp.max - temp.min)) + temp.min;
+					}
+					return {
+						min: temperature,
+						max: temperature
+					};
 				}
 			}
 		}
 	}
-}
 
-function getStarPlanets(star) {
-	MISC.rnd = seedrandom(`star_planets_${star.id}`);
-	const planetLength = Math.floor(MISC.rnd() * star.size * 4); // number of planets depends on star size
-	if (planetLength) {
-		const children = [];
-		for (let p = 0; p < planetLength; p++) {
-			children.push(getPlanetInfo(star, p));
+	getChildren() {
+		if (!this.children) {
+			const children = [];
+			this.random('star_planets');
+			const childrenLength = Math.floor(MISC.rnd() * this.size * 4); // number of planets depends on star size
+			if (childrenLength > 0) {
+				for (let id = 0; id < childrenLength; id++) {
+					const child = new Body({ star: this, id, parent: this });
+					child.getChildren();
+					children.push(child);
+				}
+			}
+			this.children = children;
 		}
-		return children;
+		return this.children;
 	}
-}
 
-export function getStarName(star) {
-	MISC.rnd = seedrandom(`star_${star.id}`);
-	return getName(3, 3, 999);
-}
+	get text() {
+		return `
+			<div class="label--h1">${this.name}</div>
+			<div class="label--h2">Star #${this.id}</div>
+			<div>${this.color.text} ${this.size.text}</div>
+			<div>Size: ${toSize(this.size)}</div>
+			<div>Temperature: ${toCelcius(this.temperature.min)}</div>
+		${this.children.length > 0 ?
+		`<div class="label--h3">Planets</div>
+		<ol>
+			${this.children.map(body => `<li>${body.textShort}</li>`).join('\n')}
+		</ol>` :
+		''}`;
+	}
 
-export function getStarInfo(star) {
-	return {
-		...star,
-		type: 'star',
-		name: getStarName(star),
-		temperature: getStarTemperature(star),
-		children: getStarPlanets(star)
-	};
-}
 
-function getStarPlanetsString(star) {
-	return star.children.map(planet => `  ${planet.id + 1}. ${planet.name}`);
-}
-
-export function getStarInfoString(star) {
-	const children = star.children && star.children.length ? [ 'Planets:', ...getStarPlanetsString(star) ] : [];
-	return [
-		star.name,
-		`${getStarColorString(star)} ${getStarSizeName(star)}`,
-		`Temperature: ${toCelcius(star.temperature)}`,
-		...children
-	];
-}
-
-export default function drawStar(star) {
-	if (star) {
-		const pos = getStarPosition(star);
-		const size = star.size * 0.002 * TD.scale;
-		deleteThree(TD.star.object);
-		const hue2 = star.hue - 0.05 > 0 ? star.hue - 0.05 : 0;
-		setColor(1, star.hue, 1.0, star.brightness * 0.5, 'hsl');
-		setColor(2, hue2, 1.0, star.brightness, 'hsl');
-		setColor(3, star.hue, 0.25, star.brightness, 'hsl');
-		MISC.rnd = seedrandom(`star_rotation_${star.id}`);
+	draw() {
+		const pos = {
+			x: this.position.x * TD.scale,
+			y: this.position.y * TD.scale,
+			z: this.position.z * TD.scale
+		};
+		const size = this.size * 0.0002 * TD.scale;
+		deleteThree(this.object); // WIP. Maybe we can hide it?
+		const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
+		setColor(1, this.color.hue, 1.0, this.color.brightness, 'hsl');
+		setColor(2, hue2, 1.0, this.color.brightness, 'hsl');
+		setColor(3, this.color.hue, 0.25, this.color.brightness, 'hsl');
+		this.random('star_rotation');
 
 		// Star pivot
-		TD.star.object = new THREE.Object3D();
-		TD.star.object.rotation.x = Math.PI * MISC.rnd() * 2;
-		TD.star.object.rotation.y = Math.PI * MISC.rnd() * 2;
-		TD.star.object.rotation.z = Math.PI * MISC.rnd() * 2;
+		this.object = new THREE.Object3D();
+		this.object.rotation.x = Math.PI * MISC.rnd() * 2;
+		this.object.rotation.y = Math.PI * MISC.rnd() * 2;
+		this.object.rotation.z = Math.PI * MISC.rnd() * 2;
 
-		// Star backside
-		const geometry = new THREE.SphereBufferGeometry(size * 0.1, 32, 32);
+		const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
 		const material = new THREE.MeshBasicMaterial({
-			color: MISC.colorHelper,
+			color: MISC.colorHelper2,
 			side: THREE.BackSide,
 			transparent: true,
-			alphaTest: 0.5,
+			alphaTest: 0,
 		});
-		TD.star.sphere = new THREE.Mesh(geometry, material);
-		TD.star.sphere.renderOrder = 1;
-		TD.star.sphere.castShadow = false;
-		TD.star.sphere.receiveShadow = false;
-		TD.star.object.add(TD.star.sphere);
+		this.object.high = new THREE.Mesh(geometry, material);
+		// this.object.rotation.x = Math.PI * MISC.rnd() * 2;
+		// this.object.rotation.y = Math.PI * MISC.rnd() * 2;
+		// this.object.rotation.z = Math.PI * MISC.rnd() * 2;
+		// this.object.renderOrder = 1;
+		this.object.high.castShadow = false;
+		this.object.high.receiveShadow = false;
+		this.object.add(this.object.high);
 
-		// Star frontside
-		const material2 = new THREE.MeshBasicMaterial({
-			color: MISC.colorHelper2,
-			blending: THREE.AdditiveBlending,
-			side: THREE.FrontSide,
-			transparent: true,
-			alphaTest: 0.5,
-		});
-		const starInner = new THREE.Mesh(geometry, material2);
-		starInner.renderOrder = 1;
-		starInner.castShadow = false;
-		starInner.receiveShadow = false;
-		TD.star.object.add(starInner);
+		// // Star frontside
+		// const material2 = new THREE.MeshBasicMaterial({
+		// 	color: MISC.colorHelper2,
+		// 	blending: THREE.AdditiveBlending,
+		// 	side: THREE.FrontSide,
+		// 	transparent: true,
+		// 	alphaTest: 0.5,
+		// });
+		// const starInner = new THREE.Mesh(geometry, material2);
+		// // starInner.renderOrder = 1;
+		// starInner.castShadow = false;
+		// starInner.receiveShadow = false;
+		// this.object.add(starInner);
 
-		// Star inside
+		// Star spots
 		const material3 = new THREE.MeshBasicMaterial({
 			map: TD.texture.star.surface,
 			color: MISC.colorHelper,
 			transparent: true,
-			alphaTest: 0.5,
+			blending: THREE.AdditiveBlending,
+			opacity: 1,
+			alphaTest: 0,
 		});
 		const starInner3 = new THREE.Mesh(geometry, material3);
 		starInner3.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
 		starInner3.castShadow = false;
 		starInner3.receiveShadow = false;
-		TD.star.object.add(starInner3);
+		this.object.add(starInner3);
 
 		// Star corona
-		// MISC.colorHelper2.setHSL(hue2, 1.0, star.brightness);
-		const flareMaterial = new THREE.SpriteMaterial({
-			map: TD.texture.star.large,
+		// const flareMaterial = new THREE.SpriteMaterial({
+		// 	map: TD.texture.star.large,
+		// 	color: MISC.colorHelper2,
+		// 	opacity: 1,
+		// 	blending: THREE.AdditiveBlending,
+		// 	alphaTest: 0,
+		// 	depthTest: false
+		// });
+		// const starFlare = new THREE.Sprite(flareMaterial);
+		// starFlare.scale.set(size, size, size);
+		// starFlare.castShadow = false;
+		// starFlare.receiveShadow = false;
+		// this.object.add(starFlare);
+		const atmosphere = new Atmosphere(this.object, {
+			size: size * 1.01,
+			thickness: size * 1.5,
 			color: MISC.colorHelper2,
-			opacity: 1,
+			colorInner: MISC.colorHelper,
 			blending: THREE.AdditiveBlending,
-			alphaTest: 0.5,
-			depthTest: false
+			opacity: 0.75
 		});
-		const starFlare = new THREE.Sprite(flareMaterial);
-		starFlare.scale.set(size, size, size);
-		starFlare.castShadow = false;
-		starFlare.receiveShadow = false;
-		TD.star.object.add(starFlare);
 
 		// Star point light
-		TD.star.pointLight = new THREE.PointLight(MISC.colorHelper3, 2, TD.camera.far * 0.1 * TD.scale);
-		TD.star.pointLight.castShadow = false;
-		TD.star.object.add(TD.star.pointLight);
+		this.light = new THREE.PointLight(MISC.colorHelper3);
+		// pointLight.castShadow = true;
+		// this.object.add(pointLight);
 
 		// Star spot light
-		TD.star.light = new THREE.DirectionalLight(MISC.colorHelper3);
-		TD.star.light.intensity = 1;
-		TD.star.light.power = 20;
-		TD.star.light.decay = 0;
-		TD.star.light.distance = TD.camera.far * 0.0001 * TD.scale;
-		TD.star.light.angle = Math.PI / 4;
-		TD.star.light.penumbra = 0.1;
-		const grid = 0.005;
-		TD.star.light.shadow.bias = 0.00000001;// -TD.camera.near * 0.0001 * TD.scale;
-		TD.star.light.shadow.mapSize.width = 1024 * 2;
-		TD.star.light.shadow.mapSize.height = 1024 * 2;
-		// TD.star.light.shadow.camera.fov = 30;
-		// TD.star.light.shadow.camera.aspect = 1;
-		TD.star.light.shadow.camera.left = -grid * TD.scale;
-		TD.star.light.shadow.camera.right = grid * TD.scale;
-		TD.star.light.shadow.camera.top = grid * TD.scale;
-		TD.star.light.shadow.camera.bottom = -grid * TD.scale;
-		TD.star.light.shadow.camera.near = 0.00000001;// TD.camera.near * TD.scale;
-		TD.star.light.shadow.camera.far = TD.camera.far * 0.0001 * TD.scale;
-		TD.star.light.castShadow = true;
-		TD.star.light.visible = false;
+		// this.light = new THREE.DirectionalLight(MISC.colorHelper3);
+		this.light.intensity = 5;
+		this.light.power = 50;
+		this.light.decay = 0;
+		this.light.distance = TD.camera.far * 0.0001 * TD.scale;
+		// this.light.angle = Math.PI / 4;
+		this.light.penumbra = 0.1;
+		// const grid = 0.005;
+		this.light.shadow.bias = -TD.camera.near * 0.01 * TD.scale;
+		this.light.shadow.mapSize.width = 1024 * 2;
+		this.light.shadow.mapSize.height = 1024 * 2;
+		// this.light.shadow.camera.fov = 180;
+		// this.light.shadow.camera.aspect = 1;
+		// this.light.shadow.camera.left = -grid * TD.scale;
+		// this.light.shadow.camera.right = grid * TD.scale;
+		// this.light.shadow.camera.top = grid * TD.scale;
+		// this.light.shadow.camera.bottom = -grid * TD.scale;
+		this.light.shadow.camera.near = TD.camera.near * TD.scale;
+		this.light.shadow.camera.far = TD.camera.far * 0.001 * TD.scale;
+		this.light.castShadow = true;
+		this.light.visible = true;
 
-		// TD.star.object.add(TD.star.light.target);
-		TD.star.object.add(TD.star.light);
+		// this.object.add(this.light.target);
+		this.object.add(this.light);
 
 		// Set star position
-		TD.star.object.position.set(pos.x, pos.y, pos.z);
+		this.object.position.set(pos.x, pos.y, pos.z);
 
 		// Draw planets of star
-		TD.star = drawPlanets(star);
+		if (this.children.length) {
+			for (let c = 0; c < this.children.length; c++) {
+				deleteThree(this.children[c].object.high); // WIP. Same... maybe hide it?
+				this.children[c].drawLow();
+			};
+		}
 
 		// Add star to scene
-		TD.scene.add(TD.star.object);
-		// TD.star.light.updateMatrix();
-		// TD.star.light.updateMatrixWorld();
-		TD.star.sphere.this = star;
-	}
-}
-
-export function getStar() {
-	if (TD.star.sphere && TD.star.this) {
-		raycastStar(TD.star.sphere);
+		TD.scene.add(this.object);
+		this.object.high.this = this;
+		console.log(this);
 	}
 }

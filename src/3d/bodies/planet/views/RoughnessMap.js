@@ -5,10 +5,10 @@ import fragShader from '../../../../shaders/roughnessMap.frag';
 import Map from './Map.js';
 
 class RoughnessMap extends Map {
-	constructor(resolution) {
-		super();
+	constructor(resolution, enabled) {
+		super(resolution, enabled);
 		this.setup();
-		super.setup(resolution);
+		super.setup();
 	}
 
 	setup() {

@@ -5,15 +5,15 @@ class Biome {
 	constructor() {
 		this.canvas = document.createElement('canvas');
 		this.canvas.id = 'biomeCanvas';
-		this.canvas.width = 256;
-		this.canvas.height = 256;
+		this.canvas.width = 512;
+		this.canvas.height = 512;
 		this.width = this.canvas.width;
 		this.height = this.canvas.height;
 		this.ctx = this.canvas.getContext('2d');
 
-		if (document.body) {
-			document.body.appendChild(this.canvas);
-		}
+		// if (document.body) {
+		// 	document.body.appendChild(this.canvas);
+		// }
 		// this.toggleCanvasDisplay(false);
 	}
 
@@ -44,7 +44,7 @@ class Biome {
 		this.drawInland();
 		this.drawBeach();
 		this.drawWater();
-		this.drawRivers();
+		// this.drawRivers();
 
 		this.texture = new THREE.CanvasTexture(this.canvas);
 	}
@@ -90,7 +90,10 @@ class Biome {
 	drawRivers() {
 		// rivers
 		const c = this.randomColor();
-		this.ctx.strokeStyle = 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', 0.5)';
+		const falloff = 1.3;
+		const opacity = 0.9;
+		// this.ctx.strokeStyle = 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', 0.5)';
+		this.ctx.strokeStyle = 'rgba(' + Math.round(c.r * falloff) + ', ' + Math.round(c.g * falloff) + ', ' + Math.round(c.b * falloff) + ', ' + opacity + ')';
 
 		let x = this.randRange(0, this.width);
 		let y = this.randRange(0, this.height);
@@ -187,17 +190,20 @@ class Biome {
 
 		const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-		// let c = this.randomColor();
+
+		// const c = this.randomColor();
 		const c = this.randomWaterColor();
 
 		const falloff = 1.3;
 		const falloff2 = 1.0;
 		const falloff3 = 0.7;
+		const falloff4 = 0.5;
 		const opacity = 0.9;
 		// gradient.addColorStop(0.0, "rgba("+cr+", "+cg+", "+cb+", "+0+")");
 		gradient.addColorStop(0.0, 'rgba(' + Math.round(c.r * falloff) + ', ' + Math.round(c.g * falloff) + ', ' + Math.round(c.b * falloff) + ', ' + opacity + ')');
 		gradient.addColorStop(0.2, 'rgba(' + Math.round(c.r * falloff2) + ', ' + Math.round(c.g * falloff2) + ', ' + Math.round(c.b * falloff2) + ', ' + opacity + ')');
-		gradient.addColorStop(0.8, 'rgba(' + Math.round(c.r * falloff3) + ', ' + Math.round(c.g * falloff3) + ', ' + Math.round(c.b * falloff3) + ', ' + opacity + ')');
+		gradient.addColorStop(0.6, 'rgba(' + Math.round(c.r * falloff3) + ', ' + Math.round(c.g * falloff3) + ', ' + Math.round(c.b * falloff3) + ', ' + opacity + ')');
+		gradient.addColorStop(0.8, 'rgba(' + Math.round(c.r * falloff4) + ', ' + Math.round(c.g * falloff4) + ', ' + Math.round(c.b * falloff4) + ', ' + opacity + ')');
 
 		this.ctx.fillStyle = gradient;
 		this.ctx.fillRect(x1, y1, this.width, this.height);
@@ -285,13 +291,13 @@ class Biome {
 		const c = new Color();
 		newColor.getHSL(c);
 		c.h = this.randRange(0.0, 1.0);
-		c.s = c.s + sOffset; // this.randRange(0.0, 0.6);
+		c.s = c.s + this.randRange(0.0, 0.6);
 		// console.log("sat = " + c.s);
-		c.l = c.l + lOffset; // this.randRange(0.1, 0.4);
+		c.l = c.l + this.randRange(0.1, 0.4);
 
 		newColor.setHSL(c.h, c.s, c.l);
 
-		// newColor.offsetHSL(hOffset, sOffset, lOffset);
+		newColor.offsetHSL(hOffset, sOffset, lOffset);
 
 		return { r: Math.round(newColor.r * 255),
 			g: Math.round(newColor.g * 255),

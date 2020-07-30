@@ -1,14 +1,13 @@
 import * as THREE from 'three';
 import vertShader from '../../../../shaders/texture.vert';
 import fragShader from '../../../../shaders/cloudMap.frag';
-
 import Map from './Map.js';
 
 class CloudMap extends Map {
-	constructor(resolution) {
-		super();
+	constructor(resolution, enabled) {
+		super(resolution, enabled);
 		this.setup();
-		super.setup(resolution);
+		super.setup();
 	}
 
 	setup() {

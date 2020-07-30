@@ -5,25 +5,26 @@ import TextureMap from './TextureMap.js';
 import NormalMap from './NormalMap.js';
 import RoughnessMap from './RoughnessMap.js';
 import Clouds from './Clouds.js';
-import seedrandom from 'seedrandom';
+import { MISC } from '../../../../variables';
+import random from '../../../../misc/random';
 import wait from '../../../tools/wait';
 
-class Planet {
-	constructor({ rnd, size, resolution, obj, biome }, callback) {
+class BodySurface {
+	constructor({ rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor }, callback) {
+		MISC.interrupt = true;
 		this.seedString = rnd || 'lorem';
 		this.initSeed();
-
-		this.view = new THREE.Object3D();
+		this.timerBank = this.seedString;
+		this.ground = new THREE.Mesh();
 		this.obj = obj;
 
 		this.materials = [];
+		this.detail = detail;
 		this.roughness = 0.8;
 		this.metalness = 0.5;
 		this.normalScale = 3.0;
 		this.size = size || 1;
-		this.waterLevel = 0.0;
-		// this.waterLevel = 0.5;
-		this.hasClouds = false;// this.randRange(0, 2) < 1;
+		this.hasClouds = hasClouds && this.detail === 0;
 
 		this.heightMaps = [];
 		this.moistureMaps = [];
@@ -32,49 +33,55 @@ class Planet {
 		this.roughnessMaps = [];
 		this.resolution = resolution || 256;
 		this.segments = resolution / 32 > 16 ? resolution / 32 : 16;
-		this.biome = biome || new Biome();
-		// wait(true, () => {
-		this.createScene();
-		this.render(resolution, callback);
-		// });
+		this.cloudColor = cloudColor;
+		this.clouds = undefined;
+		if (this.hasClouds) {
+			this.clouds = this.createClouds();
+		}
+		wait(this.timerBank, () => {
+			this.initSeed();
+			this.biome = biome || new Biome();
+			wait(this.timerBank, () => {
+				this.createScene();
+				this.render(resolution, callback);
+			});
+		});
 	}
 
 	render(detail, callback) {
 		this.resolution = detail || 256;
-		console.log('RENDER:', this.resolution, 2);
-		if (this.hasClouds) {
-			this.createClouds();
-		}
+		console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
 		// wait(() => {
 		this.renderScene(callback);
 		// });
 	}
 
 	initSeed() {
-		window.rng = seedrandom(this.seedString);
+		window.rng = random(this.seedString);
 	}
 
 	createScene() {
 		this.heightMap = new NoiseMap(this.resolution);
 		this.heightMaps = this.heightMap.maps;
 
-		this.moistureMap = new NoiseMap(this.resolution);
+		this.moistureMap = new NoiseMap(this.resolution, this.detail > 0);
 		this.moistureMaps = this.moistureMap.maps;
 
 		this.textureMap = new TextureMap(this.resolution);
 		this.textureMaps = this.textureMap.maps;
 
-		this.normalMap = new NormalMap(this.resolution);
+		this.normalMap = new NormalMap(this.resolution, this.detail > 0);
 		this.normalMaps = this.normalMap.maps;
 
-		this.roughnessMap = new RoughnessMap(this.resolution);
+		this.roughnessMap = new RoughnessMap(this.resolution, this.detail > 1);
 		this.roughnessMaps = this.roughnessMap.maps;
 
 		for (let i = 0; i < 6; i++) {
 			const material = new THREE.MeshStandardMaterial({
 				color: new THREE.Color(0xffffff),
 				transparent: true,
-				opacity: 0
+				// opacity: 0,
+				alphaTest: 0
 			});
 			this.materials[i] = material;
 		}
@@ -86,44 +93,38 @@ class Planet {
 		this.computeGeometry(geo);
 		this.geometry = new THREE.BufferGeometry().fromGeometry(geo);
 		geo.dispose();
-		this.ground = new THREE.Mesh(this.geometry, this.materials);
+		this.ground.geometry = this.geometry;
+		this.ground.material = this.materials;
 		this.ground.castShadow = true;
 		this.ground.receiveShadow = true;
-		this.view.add(this.ground);
+		this.ground.visible = false;
+		// this.view.add(this.ground);
 	}
 
+	renderCallback(message, callback) {
+		this.updateMaterial();
+		this.ground.visible = true;
+		console.log(`[${this.timerBank}] ${message} PLANET: ${this.resolution}`);
+		if (callback) {
+			callback();
+		}
+	}
 
 	renderScene(callback) {
 		this.initSeed();
-		this.seed = this.randRange(0, 1) * 1000.0;
-		this.waterLevel = this.randRange(0.1, 0.5);
-		if (this.hasClouds) {
-			this.clouds.resolution = this.resolution;
-		}
-
+		this.seed = this.randRange(0, 1) * 100000.0;
+		this.waterLevel = this.randRange(0.0, 1.0);
 		this.updateNormalScaleForRes(this.resolution);
 
 		this.renderBiomeTexture();
-		if (this.hasClouds) {
-			this.clouds.randomizeColor();
-		}
-		if (this.glow) {
-			this.glow.randomizeColor();
-		}
+
 		let resMin = 0.01;
 		let resMax = 5.0;
 
+		MISC.interrupt = false;
 		this.initSeed();
-		// wait(() => {
-		if (this.hasClouds) {
-			console.log(1234);
-			this.clouds.render({
-				waterLevel: this.waterLevel
-			});
-			 // this.updateMaterial();
-		}
-		// wait(() => {
 		this.heightMap.render({
+			timerBank: this.timerBank,
 			seed: this.seed,
 			resolution: this.resolution,
 			res1: this.randRange(resMin, resMax),
@@ -132,58 +133,61 @@ class Planet {
 			mixScale: this.randRange(0.5, 1.0),
 			doesRidged: Math.floor(this.randRange(0, 4))
 			// doesRidged: 1
-		});
-		// this.updateMaterial();
-		// wait(() => {
-		const resMod = this.randRange(3, 10);
-		resMax = resMax * resMod;
-		resMin = resMin * resMod;
-
-		this.moistureMap.render({
-			seed: this.seed + 392.253,
-			resolution: this.resolution,
-			res1: this.randRange(resMin, resMax),
-			res2: this.randRange(resMin, resMax),
-			resMix: this.randRange(resMin, resMax),
-			mixScale: this.randRange(0.5, 1.0),
-			doesRidged: Math.floor(this.randRange(0, 4))
-			// doesRidged: 0
-		});
-		// this.updateMaterial();
-		// wait(() => {
-		this.textureMap.render({
-			resolution: this.resolution,
-			heightMaps: this.heightMaps,
-			moistureMaps: this.moistureMaps,
-			biomeMap: this.biome.texture
-		});
-		// this.updateMaterial();
-		// wait(() => {
-		this.normalMap.render({
-			resolution: this.resolution,
-			waterLevel: this.waterLevel,
-			heightMaps: this.heightMaps,
-			textureMaps: this.textureMaps
-		});
-		// this.updateMaterial();
-		// wait(() => {
-		this.roughnessMap.render({
-			resolution: this.resolution,
-			heightMaps: this.heightMaps,
-			waterLevel: this.waterLevel
 		}, () => {
-			this.updateMaterial();
-			if (callback) {
-				console.log('CALLBACK');
-				callback();
-			}
+		// this.updateMaterial();
+			const resMod = this.randRange(3, 10);
+			resMax = resMax * resMod;
+			resMin = resMin * resMod;
+
+			this.moistureMap.render({
+				timerBank: this.timerBank,
+				seed: this.seed + 392.253,
+				resolution: this.resolution,
+				res1: this.randRange(resMin, resMax),
+				res2: this.randRange(resMin, resMax),
+				resMix: this.randRange(resMin, resMax),
+				mixScale: this.randRange(0.5, 1.0),
+				doesRidged: Math.floor(this.randRange(0, 4))
+			// doesRidged: 0
+			}, () => {
+			// this.updateMaterial();
+				this.textureMap.render({
+					timerBank: this.timerBank,
+					resolution: this.resolution,
+					heightMaps: this.heightMaps,
+					moistureMaps: this.moistureMaps,
+					biomeMap: this.biome.texture
+				}, () => {
+					// this.updateMaterial();
+					this.normalMap.render({
+						timerBank: this.timerBank,
+						resolution: this.resolution,
+						waterLevel: this.waterLevel,
+						heightMaps: this.heightMaps,
+						textureMaps: this.textureMaps
+					}, () => {
+						// this.updateMaterial();
+						this.roughnessMap.render({
+							timerBank: this.timerBank,
+							resolution: this.resolution,
+							heightMaps: this.heightMaps,
+							waterLevel: this.waterLevel
+						}, () => {
+							if (this.hasClouds) {
+								this.clouds.render({
+									timerBank: this.timerBank,
+									waterLevel: this.waterLevel
+								}, () => {
+									this.renderCallback('CALLBACK', callback);
+								});
+							} else {
+								this.renderCallback('CALLBACK', callback);
+							}
+						});
+					});
+				});
+			});
 		});
-		// 					});
-		// 				});
-		// 			});
-		// 		});
-		// 	});
-		// });
 	}
 
 	updateMaterial() {
@@ -197,7 +201,7 @@ class Planet {
 			material.normalScale = new THREE.Vector2(this.normalScale, this.normalScale);
 			material.roughnessMap = this.roughnessMaps[i];
 			material.metalnessMap = this.roughnessMaps[i];
-			material.opacity = 1;
+			// material.opacity = 1;
 			material.needsUpdate = true;
 		}
 	}
@@ -209,8 +213,14 @@ class Planet {
 	}
 
 	createClouds() {
-		this.clouds = new Clouds({ size: this.size, resolution: 256 });
-		this.view.add(this.clouds.view);
+		return new Clouds({
+			rnd: this.seedString,
+			size: this.size,
+			resolution: 512,
+			show: true,
+			color: this.cloudColor
+		});
+		// this.ground.add(this.clouds.view);
 	}
 
 	updateNormalScaleForRes(value) {
@@ -247,4 +257,4 @@ class Planet {
 	}
 }
 
-export default Planet;
+export default BodySurface;

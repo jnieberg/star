@@ -1,6 +1,6 @@
 import { TD, EVENT } from '../../variables';
 import * as THREE from 'three';
-import { hideLabel } from '../label/label';
+import { labelHide } from '../label/label';
 import { deleteThree } from './init';
 import { resetCamera } from './camera';
 
@@ -296,12 +296,12 @@ export function to3DCoordinate(x, y) {
 	return new THREE.Vector3(width, height, -2.0 * TD.camera.near * TD.scale);
 }
 
-export function getMouse(e) {
-	e.preventDefault();
-	EVENT.mouse2d.x = e.clientX;
-	EVENT.mouse2d.y = e.clientY;
-	EVENT.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-	EVENT.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+export function getMouse(event) {
+	event.preventDefault();
+	EVENT.mouse2d.x = event.clientX;
+	EVENT.mouse2d.y = event.clientY;
+	EVENT.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	EVENT.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 export function getKeys(e) {
@@ -312,8 +312,8 @@ export function getKeys(e) {
 		EVENT.controls.accF = 0;
 		EVENT.controls.accL = 0;
 		EVENT.controls.accU = 0;
-		hideLabel('star');
-		hideLabel('planet');
+		labelHide('star');
+		labelHide('planet');
 		for (const i of Object.keys(TD.stars)) {
 			deleteThree(TD.stars[i].object);
 		}

@@ -8,3 +8,37 @@ body {
 	position: absolute;
 	top: 0;
 }
+
+.label {
+	font-family: 'Montserrat Alternates', sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	padding: 8px;
+	color: #fff;
+	border: solid 1px #fff;
+	border-radius: 4px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 32, 64, 0.5);
+	opacity: 0;
+	white-space: nowrap;
+	z-index: 999;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+.label ol {
+	margin: 0;
+	padding: 0 0 0 20px;
+}
+.label--h1 {
+	font-size: 18px;
+}
+.label--h2 {
+	font-size: 14px;
+	font-weight: 700;
+}
+.label--h3 {
+	font-weight: 700;
+	margin-top: 8px;
+}

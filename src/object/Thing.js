@@ -4,7 +4,11 @@ import { MISC } from '../variables';
 export default class Thing {
 	constructor(id) {
 		this.id = id;
-		MISC.things.add(id, this, true);
+		// MISC.things.add({
+		// 	id,
+		// 	thing: this,
+		// 	overwrite: true
+		// });
 	}
 
 	_setParameters(objA, params) {
@@ -40,6 +44,7 @@ export default class Thing {
 
 	add(parent) {
 		parent.add(this.mesh);
+		return this;
 	}
 
 	remove() {

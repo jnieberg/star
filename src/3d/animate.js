@@ -2,7 +2,7 @@ import { TD, EVENT, MISC } from '../variables';
 import drawStars, { getStars } from './bodies/star/stars';
 import { getPlanets, eventPlanets } from './bodies/planet/planets';
 import { eventLabel } from './label/label';
-import { getStar } from './bodies/star/star';
+import { getStar } from './bodies/star/stars';
 
 export function render() {
 	TD.renderer.render(TD.scene, TD.camera.object);
@@ -15,17 +15,16 @@ export function loop() {
 }
 
 export function interval() {
-	// setInterval(() => {
-	drawStars();
-	getStar();
-	getStars();
-	getPlanets();
-	// });
+	setInterval(() => {
+		drawStars();
+		getStar();
+		getStars();
+		getPlanets();
+	}, 100);
 }
 
 export default function animate() {
-	interval();
 	loop();
-	requestAnimationFrame(animate);
+	MISC.animation = requestAnimationFrame(animate);
 	render();
 };

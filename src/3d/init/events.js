@@ -15,4 +15,5 @@ export default function initEvents() {
 
 	window.addEventListener('mousemove', getMouse, false);
 	window.addEventListener('keypress', getKeys, false);
+	window.dispatchEvent(new MouseEvent('mousemove'));
 }
