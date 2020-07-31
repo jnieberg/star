@@ -16,14 +16,14 @@ function raycastStarsEvents(intersect) {
 			TD.star = star;
 			TD.star.getChildren();
 			const starInfo = TD.star.text;
-			setLabel('stars', starInfo);
+			// setLabel('stars', starInfo);
 			setLabel('star', starInfo);
-			labelHide('star');
+			// labelHide('star');
 			TD.star.draw();
 		}
 	}
 	if (intersect.distance <= distanceNear * TD.scale) {
-		labelHide('stars');
+		// labelHide('stars');
 		return false;
 	}
 	labelShow('stars');
@@ -38,9 +38,9 @@ export default function raycastStars() {
 	const intersect = raycastFound(obj, distance, 0.1);
 	if (intersect && intersect.object && intersect.object.name) {
 		result = raycastStarsEvents(intersect); // , stars.this
-	} else if (TD.star && TD.label.stars && TD.label.stars.visible) {
+	} else if (TD.star && TD.label && TD.label.visible) {
 		result = false;
-		// hideLabel('stars');
+		labelHide('stars');
 	}
 	if (TD.star) {
 		const distanceCam = distanceToCamera(TD.star.position.x, TD.star.position.y, TD.star.position.z);

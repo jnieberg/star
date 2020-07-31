@@ -15,6 +15,7 @@ export default function initScene() {
 		precision: 'highp',
 		powerPreference: 'high-performance',
 		// stencil: false,
+		// failIfMajorPerformanceCaveat: true,
 		alpha: true,
 		antialias: true,
 		physicallyCorrectLights: true

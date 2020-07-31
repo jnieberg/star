@@ -55,6 +55,7 @@ const FirstPersonControls = function(object) {
 	this.accF = 0;
 	this.accL = 0;
 	this.accU = 0;
+	this.accRoll = 0;
 	this.actualLookSpeed = 0;
 
 	const lookDirection = new THREE.Vector3();
@@ -131,6 +132,10 @@ const FirstPersonControls = function(object) {
 
 		case 82: /* R*/ this.moveUp = true; this.rotate = true; break;
 		case 70: /* F*/ this.moveDown = true; this.rotate = true; break;
+
+		case 81: /* Q*/ this.rollLeft = true; this.rotate = true; break;
+		case 69: /* E*/ this.rollRight = true; this.rotate = true; break;
+
 		default: break;
 		}
 	};
@@ -151,6 +156,9 @@ const FirstPersonControls = function(object) {
 
 		case 82: /* R*/ this.moveUp = false; this.rotate = false; break;
 		case 70: /* F*/ this.moveDown = false; this.rotate = false; break;
+
+		case 81: /* Q*/ this.rollLeft = false; this.rotate = false; break;
+		case 69: /* E*/ this.rollRight = false; this.rotate = false; break;
 		default: break;
 		}
 	};
@@ -227,12 +235,21 @@ const FirstPersonControls = function(object) {
 			if (this.moveDown) {
 				this.accU = this.acceleration ? this.accU - actualMoveSpeed * 0.05 : -actualMoveSpeed;
 			}
+
+			if (this.rollLeft) {
+				this.accRoll = this.acceleration ? this.accRoll + actualMoveSpeed * 0.05 : actualMoveSpeed;
+			}
+			if (this.rollRight) {
+				this.accRoll = this.acceleration ? this.accRoll - actualMoveSpeed * 0.05 : -actualMoveSpeed;
+			}
 			this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateY(this.accU * this.speedFactorStar * this.speedFactorPlanet);
+			this.object.rotateZ(this.accRoll * this.speedFactorStar * this.speedFactorPlanet);
 			this.accF = this.accF * brakeFactor;
 			this.accL = this.accL * brakeFactor;
 			this.accU = this.accU * brakeFactor;
+			this.accRoll = this.accRoll * brakeFactor;
 
 			if (this.rotate) {
 				this.actualLookSpeed = delta * this.lookSpeed;

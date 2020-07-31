@@ -8,6 +8,7 @@ import setColor from '../../../misc/color';
 import random from '../../../misc/random';
 import Atmosphere from '../planet/Atmosphere';
 import { toSize } from '../../../misc/size';
+import getTime from '../../../misc/time';
 
 export default class Star {
 	constructor({ x, y, z, index }) {
@@ -29,11 +30,11 @@ export default class Star {
 	}
 
 	random(seed) {
-		MISC.rnd = random(`${seed}_${this.id}`);
+		MISC.rnd = random(`star_${seed}_${this.id}`);
 	}
 
 	get name() {
-		this.random('star_name');
+		this.random('name');
 		return new Word({
 			words: 3,
 			syllables: 3,
@@ -115,7 +116,7 @@ export default class Star {
 
 	// Star temperature in Kelvin
 	get temperature() {
-		this.random('star_temperature');
+		this.random('temperature');
 		for (const tempColor in STAR.temperature) {
 			if (STAR.temperature.hasOwnProperty(tempColor)) {
 				if (tempColor === this.color.hue.text) {
@@ -145,7 +146,7 @@ export default class Star {
 	getChildren() {
 		if (!this.children) {
 			const children = [];
-			this.random('star_planets');
+			this.random('planets');
 			const childrenLength = Math.floor(MISC.rnd() * this.size * 4); // number of planets depends on star size
 			if (childrenLength > 0) {
 				for (let id = 0; id < childrenLength; id++) {
@@ -174,6 +175,32 @@ export default class Star {
 		''}`;
 	}
 
+	get rotationSpeedAroundAxis() {
+		const temperature = this.temperature.min;
+		this.random('rotation_speed');
+		return MISC.rnd() * temperature * 0.00000005 + 0.00000005;
+	}
+
+	drawRotation() {
+		if (this.object) {
+			this.random('rotation');
+			this.object.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+			this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
+			if (this.children) {
+				for (const child of this.children) {
+					child.drawRotation();
+				}
+			}
+		}
+	}
+
+	hideChildren() {
+		for (const child of this.children) {
+			if (child.object && child.object.high) {
+				child.hide();
+			}
+		}
+	}
 
 	draw() {
 		const pos = {
@@ -187,13 +214,13 @@ export default class Star {
 		setColor(1, this.color.hue, 1.0, this.color.brightness, 'hsl');
 		setColor(2, hue2, 1.0, this.color.brightness, 'hsl');
 		setColor(3, this.color.hue, 0.25, this.color.brightness, 'hsl');
-		this.random('star_rotation');
+		this.random('rotation');
 
 		// Star pivot
 		this.object = new THREE.Object3D();
-		this.object.rotation.x = Math.PI * MISC.rnd() * 2;
-		this.object.rotation.y = Math.PI * MISC.rnd() * 2;
-		this.object.rotation.z = Math.PI * MISC.rnd() * 2;
+		// this.object.rotation.x = Math.PI * MISC.rnd() * 2;
+		// this.object.rotation.y = Math.PI * MISC.rnd() * 2;
+		// this.object.rotation.z = Math.PI * MISC.rnd() * 2;
 
 		const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
 		const material = new THREE.MeshBasicMaterial({
@@ -202,14 +229,14 @@ export default class Star {
 			transparent: true,
 			alphaTest: 0,
 		});
-		this.object.high = new THREE.Mesh(geometry, material);
+		this.object.low = new THREE.Mesh(geometry, material);
 		// this.object.rotation.x = Math.PI * MISC.rnd() * 2;
 		// this.object.rotation.y = Math.PI * MISC.rnd() * 2;
 		// this.object.rotation.z = Math.PI * MISC.rnd() * 2;
 		// this.object.renderOrder = 1;
-		this.object.high.castShadow = false;
-		this.object.high.receiveShadow = false;
-		this.object.add(this.object.high);
+		this.object.low.castShadow = false;
+		this.object.low.receiveShadow = false;
+		this.object.add(this.object.low);
 
 		// // Star frontside
 		// const material2 = new THREE.MeshBasicMaterial({
@@ -226,7 +253,7 @@ export default class Star {
 		// this.object.add(starInner);
 
 		// Star spots
-		const material3 = new THREE.MeshBasicMaterial({
+		const materialSpots = new THREE.MeshBasicMaterial({
 			map: TD.texture.star.surface,
 			color: MISC.colorHelper,
 			transparent: true,
@@ -234,11 +261,11 @@ export default class Star {
 			opacity: 1,
 			alphaTest: 0,
 		});
-		const starInner3 = new THREE.Mesh(geometry, material3);
-		starInner3.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
-		starInner3.castShadow = false;
-		starInner3.receiveShadow = false;
-		this.object.add(starInner3);
+		this.object.high = new THREE.Mesh(geometry, materialSpots);
+		this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
+		this.object.high.castShadow = false;
+		this.object.high.receiveShadow = false;
+		this.object.add(this.object.high);
 
 		// Star corona
 		// const flareMaterial = new THREE.SpriteMaterial({
@@ -254,7 +281,8 @@ export default class Star {
 		// starFlare.castShadow = false;
 		// starFlare.receiveShadow = false;
 		// this.object.add(starFlare);
-		const atmosphere = new Atmosphere(this.object, {
+		// eslint-disable-next-line no-unused-vars
+		const _foo = new Atmosphere(this.object.high, {
 			size: size * 1.01,
 			thickness: size * 1.5,
 			color: MISC.colorHelper2,
@@ -275,9 +303,11 @@ export default class Star {
 		this.light.decay = 0;
 		this.light.distance = TD.camera.far * 0.0001 * TD.scale;
 		// this.light.angle = Math.PI / 4;
-		this.light.penumbra = 0.1;
+		// this.light.penumbra = 0.1;
 		// const grid = 0.005;
-		this.light.shadow.bias = -TD.camera.near * 0.01 * TD.scale;
+		this.light.shadow.bias = -TD.camera.near * 0.006 * TD.scale;
+		this.light.shadow.radius = 3;
+		this.light.shadow.normalBias = 0;
 		this.light.shadow.mapSize.width = 1024 * 2;
 		this.light.shadow.mapSize.height = 1024 * 2;
 		// this.light.shadow.camera.fov = 180;
@@ -292,7 +322,7 @@ export default class Star {
 		this.light.visible = true;
 
 		// this.object.add(this.light.target);
-		this.object.add(this.light);
+		this.object.high.add(this.light);
 
 		// Set star position
 		this.object.position.set(pos.x, pos.y, pos.z);

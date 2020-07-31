@@ -11,11 +11,3 @@ export function getPlanets() {
 	}
 }
 
-export function eventPlanets() {
-	if (TD.star && TD.star.children) {
-		for (const body of TD.star.children) {
-			body.drawRotation();
-		}
-	}
-}
-

@@ -22,25 +22,25 @@ export default class Body {
 		};
 		// this.objectLow = undefined;
 		this.surfaceRenders = {
-			resolutions: [ 128, 512, 1024 ],
+			resolutions: [ 128, 512 ], // 1024
 			last: undefined
 		};
 	}
 
 	random(seed) {
-		const seedString = `${seed}_${this.star.id}_${this.parentId}_${this.id}`;
+		const seedString = `body_${seed}_${this.star.id}_${this.parentId}_${this.id}`;
 		MISC.rnd = random(seedString);
 		return seedString;
 	}
 
 	get name() {
-		this.random('body_name');
+		this.random('name');
 		return new Word();
 	}
 
 	get size() {
 		const parentSize = this.parent.size;
-		this.random('body_size');
+		this.random('size');
 		let size = parentSize * (MISC.rnd() * 0.02 + 0.002);
 		if (this.isMoon) {
 			size = parentSize * (MISC.rnd() * 0.2 + 0.02);
@@ -60,13 +60,13 @@ export default class Body {
 			size = this.parent.size;
 			scale = 0.05;
 		}
-		this.random('body_distance');
+		this.random('distance');
 		return size + ((id * id * ((MISC.rnd() * 0.25) + 1) + 3 + MISC.rnd() * 0.5)) * scale;
 	}
 
 	get temperature() {
 		const starTemp = this.parent.temperature.min;
-		this.random('body_temperature');
+		this.random('temperature');
 		let temp = [
 			Math.floor(starTemp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 1)),
 			Math.floor(starTemp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 1))
@@ -89,7 +89,7 @@ export default class Body {
 			}
 		};
 		// if (!this.isMoon) {
-		this.random('body_atmosphere');
+		this.random('atmosphere');
 		if (MISC.rnd() > 0.2) {
 			atmos = {
 				size: MISC.rnd() * Number(this.size) * 0.1,
@@ -122,7 +122,7 @@ export default class Body {
 	}
 
 	get clouds() {
-		this.random('body_clouds');
+		this.random('clouds');
 		if (!this.isMoon && this.atmosphere.text !== 'No' && Math.floor(MISC.rnd() * 2) === 0) {
 			return {
 				hue: this.atmosphere.color.hue + MISC.rnd() * 0.2,
@@ -133,9 +133,22 @@ export default class Body {
 		return false;
 	}
 
+	get water() {
+		this.random('water');
+		return {
+			level: MISC.rnd(),
+			color: {
+				r: MISC.rnd(),
+				g: MISC.rnd(),
+				b: MISC.rnd(),
+				a: MISC.rnd() * 0.9 + 0.1
+			}
+		};
+	}
+
 	get rings() {
 		if (!this.isMoon) {
-			this.random('body_ring');
+			this.random('ring');
 			 if (this.size > 0.01 && MISC.rnd() < 0.5) {
 				return {
 					thickness: MISC.rnd(),
@@ -154,7 +167,7 @@ export default class Body {
 	getChildren() {
 		if (!this.children) {
 			const children = [];
-			this.random('body_moons');
+			this.random('moons');
 			const childrenLength = Math.floor(MISC.rnd() * this.size * 50);
 			if (!this.isMoon && childrenLength) {
 				for (let id = 0; id < childrenLength; id++) {
@@ -189,28 +202,39 @@ export default class Body {
 		''}`;
 	}
 
-	get axisRotationSpeed() {
-		this.random('body_rotation_speed');
+	get rotationSpeedAroundParent() {
+		// const temp = this.parent.temperature.min;
+		this.random('rotation_speed_parent');
+		// return temp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 10 * TD.scale);
+		return (1.0 / (this.distance * (MISC.rnd() * 50.0 + 150.0))) - this.parent.rotationSpeedAroundAxis;
+	}
+
+	get rotationSpeedAroundAxis() {
+		this.random('rotation_speed');
 		return MISC.rnd() * 0.01;
 	}
 
-	get parentRotationSpeed() {
-		const temp = this.parent.temperature.min;
-		this.random('body_star_rotation_speed');
-		return temp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 10 * TD.scale);
-	}
-
 	drawRotation() {
-		if (this.object) {
+		if (this.object && this.object.position) {
 			this.object.position.set(0, 0, 0);
 			this.object.rotation.set(0, 0, 0);
 
-			this.random('body_star_rotation');
-			this.object.rotateY((getTime() * this.parentRotationSpeed) + Math.PI * MISC.rnd() * 2);
+			this.random('rotation_parent');
+			this.object.rotateY((getTime() * this.rotationSpeedAroundParent) + Math.PI * MISC.rnd() * 2);
 			this.object.translateX(this.distance * 0.001 * TD.scale);
-			this.random('body_rotation');
-			this.object.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
-			this.object.rotateY(getTime() * TD.stargrid.size * this.axisRotationSpeed);
+			this.random('rotation');
+			// this.object.rotateY(getTime() * -this.parent.rotationSpeedAroundAxis + Math.PI * MISC.rnd() * 2);
+			// Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+			this.object.rotateY(getTime() * this.rotationSpeedAroundParent);
+			this.object.rotateX(Math.PI * MISC.rnd() * 2);
+			this.object.rotateZ(Math.PI * MISC.rnd() * 2);
+			this.object.rotateY(Math.PI * MISC.rnd() * 2 + getTime() * this.rotationSpeedAroundAxis);
+			// this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
+			if (this.children) {
+				for (const child of this.children) {
+					child.drawRotation();
+				}
+			}
 		}
 	}
 
@@ -222,7 +246,7 @@ export default class Body {
 				rnd: `planet_${this.star.id}_${this.id}_${this.parentId}`,
 				size: this.size * 0.001 * TD.scale,
 				resolution,
-				detail: 3 - this.surfaceRenders.resolutions.length,
+				detail: 2 - this.surfaceRenders.resolutions.length,
 				biome: this.surfaceRenders.last && this.surfaceRenders.last.biome,
 				hasClouds: this.clouds,
 				cloudColor: MISC.colorHelper
@@ -255,17 +279,11 @@ export default class Body {
 	show(obj = this.object && this.object.high) {
 		if (obj) {
 			obj.visible = true;
-			// for (const child of obj.children) {
-			// 	this.show(child);
-			// }
 		}
 	}
 	hide(obj = this.object && this.object.high) {
 		if (obj) {
 			obj.visible = false;
-			// for (const child of obj.children) {
-			// 	this.hide(child);
-			// }
 		}
 	}
 
@@ -292,11 +310,11 @@ export default class Body {
 		this.object.translateX(this.distance * 0.001 * TD.scale || 0);
 
 		// Planet sphere
-		this.random('body_star_rotation');
+		this.random('star_rotation');
 		const bodySurface = new BodySurface({
 			rnd: `planet_${this.star.id}_${this.id}_${this.parentId}`,
 			size: (this.size * 0.00099) * TD.scale,
-			resolution: 64,
+			resolution: 32,
 			detail: 0,
 		});
 		this.object.low = bodySurface.ground;
@@ -321,18 +339,6 @@ export default class Body {
 		trajectoryMesh.receiveShadow = false;
 		trajectoryMesh.renderOrder = -1;
 		this.parent.object.high.add(trajectoryMesh);
-
-		// Planet atmosphere
-		if (this.atmosphere.color.a) {
-			setColor(1, this.atmosphere.color.hue, this.atmosphere.color.saturation, this.atmosphere.color.lightness, 'hsl');
-			// eslint-disable-next-line no-unused-vars
-			const atmosphere = new Atmosphere(this.object.low, {
-				size: (this.size * 0.001015) * TD.scale,
-				thickness: (this.atmosphere.size * 0.001015) * TD.scale,
-				color: MISC.colorHelper,
-				opacity: this.atmosphere.color.a
-			});
-		}
 
 		// Planet rings
 		if (this.rings) {
@@ -360,7 +366,7 @@ export default class Body {
 				alphaTest: 0,
 				transparent: true
 			});
-			ringMesh.renderOrder = 1;
+			ringMesh.renderOrder = 2;
 			ringMesh.rotateX(Math.PI * 0.5);
 			ringMesh.castShadow = true;
 			ringMesh.receiveShadow = true;
@@ -372,11 +378,6 @@ export default class Body {
 
 	drawHigh() {
 		// Hide other high detail planets
-		for (const planet of this.star.children) {
-			if (planet.object && planet.object.high) {
-				planet.hide();
-			}
-		}
 		if (this.object) {
 			if (this.object.high) {
 				this.drawSurface();
@@ -387,6 +388,19 @@ export default class Body {
 				this.object.add(this.object.high);
 				this.drawSurface();
 
+				// Planet atmosphere
+				if (this.atmosphere.color.a) {
+					setColor(1, this.atmosphere.color.hue, this.atmosphere.color.saturation, this.atmosphere.color.lightness, 'hsl');
+					// eslint-disable-next-line no-unused-vars
+					const atmosphere = new Atmosphere(this.object.high, {
+						size: (this.size * 0.001015) * TD.scale,
+						thickness: (this.atmosphere.size * 0.001015) * TD.scale,
+						color: MISC.colorHelper,
+						blending: THREE.AdditiveBlending,
+						opacity: this.atmosphere.color.a
+					});
+				}
+
 				// Draw moons of planet
 				if (this.children && this.children.length) {
 					for (const child of this.children) {
@@ -394,11 +408,6 @@ export default class Body {
 					}
 				}
 			}
-			// Update star spotlight
-			// this.star.light.target = this.object.low;
-			// this.star.light.visible = true;
-			// TD.scene.add(new THREE.CameraHelper(this.star.light.shadow.camera)); // TEST
-			// this.object.this = this;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 import { MISC } from '../variables';
 
 const NAME_LETTERS = {
-	vowelsSME: [
+	vowels: [
 		'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
 		'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e',
 		'i', 'i', 'i', 'i', 'i',
@@ -39,11 +39,11 @@ const NAME_LETTERS = {
 		'qu', 'sl', 'sn', 'sm', 'spr', 'str', 'thr', 'tr', 'vl', 'vr', 'wr'
 	],
 	consM: [
-		'bb', 'dd', 'ff', 'gg', 'kk', 'll', 'lp', 'lv', 'md', 'mm', 'nn', 'pp', 'pt', 'rr', 'tt'
+		'bb', 'dd', 'ff', 'gg', 'kk', 'lp', 'lv', 'md', 'mm', 'nn', 'np', 'pp', 'pt', 'rr', 'rv', 'tt'
 	],
 	consME: [
-		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'lk', 'ls', 'lt', 'mb', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'np', 'nt',
-		'rc', 'rch', 'rd', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'ss', 'tch'
+		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'll', 'lk', 'ls', 'lt', 'mb', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'nt',
+		'rc', 'rch', 'rd', 'rf', 'rg', 'rk', 'rm', 'rn', 'rp', 'rs', 'rsh', 'rst', 'rt', 'rth', 'ss', 'tch'
 	]
 };
 
@@ -57,9 +57,9 @@ export default class Word {
 		const consS = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM);
 		const consM = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM, NAME_LETTERS.consM);
 		const consE = NAME_LETTERS.cons.concat(NAME_LETTERS.consME);
-		const vowlS = NAME_LETTERS.vowelsSME;
-		const vowlM = NAME_LETTERS.vowelsSME;
-		const vowlE = NAME_LETTERS.vowelsSME.concat(NAME_LETTERS.vowelsE);
+		const vowlS = NAME_LETTERS.vowels;
+		const vowlM = NAME_LETTERS.vowels;
+		const vowlE = NAME_LETTERS.vowels.concat(NAME_LETTERS.vowelsE);
 		let wordList = [];
 		for (let w = 0; w < wordsTotal; w++) {
 			const consAtEnd = Math.floor(MISC.rnd() * 2) === 0;

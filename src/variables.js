@@ -44,7 +44,7 @@ export const TD = {
 	stars: {},
 	star: undefined,
 	planet: undefined,
-	label: {}
+	label: undefined
 };
 
 export const EVENT = {

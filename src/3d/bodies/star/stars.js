@@ -107,6 +107,12 @@ export function getStars() {
 	let result = false;
 	result = raycastStars();
 	if (!result) {
-		labelHide('stars');
+		// labelHide('stars');
+	}
+}
+
+export function eventStars() {
+	if (TD.star) {
+		TD.star.drawRotation();
 	}
 }

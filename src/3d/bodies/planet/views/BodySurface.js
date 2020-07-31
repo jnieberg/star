@@ -64,16 +64,16 @@ class BodySurface {
 		this.heightMap = new NoiseMap(this.resolution);
 		this.heightMaps = this.heightMap.maps;
 
-		this.moistureMap = new NoiseMap(this.resolution, this.detail > 0);
+		this.moistureMap = new NoiseMap(this.resolution);
 		this.moistureMaps = this.moistureMap.maps;
 
 		this.textureMap = new TextureMap(this.resolution);
 		this.textureMaps = this.textureMap.maps;
 
-		this.normalMap = new NormalMap(this.resolution, this.detail > 0);
+		this.normalMap = new NormalMap(this.resolution);
 		this.normalMaps = this.normalMap.maps;
 
-		this.roughnessMap = new RoughnessMap(this.resolution, this.detail > 1);
+		this.roughnessMap = new RoughnessMap(this.resolution);
 		this.roughnessMaps = this.roughnessMap.maps;
 
 		for (let i = 0; i < 6; i++) {
@@ -134,7 +134,8 @@ class BodySurface {
 			doesRidged: Math.floor(this.randRange(0, 4))
 			// doesRidged: 1
 		}, () => {
-		// this.updateMaterial();
+			this.initSeed();
+			// this.updateMaterial();
 			const resMod = this.randRange(3, 10);
 			resMax = resMax * resMod;
 			resMin = resMin * resMod;
@@ -225,12 +226,12 @@ class BodySurface {
 
 	updateNormalScaleForRes(value) {
 		switch (value) {
-		case 64: this.normalScale = 0.1; break;
-		case 256: this.normalScale = 0.25; break;
-		case 512: this.normalScale = 0.5; break;
-		case 1024: this.normalScale = 1.0; break;
-		case 2048: this.normalScale = 1.5; break;
-		case 4096: this.normalScale = 3.0; break;
+		case 32: this.normalScale = 0.03; break;
+		case 64: this.normalScale = 0.05; break;
+		case 128: this.normalScale = 0.10; break;
+		case 256: this.normalScale = 0.15; break;
+		case 512: this.normalScale = 0.25; break;
+		case 1024: this.normalScale = 0.5; break;
 		default: this.normalScale = 0; break;
 		}
 	}

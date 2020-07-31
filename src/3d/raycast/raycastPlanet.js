@@ -7,22 +7,23 @@ import * as THREE from 'three';
 function raycastPlanetEvents(intersect, planet) {
 	if (TD.planet !== planet) {
 		TD.planet = planet;
+		TD.planet.parent.hideChildren();
 		TD.planet.drawHigh();
 	}
 	if (intersect && intersect.object) {
-		labelHide('star');
-		if (planet && (!TD.planet || TD.planet.id !== planet.id || !TD.label.planet || !TD.label.planet.visible)) {
+		// labelHide('star');
+		if (planet && (!TD.planet || TD.planet.id !== planet.id || !TD.label || !TD.label.visible)) {
 			const foundPlanet = intersect.object.this || intersect.object.parent.this;
 			if (foundPlanet) {
 				setLabel(foundPlanet.isMoon ? 'moon' : 'planet', foundPlanet.text);
-				labelHide(foundPlanet.isMoon ? 'planet' : 'moon');
+				// labelHide(foundPlanet.isMoon ? 'planet' : 'moon');
 				labelShow(foundPlanet.isMoon ? 'moon' : 'planet');
 				console.log(foundPlanet);
 			}
 		}
 	} else {
-		labelHide('planet');
-		labelHide('moon');
+		// labelHide('planet');
+		// labelHide('moon');
 	}
 }
 
@@ -56,8 +57,11 @@ export default function raycastPlanet(bodies) {
 			const distance = 0.01;
 			const { range, planet } = getClosestPlanet(planets);
 			if (range >= distance) {
-				TD.planet = undefined;
-				EVENT.controls.speedFactorPlanet = 1.0;
+				if (TD.planet) {
+					TD.planet.parent.hideChildren();
+					TD.planet = undefined;
+					EVENT.controls.speedFactorPlanet = 1.0;
+				}
 			} else if (range > -1) {
 				const obj = bodies.map(body => body.object.low);
 				const intersect = raycastFound(obj, 0.1, 2);

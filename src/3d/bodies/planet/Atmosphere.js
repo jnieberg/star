@@ -8,7 +8,7 @@ export default class Atmosphere {
 		this.color = new THREE.Color(colorS);
 		this.colorInner = new THREE.Color(colorInnerS);
 		this.atmosphereIn = new Thing('glowInside')
-			.geometry(new THREE.SphereBufferGeometry(size, 32, 32))
+			.geometry(new THREE.SphereBufferGeometry(size, 64, 64))
 			.material(this.atmosphereMaterial(blending), {
 				'uniforms.b.value': opacity * 0.5 + 0.75 - size * 0.01,
 				'uniforms.p.value': power,
@@ -19,14 +19,14 @@ export default class Atmosphere {
 				name: 'Atmosphere inside',
 				castShadow: false,
 				receiveShadow: false,
-				renderOrder: 2 // Needed to be visible
+				renderOrder: 1
 			})
 			.add(mesh);
 		this.atmosphereOut = new Thing('glowOutside')
-			.geometry(new THREE.SphereBufferGeometry(size + thickness, 32, 32))
+			.geometry(new THREE.SphereBufferGeometry(size + thickness, 64, 64))
 			.material(this.atmosphereMaterial(blending), {
-				'uniforms.b.value' : -0.1,
-				'uniforms.p.value' : (thickness / size) * (1.1 - opacity) * 20,
+				'uniforms.b.value' : -0.085,
+				'uniforms.p.value' : (thickness / size) * (1.1 - opacity * 0.5) * 20,
 				'uniforms.glowColor.value' : this.color,
 				'side': THREE.BackSide
 			})
@@ -34,7 +34,6 @@ export default class Atmosphere {
 				name: 'Atmosphere outside',
 				castShadow: false,
 				receiveShadow: false,
-				renderOrder: 1
 			})
 			.add(mesh);
 	};
