@@ -6,21 +6,22 @@ import { deleteThree } from '../../init/init';
 import getTime from '../../../misc/time';
 import BodySurface from './views/BodySurface';
 import Atmosphere from './Atmosphere';
-import random from '../../../misc/random';
+import { Random } from '../../../misc/random';
 import { toSize } from '../../../misc/size';
 import Word from '../../../misc/Word';
 
 export default class Body {
 	constructor({ star, id, parent }) {
+		this.seed = new Random();
 		this.star = star;
 		this.id = id;
 		this.parent = parent;
 		this.isMoon = parent instanceof Body;
+		this.isPlanet = !this.isMoon;
 		this.object = {
 			low: undefined,
 			high: undefined
 		};
-		// this.objectLow = undefined;
 		this.surfaceRenders = {
 			resolutions: [ 128, 512 ], // 1024
 			last: undefined
@@ -28,24 +29,27 @@ export default class Body {
 	}
 
 	random(seed) {
-		const seedString = `body_${seed}_${this.star.id}_${this.parentId}_${this.id}`;
-		MISC.rnd = random(seedString);
-		return seedString;
+		this.seed.set(`body_${seed}_${this.star.id}_${this.parentId}_${this.id}`);
+		return this.seed;
 	}
 
 	get name() {
-		this.random('name');
-		return new Word();
+		if (!this._name) {
+			this._name = new Word(this.random('name'));
+		}
+		return this._name;
 	}
 
 	get size() {
-		const parentSize = this.parent.size;
-		this.random('size');
-		let size = parentSize * (MISC.rnd() * 0.02 + 0.002);
-		if (this.isMoon) {
-			size = parentSize * (MISC.rnd() * 0.2 + 0.02);
+		if (!this._size) {
+			const parentSize = this.parent.size;
+			this.random('size');
+			this._size = parentSize * this.seed.rnd(0.002, 0.03);
+			if (this.isMoon) {
+				this._size = parentSize * this.seed.rnd(0.02, 0.3);
+			}
 		}
-		return size;
+		return this._size;
 	}
 
 	get parentId() {
@@ -53,57 +57,63 @@ export default class Body {
 	}
 
 	get distance() {
-		let size = this.parent.size * 0.2;
-		let scale = 0.5;
-		const id = this.id + 1;
-		if (this.isMoon) {
-			size = this.parent.size;
-			scale = 0.05;
+		if (!this._distance) {
+			let size = this.parent.size * 0.2;
+			let scale = 0.5;
+			const id = this.id + 1;
+			if (this.isMoon) {
+				size = this.parent.size;
+				scale = 0.05;
+			}
+			this.random('distance');
+			this._distance = size + ((id * id * this.seed.rnd(1, 1.25) + 3 + this.seed.rnd(0.5))) * scale;
 		}
-		this.random('distance');
-		return size + ((id * id * ((MISC.rnd() * 0.25) + 1) + 3 + MISC.rnd() * 0.5)) * scale;
+		return this._distance;
 	}
 
 	get temperature() {
-		const starTemp = this.parent.temperature.min;
-		this.random('temperature');
-		let temp = [
-			Math.floor(starTemp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 1)),
-			Math.floor(starTemp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 1))
-		];
-		temp = temp.sort((a, b) => (a > b ? 1 : -1));
-		return {
-			min: temp[0],
-			max: temp[1]
-		};
+		if (!this._temperature) {
+			const starTemp = this.parent.temperature.min;
+			const distance = this.distance;
+			this.random('temperature');
+			let temp = [
+				Math.floor(starTemp / this.seed.rnd(distance * 1.5, distance * 3.5)),
+				Math.floor(starTemp / this.seed.rnd(distance * 1.5, distance * 3.5))
+			];
+			temp = temp.sort((a, b) => (a > b ? 1 : -1));
+			this._temperature = {
+				min: temp[0],
+				max: temp[1]
+			};
+		}
+		return this._temperature;
 	}
 
 	get atmosphere() {
-		let atmos = {
-			size: 0,
-			color: {
-				hue: 0,
-				saturation: 0,
-				lightness: 0,
-				a: 0
-			}
-		};
-		// if (!this.isMoon) {
-		this.random('atmosphere');
-		if (MISC.rnd() > 0.2) {
-			atmos = {
-				size: MISC.rnd() * Number(this.size) * 0.1,
+		if (!this._atmosphere) {
+			let atmos = {
+				size: 0,
 				color: {
-					hue: MISC.rnd(),
-					saturation: MISC.rnd() * 0.5 + 0.25,
-					lightness: MISC.rnd() * 0.5 + 0.25,
-					a: MISC.rnd()
+					hue: 0,
+					saturation: 0,
+					lightness: 0,
+					a: 0
 				}
 			};
-		}
-		// }
-		const atmosThick = atmos.color.a;
-		const text =
+			this.random('atmosphere');
+			if (this.seed.rndInt(5) > 0) {
+				atmos = {
+					size: this.seed.rnd(this.size * 0.1),
+					color: {
+						hue: this.seed.rnd(),
+						saturation: this.seed.rnd(0.25, 0.75),
+						lightness: this.seed.rnd(0.25, 0.75),
+						a: this.seed.rnd(0.1, 1.0)
+					}
+				};
+			}
+			const atmosThick = atmos.color.a;
+			const text =
 		(atmosThick === 0) ?
 			'No' :
 			(atmosThick < 0.2) ?
@@ -115,19 +125,21 @@ export default class Body {
 						(atmosThick < 0.8) ?
 							'Dense' :
 							'Very dense';
-		return {
-			...atmos,
-			text
-		};
+			this._atmosphere = {
+				...atmos,
+				text
+			};
+		}
+		return this._atmosphere;
 	}
 
 	get clouds() {
 		this.random('clouds');
-		if (!this.isMoon && this.atmosphere.text !== 'No' && Math.floor(MISC.rnd() * 2) === 0) {
+		if (this.isPlanet && this.atmosphere.text !== 'No' && this.seed.rndInt(2) === 0) {
 			return {
-				hue: this.atmosphere.color.hue + MISC.rnd() * 0.2,
+				hue: this.atmosphere.color.hue + this.seed.rnd(0.2),
 				saturation: this.atmosphere.color.saturation,
-				lightness: this.atmosphere.color.lightness + MISC.rnd() * 0.25
+				lightness: this.atmosphere.color.lightness + this.seed.rnd(0.25)
 			};
 		}
 		return false;
@@ -136,28 +148,28 @@ export default class Body {
 	get water() {
 		this.random('water');
 		return {
-			level: MISC.rnd(),
+			level: this.seed.rnd(),
 			color: {
-				r: MISC.rnd(),
-				g: MISC.rnd(),
-				b: MISC.rnd(),
-				a: MISC.rnd() * 0.9 + 0.1
+				r: this.seed.rnd(),
+				g: this.seed.rnd(),
+				b: this.seed.rnd(),
+				a: this.seed.rnd(0.1, 1.0)
 			}
 		};
 	}
 
 	get rings() {
-		if (!this.isMoon) {
+		if (this.isPlanet) {
 			this.random('ring');
-			 if (this.size > 0.01 && MISC.rnd() < 0.5) {
+			 if (this.size > 0.01 && this.seed.rnd(2) === 0) {
 				return {
-					thickness: MISC.rnd(),
-					size: this.size * 2 + MISC.rnd() * this.size * 3,
+					thickness: this.seed.rnd(),
+					size: this.size * 2 + this.seed.rnd() * this.size * 3,
 					color: {
-						r: MISC.rnd(),
-						g: MISC.rnd(),
-						b: MISC.rnd(),
-						a: MISC.rnd() * 0.75 + 0.25
+						r: this.seed.rnd(),
+						g: this.seed.rnd(),
+						b: this.seed.rnd(),
+						a: this.seed.rnd(0.25, 1)
 					}
 				};
 			}
@@ -167,9 +179,10 @@ export default class Body {
 	getChildren() {
 		if (!this.children) {
 			const children = [];
+			const size = this.size;
 			this.random('moons');
-			const childrenLength = Math.floor(MISC.rnd() * this.size * 50);
-			if (!this.isMoon && childrenLength) {
+			const childrenLength = this.seed.rndInt(size * 50);
+			if (this.isPlanet && childrenLength) {
 				for (let id = 0; id < childrenLength; id++) {
 					const child = new Body({ star: this.star, id, parent: this });
 					// child.getChildren();
@@ -182,7 +195,7 @@ export default class Body {
 	}
 
 	get textShort() {
-		return this.name;
+		return `${this.name} ${this.children && this.children.length ? `(+${this.children.length})` : ''}`;
 	}
 
 	get text() {
@@ -205,13 +218,13 @@ export default class Body {
 	get rotationSpeedAroundParent() {
 		// const temp = this.parent.temperature.min;
 		this.random('rotation_speed_parent');
-		// return temp / ((MISC.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 10 * TD.scale);
-		return (1.0 / (this.distance * (MISC.rnd() * 50.0 + 150.0))) - this.parent.rotationSpeedAroundAxis;
+		// return temp / ((this.seed.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 10 * TD.scale);
+		return (1.0 / (this.distance * this.seed.rnd(150, 200))) - this.parent.rotationSpeedAroundAxis;
 	}
 
 	get rotationSpeedAroundAxis() {
 		this.random('rotation_speed');
-		return MISC.rnd() * 0.01;
+		return this.seed.rnd(0.01);
 	}
 
 	drawRotation() {
@@ -220,16 +233,14 @@ export default class Body {
 			this.object.rotation.set(0, 0, 0);
 
 			this.random('rotation_parent');
-			this.object.rotateY((getTime() * this.rotationSpeedAroundParent) + Math.PI * MISC.rnd() * 2);
+			this.object.rotateY((getTime() * this.rotationSpeedAroundParent) + this.seed.rnd(2 * Math.PI));
 			this.object.translateX(this.distance * 0.001 * TD.scale);
+
 			this.random('rotation');
-			// this.object.rotateY(getTime() * -this.parent.rotationSpeedAroundAxis + Math.PI * MISC.rnd() * 2);
-			// Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
 			this.object.rotateY(getTime() * this.rotationSpeedAroundParent);
-			this.object.rotateX(Math.PI * MISC.rnd() * 2);
-			this.object.rotateZ(Math.PI * MISC.rnd() * 2);
-			this.object.rotateY(Math.PI * MISC.rnd() * 2 + getTime() * this.rotationSpeedAroundAxis);
-			// this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
+			this.object.rotateX(this.seed.rnd(2 * Math.PI));
+			this.object.rotateZ(this.seed.rnd(2 * Math.PI));
+			this.object.rotateY(this.seed.rnd(2 * Math.PI) + getTime() * this.rotationSpeedAroundAxis);
 			if (this.children) {
 				for (const child of this.children) {
 					child.drawRotation();
@@ -289,12 +300,12 @@ export default class Body {
 
 	drawLow() {
 		// Set atmosphere color as emmisive
-		if (this.atmosphere && !this.isMoon) {
+		if (this.atmosphere && this.isPlanet) {
 			setColor(2, this.atmosphere.color.hue, this.atmosphere.color.saturation, this.atmosphere.color.lightness, 'hsl');
 		}
 
 		// Mix inner and outer color
-		if (this.outer && !this.isMoon) {
+		if (this.outer && this.isPlanet) {
 			const mix = getColorMix(
 				this.color.r, this.color.g, this.color.b, // mix inner and outer sphere color
 				this.outer.color.r, this.outer.color.g, this.outer.color.b,
@@ -306,7 +317,7 @@ export default class Body {
 		this.object = new THREE.Object3D();
 		this.object.name = 'Planet pivot';
 		this.parent.object.high.add(this.object);
-		this.object.rotation.y = Math.PI * MISC.rnd() * 2 || 0;
+		this.object.rotation.y = this.seed.rnd(2 * Math.PI) || 0;
 		this.object.translateX(this.distance * 0.001 * TD.scale || 0);
 
 		// Planet sphere

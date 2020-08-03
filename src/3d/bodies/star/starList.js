@@ -1,7 +1,8 @@
-import { TD, MISC } from '../../variables';
-import setColor from '../../misc/color';
-import Star from '../bodies/star/Star';
-import random from '../../misc/random';
+import { TD, MISC } from '../../../variables';
+import setColor from '../../../misc/color';
+import Star from './Star';
+import random from '../../../misc/random';
+import { deleteThree } from '../../init/init';
 
 function createStar({ x, y, z, index }) {
 	const star = new Star({ x, y, z, index });
@@ -11,6 +12,22 @@ function createStar({ x, y, z, index }) {
 	TD.stars[`${x}_${y}_${z}`].positions.push(pos.x, pos.y, pos.z);
 	TD.stars[`${x}_${y}_${z}`].colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
 	TD.stars[`${x}_${y}_${z}`].sizes.push(star.size * 0.5 * TD.scale);
+}
+
+function deleteStarsOutsideRange({ posx, posy, posz }) {
+	for (const s in TD.stars) {
+		if (TD.stars[s]) {
+			const coord = s.split('_').map(c => Number(c));
+			if (
+				coord[0] < posx - TD.stargrid.radius || coord[0] > posx + TD.stargrid.radius ||
+				coord[1] < posy - TD.stargrid.radius || coord[1] > posy + TD.stargrid.radius ||
+				coord[2] < posz - TD.stargrid.radius || coord[2] > posz + TD.stargrid.radius
+			) {
+				deleteThree(TD.stars[s].object);
+				delete TD.stars[s];
+			}
+		}
+	}
 }
 
 export default function starList({ posx, posy, posz }, callback) {
@@ -40,4 +57,5 @@ export default function starList({ posx, posy, posz }, callback) {
 			}
 		}
 	}
+	deleteStarsOutsideRange({ posx, posy, posz });
 }

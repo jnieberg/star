@@ -1,8 +1,8 @@
 import { TD, EVENT, MISC } from '../variables';
-import drawStars, { getStars, eventStars } from './bodies/star/stars';
-import { getPlanets, eventPlanets } from './bodies/planet/planets';
-import { eventLabel } from './label/label';
-import { getStar } from './bodies/star/stars';
+import drawStars, { eventStars } from './bodies/star/stars';
+import { eventLabel, labelHide } from './label/label';
+import raycastStars from './raycast/raycastStars';
+import raycastBody from './raycast/raycastPlanets';
 
 export function render() {
 	TD.renderer.render(TD.scene, TD.camera.object);
@@ -17,9 +17,11 @@ export function loop() {
 export function interval() {
 	setInterval(() => {
 		drawStars();
-		getStars();
-		getStar();
-		getPlanets();
+		let keepLabel = raycastStars();
+		keepLabel = raycastBody() || keepLabel;
+		if (!keepLabel && TD.label && TD.label.visible) {
+			labelHide();
+		}
 	}, 100);
 }
 

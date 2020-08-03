@@ -1,11 +1,8 @@
 import * as THREE from 'three';
 import vertShader from '../../../shaders/stars.vert';
 import { TD, MISC, SHADER } from '../../../variables';
-import raycastStars from '../../raycast/raycastStars';
 import { getCoordinateOffset, setCameraPosition, updateCoordinatesByOffset } from '../../init/camera';
-import starList from '../../tools/starList';
-import { labelHide } from '../../label/label';
-import raycastStar from '../../raycast/raycastStar';
+import starList from './starList';
 
 export function getRealCoordinate(x, y, z) {
 	return {
@@ -94,20 +91,6 @@ export default function drawStars() {
 			const off = setCameraPosition();
 			updateStars(off);
 		});
-	}
-}
-
-export function getStar() {
-	if (TD.star && TD.star.object) {
-		raycastStar(TD.star);
-	}
-}
-
-export function getStars() {
-	let result = false;
-	result = raycastStars();
-	if (!result) {
-		// labelHide('stars');
 	}
 }
 

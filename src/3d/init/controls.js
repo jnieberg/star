@@ -237,10 +237,10 @@ const FirstPersonControls = function(object) {
 			}
 
 			if (this.rollLeft) {
-				this.accRoll = this.acceleration ? this.accRoll + actualMoveSpeed * 0.05 : actualMoveSpeed;
+				this.accRoll = this.acceleration ? this.accRoll + 5 : actualMoveSpeed;
 			}
 			if (this.rollRight) {
-				this.accRoll = this.acceleration ? this.accRoll - actualMoveSpeed * 0.05 : -actualMoveSpeed;
+				this.accRoll = this.acceleration ? this.accRoll - 5 : -actualMoveSpeed;
 			}
 			this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
@@ -329,8 +329,6 @@ export function getKeys(e) {
 		EVENT.controls.accF = 0;
 		EVENT.controls.accL = 0;
 		EVENT.controls.accU = 0;
-		labelHide('star');
-		labelHide('planet');
 		for (const i of Object.keys(TD.stars)) {
 			deleteThree(TD.stars[i].object);
 		}

@@ -5,24 +5,21 @@ import { TD, MISC, STAR } from '../../../variables';
 import * as THREE from 'three';
 import { deleteThree } from '../../init/init';
 import setColor from '../../../misc/color';
-import random from '../../../misc/random';
+import { Random } from '../../../misc/random';
 import Atmosphere from '../planet/Atmosphere';
 import { toSize } from '../../../misc/size';
 import getTime from '../../../misc/time';
 
 export default class Star {
 	constructor({ x, y, z, index }) {
+		this.seed = new Random();
 		this.isStar = true;
 		this.index = index;
 		this.coordinate = { x, y, z };
-		this.position = this.getPosition();
-		this.universe = this.getUniverse();
 		this.id = {
 			text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
 			toString: () => `${this.coordinate.x},${this.coordinate.y},${this.coordinate.z},${index}`
 		};
-		this.size = this.getSize();
-		this.color = this.getColor();
 		this.object = {
 			low: undefined,
 			high: undefined
@@ -30,20 +27,25 @@ export default class Star {
 	}
 
 	random(seed) {
-		MISC.rnd = random(`star_${seed}_${this.id}`);
+		this.seed.set(`star_${seed}_${this.id}`);
+		return this.seed;
 	}
 
 	get name() {
-		this.random('name');
-		return new Word({
-			words: 3,
-			syllables: 3,
-			numberSuffixLength: 999
-		});
+		if (!this._name) {
+			this.random('name');
+			this._name = new Word(this.seed, {
+				syllablesMin: 3,
+				syllablesMax: 7,
+				numberSuffixLength: 999
+			});
+		}
+		return this._name;
 	}
 
-	getSize() {
-		const size = MISC.rnd() * 5 + 0.1;
+	get size() {
+		this.random('size');
+		const size = this.seed.rnd(0.1, 5);
 		const sizeString =
 		size < 1 ?
 			'Dwarf' :
@@ -60,11 +62,12 @@ export default class Star {
 		};
 	}
 
-	getPosition() {
+	get position() {
+		this.random('position');
 		return {
-			x: MISC.rnd() * TD.stargrid.size,
-			y: MISC.rnd() * TD.stargrid.size,
-			z: MISC.rnd() * TD.stargrid.size
+			x: this.seed.rnd(TD.stargrid.size),
+			y: this.seed.rnd(TD.stargrid.size),
+			z: this.seed.rnd(TD.stargrid.size)
 		};
 	}
 
@@ -72,7 +75,7 @@ export default class Star {
 		return TD.camera.coordinate;
 	}
 
-	getUniverse() {
+	get universe() {
 		return {
 			x: (this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size) * TD.scale,
 			y: (this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size) * TD.scale,
@@ -80,9 +83,10 @@ export default class Star {
 		};
 	}
 
-	getColor() {
-		const hue = MISC.rnd();
-		const brightness = MISC.rnd() * 0.9 + 0.1;
+	get color() {
+		this.random('color');
+		const hue = this.seed.rnd();
+		const brightness = this.seed.rnd(0.1, 1.0);
 		let brightString = '';
 		let hueString = 'Red';
 		for (const col in STAR.color.brightness) {
@@ -126,13 +130,13 @@ export default class Star {
 					let temperature = 0;
 					switch (this.color.brightness.text) {
 					case 'Bright':
-						temperature = Math.floor(MISC.rnd() * (temp.max - tempBright)) + tempBright;
+						temperature = this.seed.rndInt(tempBright, temp.max);
 					case 'Dark':
-						temperature = Math.floor(MISC.rnd() * (tempDark - temp.min)) + temp.min;
+						temperature = this.seed.rndInt(temp.min, tempDark);
 					case '':
-						temperature = Math.floor(MISC.rnd() * (tempBright - tempDark)) + tempDark;
+						temperature = this.seed.rndInt(tempDark, tempBright);
 					default:
-						temperature = Math.floor(MISC.rnd() * (temp.max - temp.min)) + temp.min;
+						temperature = this.seed.rndInt(temp.min, temp.max);
 					}
 					return {
 						min: temperature,
@@ -146,8 +150,9 @@ export default class Star {
 	getChildren() {
 		if (!this.children) {
 			const children = [];
+			const size = this.size;
 			this.random('planets');
-			const childrenLength = Math.floor(MISC.rnd() * this.size * 4); // number of planets depends on star size
+			const childrenLength = this.seed.rndInt(size * 4); // number of planets depends on star size
 			if (childrenLength > 0) {
 				for (let id = 0; id < childrenLength; id++) {
 					const child = new Body({ star: this, id, parent: this });
@@ -178,13 +183,13 @@ export default class Star {
 	get rotationSpeedAroundAxis() {
 		const temperature = this.temperature.min;
 		this.random('rotation_speed');
-		return MISC.rnd() * temperature * 0.00000005 + 0.00000005;
+		return this.seed.rnd(temperature * 0.0000002, temperature * 0.0000004);
 	}
 
 	drawRotation() {
-		if (this.object) {
+		if (this.object && this.object.rotation) {
 			this.random('rotation');
-			this.object.rotation.set(Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2, Math.PI * MISC.rnd() * 2);
+			this.object.rotation.set(this.seed.rnd(2 * Math.PI), this.seed.rnd(2 * Math.PI), this.seed.rnd(2 * Math.PI));
 			this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
 			if (this.children) {
 				for (const child of this.children) {
@@ -213,14 +218,11 @@ export default class Star {
 		const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
 		setColor(1, this.color.hue, 1.0, this.color.brightness, 'hsl');
 		setColor(2, hue2, 1.0, this.color.brightness, 'hsl');
-		setColor(3, this.color.hue, 0.25, this.color.brightness, 'hsl');
+		setColor(3, this.color.hue, 0.2, this.color.brightness, 'hsl');
 		this.random('rotation');
 
 		// Star pivot
 		this.object = new THREE.Object3D();
-		// this.object.rotation.x = Math.PI * MISC.rnd() * 2;
-		// this.object.rotation.y = Math.PI * MISC.rnd() * 2;
-		// this.object.rotation.z = Math.PI * MISC.rnd() * 2;
 
 		const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
 		const material = new THREE.MeshBasicMaterial({
@@ -230,27 +232,10 @@ export default class Star {
 			alphaTest: 0,
 		});
 		this.object.low = new THREE.Mesh(geometry, material);
-		// this.object.rotation.x = Math.PI * MISC.rnd() * 2;
-		// this.object.rotation.y = Math.PI * MISC.rnd() * 2;
-		// this.object.rotation.z = Math.PI * MISC.rnd() * 2;
-		// this.object.renderOrder = 1;
+		this.object.low.name = 'Star low';
 		this.object.low.castShadow = false;
 		this.object.low.receiveShadow = false;
 		this.object.add(this.object.low);
-
-		// // Star frontside
-		// const material2 = new THREE.MeshBasicMaterial({
-		// 	color: MISC.colorHelper2,
-		// 	blending: THREE.AdditiveBlending,
-		// 	side: THREE.FrontSide,
-		// 	transparent: true,
-		// 	alphaTest: 0.5,
-		// });
-		// const starInner = new THREE.Mesh(geometry, material2);
-		// // starInner.renderOrder = 1;
-		// starInner.castShadow = false;
-		// starInner.receiveShadow = false;
-		// this.object.add(starInner);
 
 		// Star spots
 		const materialSpots = new THREE.MeshBasicMaterial({
@@ -262,26 +247,12 @@ export default class Star {
 			alphaTest: 0,
 		});
 		this.object.high = new THREE.Mesh(geometry, materialSpots);
+		this.object.high.name = 'Star high';
 		this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
 		this.object.high.castShadow = false;
 		this.object.high.receiveShadow = false;
 		this.object.add(this.object.high);
 
-		// Star corona
-		// const flareMaterial = new THREE.SpriteMaterial({
-		// 	map: TD.texture.star.large,
-		// 	color: MISC.colorHelper2,
-		// 	opacity: 1,
-		// 	blending: THREE.AdditiveBlending,
-		// 	alphaTest: 0,
-		// 	depthTest: false
-		// });
-		// const starFlare = new THREE.Sprite(flareMaterial);
-		// starFlare.scale.set(size, size, size);
-		// starFlare.castShadow = false;
-		// starFlare.receiveShadow = false;
-		// this.object.add(starFlare);
-		// eslint-disable-next-line no-unused-vars
 		const _foo = new Atmosphere(this.object.high, {
 			size: size * 1.01,
 			thickness: size * 1.5,
@@ -293,35 +264,20 @@ export default class Star {
 
 		// Star point light
 		this.light = new THREE.PointLight(MISC.colorHelper3);
-		// pointLight.castShadow = true;
-		// this.object.add(pointLight);
-
-		// Star spot light
-		// this.light = new THREE.DirectionalLight(MISC.colorHelper3);
 		this.light.intensity = 5;
 		this.light.power = 50;
 		this.light.decay = 0;
 		this.light.distance = TD.camera.far * 0.0001 * TD.scale;
-		// this.light.angle = Math.PI / 4;
-		// this.light.penumbra = 0.1;
-		// const grid = 0.005;
 		this.light.shadow.bias = -TD.camera.near * 0.006 * TD.scale;
 		this.light.shadow.radius = 3;
 		this.light.shadow.normalBias = 0;
 		this.light.shadow.mapSize.width = 1024 * 2;
 		this.light.shadow.mapSize.height = 1024 * 2;
-		// this.light.shadow.camera.fov = 180;
-		// this.light.shadow.camera.aspect = 1;
-		// this.light.shadow.camera.left = -grid * TD.scale;
-		// this.light.shadow.camera.right = grid * TD.scale;
-		// this.light.shadow.camera.top = grid * TD.scale;
-		// this.light.shadow.camera.bottom = -grid * TD.scale;
 		this.light.shadow.camera.near = TD.camera.near * TD.scale;
 		this.light.shadow.camera.far = TD.camera.far * 0.001 * TD.scale;
 		this.light.castShadow = true;
 		this.light.visible = true;
 
-		// this.object.add(this.light.target);
 		this.object.high.add(this.light);
 
 		// Set star position
@@ -337,7 +293,7 @@ export default class Star {
 
 		// Add star to scene
 		TD.scene.add(this.object);
-		this.object.high.this = this;
+		this.object.low.this = this;
 		console.log(this);
 	}
 }

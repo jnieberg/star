@@ -1,5 +1,3 @@
-import { MISC } from '../variables';
-
 const NAME_LETTERS = {
 	vowels: [
 		'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
@@ -7,7 +5,7 @@ const NAME_LETTERS = {
 		'i', 'i', 'i', 'i', 'i',
 		'o', 'o', 'o', 'o', 'o', 'o',
 		'u', 'u', 'u', 'u',
-		'au', 'ea', 'ee', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'ui'
+		'au', 'ea', 'ee', 'ei', 'eia', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'oo', 'ou', 'ua', 'ue', 'ui'
 	],
 	vowelsE: [
 		'ay', 'ey', 'uy', 'y'
@@ -26,7 +24,7 @@ const NAME_LETTERS = {
 		's', 's', 's', 's', 's', 's',
 		't', 't', 't', 't', 't',
 		'x',
-		'sh', 'st', 'th'
+		'sh', 'sp', 'st', 'th'
 	],
 	consSM: [
 		'b', 'b', 'b', 'b',
@@ -35,11 +33,11 @@ const NAME_LETTERS = {
 		'v', 'v', 'v',
 		'w', 'w', 'w',
 		'z',
-		'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'kl', 'kn', 'kr', 'pl', 'pr',
-		'qu', 'sl', 'sn', 'sm', 'spr', 'str', 'thr', 'tr', 'vl', 'vr', 'wr'
+		'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'kl', 'kn', 'kr', 'kw', 'pl', 'pr',
+		'qu', 'sc', 'sk', 'sl', 'sn', 'sm', 'spr', 'str', 'sw', 'thr', 'tr', 'tw', 'vl', 'vr', 'wr', 'zw'
 	],
 	consM: [
-		'bb', 'dd', 'ff', 'gg', 'kk', 'lp', 'lv', 'md', 'mm', 'nn', 'np', 'pp', 'pt', 'rr', 'rv', 'tt'
+		'bb', 'bbl', 'dd', 'ff', 'gg', 'kk', 'lp', 'lv', 'md', 'mm', 'nn', 'np', 'pp', 'ppl', 'pt', 'rr', 'rv', 'sb', 'sr', 'tt'
 	],
 	consME: [
 		'ch', 'ck', 'ct', 'gh', 'gt', 'lf', 'll', 'lk', 'ls', 'lt', 'mb', 'mp', 'mt', 'nd', 'nc', 'ng', 'nk', 'nt',
@@ -47,38 +45,48 @@ const NAME_LETTERS = {
 	]
 };
 
-function getRandomLetter(letters) {
-	return letters[Math.floor(MISC.rnd() * letters.length)];
-}
-
 export default class Word {
-	constructor({ words = 2, syllables = 2, numberSuffixLength = 0 } = {}) {
-		const wordsTotal = Math.floor(MISC.rnd() * words) + 1;
+	constructor(seed, { syllablesMin = 2, syllablesMax = 5, numberSuffixLength = 0 } = {}) {
+		this.seed = seed;
 		const consS = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM);
 		const consM = NAME_LETTERS.cons.concat(NAME_LETTERS.consSM, NAME_LETTERS.consM);
 		const consE = NAME_LETTERS.cons.concat(NAME_LETTERS.consME);
 		const vowlS = NAME_LETTERS.vowels;
 		const vowlM = NAME_LETTERS.vowels;
 		const vowlE = NAME_LETTERS.vowels.concat(NAME_LETTERS.vowelsE);
-		let wordList = [];
-		for (let w = 0; w < wordsTotal; w++) {
-			const consAtEnd = Math.floor(MISC.rnd() * 2) === 0;
-			const wordLength = Math.floor(MISC.rnd() * syllables) + 1;
-			let word = '';
-			for (let l = 0; l < wordLength; l++) {
-				word = word + (Math.floor(MISC.rnd() * 2) === 0 && l === 0 && wordLength > 2 ? '' : getRandomLetter(l === 0 ? consS : consM));
-				word = word + getRandomLetter(l === 0 ? vowlS : l === wordLength - 1 && !consAtEnd ? vowlE : vowlM, MISC.rnd);
+		const syllableLength = this.seed.rndInt(syllablesMin, syllablesMax);
+		let syllables = [];
+		let wordIndex = 0;
+		let consAtStart = this.seed.rndInt(3) > 0;
+		let consAtEnd = !consAtStart || this.seed.rndInt(3) > 0;
+		for (let s = 0; s < syllableLength; s++) {
+			const wordEnd = this.seed.rndInt(3) === 0 || s === syllableLength - 1 || wordIndex >= 3;
+			const consonant = (consAtStart || wordIndex > 0) ? this.getRandomLetter(wordIndex === 0 ? consS : consM) : '';
+			const syllable = this.getRandomLetter((wordIndex === 0) ? vowlS : (wordEnd && !consAtEnd) ? vowlE : vowlM);
+			syllables.push(consonant + syllable);
+			wordIndex++;
+			if (wordEnd) {
+				if (consAtEnd) {
+					syllables.push(this.getRandomLetter(consE));
+				}
+				wordIndex = 0;
+				consAtStart = this.seed.rndInt(3) > 0;
+				consAtEnd = !consAtStart || this.seed.rndInt(3) > 0;
+				syllables.push(' ');
 			}
-			word = word + (consAtEnd ? getRandomLetter(consE, MISC.rnd) : '');
-			wordList.push(word);
 		}
-		if (Math.floor(MISC.rnd() * 5) === 0 && numberSuffixLength > 0) {
-			wordList.push(Math.floor(MISC.rnd() * numberSuffixLength) + 1);
+		if (this.seed.rndInt(5) === 0 && numberSuffixLength > 0) {
+			syllables.push(' ');
+			syllables.push(this.seed.rndInt(1, numberSuffixLength));
 		}
-		wordList = wordList.map(word => `${word}`.replace(/^./, a => a.toUpperCase()));
+		syllables = syllables.join('').split(' ').map(word => `${word}`.replace(/^./, a => a.toUpperCase())).filter(a => a);
 		return {
-			toString: () => wordList.join(' '),
-			list: wordList
+			toString: () => syllables.join(' '),
+			list: syllables
 		};
+	}
+
+	getRandomLetter(letters) {
+		return letters[this.seed.rndInt(letters.length)];
 	}
 }

@@ -12,7 +12,7 @@ export const TD = {
 	camera: {
 		object: undefined,
 		near: 0.000001,
-		fade: 150,
+		fade: 190,
 		far: 200,
 		coordinate: {
 			x: undefined,
@@ -83,7 +83,7 @@ export const STAR = {
 			'White': 1,
 			'Bright': 0.9,
 			'': 0.7,
-			'Dark': 0.3
+			'Dark': 0.4
 		}
 	},
 	temperature: {

@@ -1,57 +1,52 @@
 import { EVENT, TD } from '../../variables';
-import setLabel, { labelHide, labelShow } from '../label/label';
+import setLabel, { labelShow } from '../label/label';
 import distanceToCamera from '../tools/distanceToCamera';
 import raycastFound from './raycastFound';
+import * as THREE from 'three';
 
 function raycastStarsEvents(intersect) {
+	const distanceFar = 10;
 	const distanceNear = 0.1;
 	const tag = intersect.object.name;
 	const id = intersect.index;
+	let star = undefined;
 	if (TD.stars[tag] && TD.stars[tag].this && id) {
-		const star = TD.stars[tag].this[id];
-		if (star && (!TD.star || TD.star.id !== star.id)) {
-			if (TD.star && TD.star.id !== star.id) {
-				EVENT.controls.speedFactorPlanet = 1.0;
-			}
-			TD.star = star;
-			TD.star.getChildren();
-			const starInfo = TD.star.text;
-			// setLabel('stars', starInfo);
-			setLabel('star', starInfo);
-			// labelHide('star');
-			TD.star.draw();
-		}
+		star = TD.stars[tag].this[id];
 	}
-	if (intersect.distance <= distanceNear * TD.scale) {
-		// labelHide('stars');
+	if (star) {
+		if (intersect.distance / TD.scale < distanceFar) {
+			if (!TD.star || TD.star.id !== star.id) {
+				TD.star = star;
+				TD.star.getChildren();
+				TD.star.draw();
+				const starInfo = TD.star.text;
+				setLabel(starInfo);
+			}
+		}
+		if (intersect.distance > distanceNear * TD.scale) {
+			labelShow();
+			return true;
+		}
 		return false;
 	}
-	labelShow('stars');
-	return true;
 }
 
 export default function raycastStars() {
-	let result = false;
-	// if (stars) {
 	const distance = 10;
-	const obj = Object.values(TD.stars).map(star => star.object);
-	const intersect = raycastFound(obj, distance, 0.1);
-	if (intersect && intersect.object && intersect.object.name) {
-		result = raycastStarsEvents(intersect); // , stars.this
-	} else if (TD.star && TD.label && TD.label.visible) {
-		result = false;
-		labelHide('stars');
-	}
-	if (TD.star) {
-		const distanceCam = distanceToCamera(TD.star.position.x, TD.star.position.y, TD.star.position.z);
+	if (TD.star && TD.star.object && TD.star.object.matrixWorld) {
+		const distanceCam = distanceToCamera(TD.star.universe.x, TD.star.universe.y, TD.star.universe.z);
+		EVENT.controls.speedFactorStar = distanceCam / (distance * 2);
 		if (distanceCam >= distance) {
 			TD.star = undefined;
 			TD.planet = undefined;
 			EVENT.controls.speedFactorStar = 1.0;
-		} else {
-			EVENT.controls.speedFactorStar = distanceCam / (distance * 2);
+			return false;
 		}
 	}
-	// }
-	return result;
+	const obj = Object.values(TD.stars).map(star => star.object);
+	const intersect = raycastFound(obj, distance, 0.1);
+	if (intersect && intersect.object && intersect.object.name) {
+		return raycastStarsEvents(intersect);
+	}
+	return false;
 }
