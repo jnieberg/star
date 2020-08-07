@@ -1,26 +1,28 @@
 import { EVENT, TD } from '../../variables';
 import setLabel, { labelShow } from '../label/label';
-import distanceToCamera from '../tools/distanceToCamera';
-import raycastFound from './raycastFound';
-import * as THREE from 'three';
+import { distanceToCamera } from '../init/camera';
+import raycastFound from './raycast-found';
+import { deleteThree } from '../init/init';
 
 function raycastStarsEvents(intersect) {
 	const distanceFar = 10;
 	const distanceNear = 0.1;
 	const tag = intersect.object.name;
 	const id = intersect.index;
-	let star = undefined;
+	let system = undefined;
 	if (TD.stars[tag] && TD.stars[tag].this && id) {
-		star = TD.stars[tag].this[id];
+		system = TD.stars[tag].this[id].system;
 	}
-	if (star) {
+	if (system) {
 		if (intersect.distance / TD.scale < distanceFar) {
-			if (!TD.star || TD.star.id !== star.id) {
-				TD.star = star;
-				TD.star.getChildren();
-				TD.star.draw();
-				const starInfo = TD.star.text;
+			// system = system.stars[0];
+			if (!TD.system || TD.system.id !== system.id) {
+				deleteThree(TD.system && TD.system.object);
+				TD.system = system;
+				TD.system.draw();
+				const starInfo = TD.system.text;
 				setLabel(starInfo);
+				console.log(TD.system);
 			}
 		}
 		if (intersect.distance > distanceNear * TD.scale) {
@@ -33,12 +35,14 @@ function raycastStarsEvents(intersect) {
 
 export default function raycastStars() {
 	const distance = 10;
-	if (TD.star && TD.star.object && TD.star.object.matrixWorld) {
-		const distanceCam = distanceToCamera(TD.star.universe.x, TD.star.universe.y, TD.star.universe.z);
+	if (TD.system && TD.system.object) {
+		const distanceCam = distanceToCamera(TD.system.universe.x, TD.system.universe.y, TD.system.universe.z);
 		EVENT.controls.speedFactorStar = distanceCam / (distance * 2);
 		if (distanceCam >= distance) {
-			TD.star = undefined;
+			TD.system.remove();
+			TD.system = undefined;
 			TD.planet = undefined;
+			TD.moon = undefined;
 			EVENT.controls.speedFactorStar = 1.0;
 			return false;
 		}

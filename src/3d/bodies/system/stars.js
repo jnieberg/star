@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import vertShader from '../../../shaders/stars.vert';
 import { TD, MISC, SHADER } from '../../../variables';
 import { getCoordinateOffset, setCameraPosition, updateCoordinatesByOffset } from '../../init/camera';
-import starList from './starList';
+import starList from './star-list';
 
 export function getRealCoordinate(x, y, z) {
 	return {
@@ -95,7 +95,31 @@ export default function drawStars() {
 }
 
 export function eventStars() {
-	if (TD.star) {
-		TD.star.drawRotation();
+	if (TD.system) {
+		// const cameraPositionOld = undefined;
+		// const cameraRotationOld = undefined;
+		// if (TD.planet) {
+		// 	const position1 = TD.planet.object.getWorldPosition(); // new THREE.Vector3();
+		// 	console.log('planet', position1);
+		// 	console.log('camera old', TD.camera.object.position);
+		// 	cameraPositionOld = new THREE.Vector3(
+		// 		position1.x - TD.camera.object.position.x,
+		// 		position1.y - TD.camera.object.position.y,
+		// 		position1.z - TD.camera.object.position.z
+		// 	);
+		// 	cameraRotationOld = TD.camera.object.rotation;
+		// }
+		TD.system.drawRotation();
+		// if (TD.planet) {
+		// 	const position2 = TD.planet.object.getWorldPosition();
+		// 	TD.camera.object.position.set(position2.x, position2.y, position2.z);
+		// 	// TD.camera.object.rotation.set(0, 0, 0);
+		// 	TD.camera.object.translateX(cameraPositionOld.x);
+		// 	TD.camera.object.translateY(cameraPositionOld.y);
+		// 	TD.camera.object.translateZ(cameraPositionOld.z);
+		// 	// TD.camera.object.rotation.set(cameraRotationOld._x, cameraRotationOld._y, cameraRotationOld._z);
+		// 	console.log(cameraRotationOld);
+		// 	console.log('camera', cameraPositionOld, TD.camera.object.position);
+		// }
 	}
 }

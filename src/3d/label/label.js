@@ -40,7 +40,7 @@ export default function setLabel(text) {
 					TD.label = document.createElement('div');
 					TD.label.id = 'label';
 					TD.label.classList.add('label');
-					document.querySelector('#root').appendChild(TD.label);
+					document.body.appendChild(TD.label);
 				}
 				TD.label.text = text;
 				TD.label.innerHTML = String(text);

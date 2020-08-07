@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import CloudMap from './CloudMap.js';
 import { Color } from 'three';
-import random from '../../../../misc/random';
+import Random from '../../../../misc/Random';
 
 class Clouds {
 	constructor({ rnd, size, resolution, show, color }) {
@@ -109,7 +109,8 @@ class Clouds {
 	}
 
 	initSeed() {
-		window.rng = random(this.seedString);
+		const seed = new Random().set(this.seedString);
+		window.seed = seed;
 	}
 
 	updateMaterial() {
@@ -136,7 +137,7 @@ class Clouds {
 
 	randRange(low, high) {
 		const range = high - low;
-		const n = window.rng() * range;
+		const n = window.seed.rnd() * range;
 		return low + n;
 	}
 

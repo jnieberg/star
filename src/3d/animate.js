@@ -1,11 +1,12 @@
 import { TD, EVENT, MISC } from '../variables';
-import drawStars, { eventStars } from './bodies/star/stars';
+import drawStars, { eventStars } from './bodies/system/stars';
 import { eventLabel, labelHide } from './label/label';
-import raycastStars from './raycast/raycastStars';
-import raycastBody from './raycast/raycastPlanets';
+import raycastStars from './raycast/raycast-stars';
+import raycastBody from './raycast/raycast-planets';
 
 export function render() {
 	TD.renderer.render(TD.scene, TD.camera.object);
+	MISC.debug.frames++;
 }
 
 export function loop() {
@@ -22,11 +23,16 @@ export function interval() {
 		if (!keepLabel && TD.label && TD.label.visible) {
 			labelHide();
 		}
-	}, 100);
+		MISC.debug.update();
+		if (!MISC.started) {
+			MISC.timeStart = Date.now() - Number(localStorage.getItem('time'));
+			MISC.started = true;
+		}
+	}, MISC.interval);
 }
 
 export default function animate() {
-	loop();
 	MISC.animation = requestAnimationFrame(animate);
+	loop();
 	render();
 };

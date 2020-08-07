@@ -6,12 +6,12 @@ import NormalMap from './NormalMap.js';
 import RoughnessMap from './RoughnessMap.js';
 import Clouds from './Clouds.js';
 import { MISC } from '../../../../variables';
-import random from '../../../../misc/random';
+import Random from '../../../../misc/Random';
 import wait from '../../../tools/wait';
 
 class BodySurface {
 	constructor({ rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor }, callback) {
-		MISC.interrupt = true;
+		MISC.interrupt = false;// true
 		this.seedString = rnd || 'lorem';
 		this.initSeed();
 		this.timerBank = this.seedString;
@@ -57,7 +57,8 @@ class BodySurface {
 	}
 
 	initSeed() {
-		window.rng = random(this.seedString);
+		const seed = new Random().set(this.seedString);
+		window.seed = seed;
 	}
 
 	createScene() {
@@ -238,7 +239,7 @@ class BodySurface {
 
 	randRange(low, high) {
 		const range = high - low;
-		const n = window.rng() * range;
+		const n = window.seed.rnd() * range;
 		return low + n;
 	}
 

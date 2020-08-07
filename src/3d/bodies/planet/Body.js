@@ -6,18 +6,19 @@ import { deleteThree } from '../../init/init';
 import getTime from '../../../misc/time';
 import BodySurface from './views/BodySurface';
 import Atmosphere from './Atmosphere';
-import { Random } from '../../../misc/random';
+import Random from '../../../misc/Random';
 import { toSize } from '../../../misc/size';
 import Word from '../../../misc/Word';
 
 export default class Body {
-	constructor({ star, id, parent }) {
+	constructor({ system, index, parent }) {
 		this.seed = new Random();
-		this.star = star;
-		this.id = id;
+		this.system = system;
+		this.index = index;
 		this.parent = parent;
 		this.isMoon = parent instanceof Body;
 		this.isPlanet = !this.isMoon;
+		this.type = this.isMoon ? 'moon' : 'planet';
 		this.object = {
 			low: undefined,
 			high: undefined
@@ -29,7 +30,7 @@ export default class Body {
 	}
 
 	random(seed) {
-		this.seed.set(`body_${seed}_${this.star.id}_${this.parentId}_${this.id}`);
+		this.seed.set(`body_${seed}_${this.system.id}_${this.grandParentId}_${this.parentId}_${this.index}`);
 		return this.seed;
 	}
 
@@ -53,32 +54,41 @@ export default class Body {
 	}
 
 	get parentId() {
-		return this.parent ? this.parent.id : -1;
+		return this.parent ? this.parent.index : -1;
+	}
+
+	get grandParentId() {
+		return this.parent && this.parent.parent ? this.parent.parent.index : -1;
+	}
+
+	get star() {
+		return this.parent.isStar ? this.parent : this.parent.parent && this.parent.parent.isStar ? this.parent.parent : null;
+	}
+
+	get distanceStar() {
+		return this.isPlanet ? this.distance : this.parent.isPlanet ? this.parent.distance : 0;
 	}
 
 	get distance() {
 		if (!this._distance) {
-			let size = this.parent.size * 0.2;
-			let scale = 0.5;
-			const id = this.id + 1;
-			if (this.isMoon) {
-				size = this.parent.size;
-				scale = 0.05;
-			}
+			const size = this.parent.size * 2;
+			const scale = this.isPlanet ? 2 : 0.2;
+			const id = this.index + 1;
 			this.random('distance');
-			this._distance = size + ((id * id * this.seed.rnd(1, 1.25) + 3 + this.seed.rnd(0.5))) * scale;
+			this._distance = size + (id * id * 0.3 + (this.seed.rnd(1) - 0.5)) * scale;
 		}
 		return this._distance;
 	}
 
 	get temperature() {
 		if (!this._temperature) {
-			const starTemp = this.parent.temperature.min;
-			const distance = this.distance;
+			const starTemp = this.star.temperature.min;
+			const distanceToStar = this.distanceStar;
+			const atmosphere = (this.atmosphere.color.a * 0.8) + 0.2;
 			this.random('temperature');
 			let temp = [
-				Math.floor(starTemp / this.seed.rnd(distance * 1.5, distance * 3.5)),
-				Math.floor(starTemp / this.seed.rnd(distance * 1.5, distance * 3.5))
+				Math.floor(atmosphere * starTemp / this.seed.rnd(distanceToStar, distanceToStar * 1.5)),
+				Math.floor(starTemp / (1.0 + atmosphere * this.seed.rnd(distanceToStar, distanceToStar * 1.5)))
 			];
 			temp = temp.sort((a, b) => (a > b ? 1 : -1));
 			this._temperature = {
@@ -161,7 +171,7 @@ export default class Body {
 	get rings() {
 		if (this.isPlanet) {
 			this.random('ring');
-			 if (this.size > 0.01 && this.seed.rnd(2) === 0) {
+			if (this.size > 0.02 && this.seed.rndInt(2) === 0) {
 				return {
 					thickness: this.seed.rnd(),
 					size: this.size * 2 + this.seed.rnd() * this.size * 3,
@@ -174,36 +184,37 @@ export default class Body {
 				};
 			}
 		}
+		return false;
 	}
 
-	getChildren() {
-		if (!this.children) {
+	get children() {
+		if (!this._children) {
 			const children = [];
 			const size = this.size;
 			this.random('moons');
 			const childrenLength = this.seed.rndInt(size * 50);
 			if (this.isPlanet && childrenLength) {
-				for (let id = 0; id < childrenLength; id++) {
-					const child = new Body({ star: this.star, id, parent: this });
-					// child.getChildren();
+				for (let index = 0; index < childrenLength; index++) {
+					const child = new Body({ system: this.system, index, parent: this });
+					const _foo = child.children;
 					children.push(child);
 				}
 			}
-			this.children = children;
+			this._children = children;
 		}
-		return this.children;
+		return this._children;
 	}
 
 	get textShort() {
-		return `${this.name} ${this.children && this.children.length ? `(+${this.children.length})` : ''}`;
+		return `${this.name}${this.children && this.children.length ? `<span>${this.children.length}</span>` : ''}`;
 	}
 
 	get text() {
 		return `
 			<div class="label--h1">${this.name}</div>
-			<div class="label--h2">${this.isMoon ? 'Moon' : 'Planet'} #${this.id + 1} of ${this.parent.name}</div>
-			<div>Size: ${toSize(this.size)}</div>
-			<div>Temperature: ${toCelcius(this.temperature.min)} to ${toCelcius(this.temperature.max)}</div>
+			<div class="label--h2">${this.isMoon ? 'Moon' : 'Planet'} #${this.index + 1} of ${this.parent.name}</div>
+			<div>Size:<span>${toSize(this.size)}</span></div>
+			<div>Temperature:<span>${toCelcius(this.temperature.min)} to ${toCelcius(this.temperature.max)}</span></div>
 			<div>${this.atmosphere.text} atmosphere</div>
 			${this.rings ? '<div>Has rings</div>' : ''}
 			${this.clouds ? '<div>Cloudy</div>' : ''}
@@ -216,31 +227,32 @@ export default class Body {
 	}
 
 	get rotationSpeedAroundParent() {
-		// const temp = this.parent.temperature.min;
 		this.random('rotation_speed_parent');
-		// return temp / ((this.seed.rnd() * (this.distance * 2) + (this.distance * 1.5)) * 10 * TD.scale);
-		return (1.0 / (this.distance * this.seed.rnd(150, 200))) - this.parent.rotationSpeedAroundAxis;
+		const speed = this.isMoon ? this.seed.rnd(10.0, 15.0) : this.seed.rnd(0.000001, 0.0000015);
+		return this.parent.rotationSpeedAroundAxis / (Math.pow(this.distance, 5) * speed + 1.0) - this.parent.rotationSpeedAroundAxis;
 	}
 
 	get rotationSpeedAroundAxis() {
 		this.random('rotation_speed');
-		return this.seed.rnd(0.01);
+		return this.seed.rnd(0.01, 0.20);
 	}
 
 	drawRotation() {
 		if (this.object && this.object.position) {
+			const rotateY = getTime() * this.rotationSpeedAroundParent;
 			this.object.position.set(0, 0, 0);
 			this.object.rotation.set(0, 0, 0);
 
 			this.random('rotation_parent');
-			this.object.rotateY((getTime() * this.rotationSpeedAroundParent) + this.seed.rnd(2 * Math.PI));
-			this.object.translateX(this.distance * 0.001 * TD.scale);
+			this.object.rotateY(rotateY + this.seed.rnd(2 * Math.PI));
+			this.object.translateX(this.distance * 0.0001 * TD.scale);
 
+			this.object.rotation.set(0, 0, 0);
 			this.random('rotation');
-			this.object.rotateY(getTime() * this.rotationSpeedAroundParent);
-			this.object.rotateX(this.seed.rnd(2 * Math.PI));
+			this.object.rotateY(getTime() * -this.parent.rotationSpeedAroundAxis);
 			this.object.rotateZ(this.seed.rnd(2 * Math.PI));
-			this.object.rotateY(this.seed.rnd(2 * Math.PI) + getTime() * this.rotationSpeedAroundAxis);
+			this.object.rotateX(this.seed.rnd(2 * Math.PI));
+			this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
 			if (this.children) {
 				for (const child of this.children) {
 					child.drawRotation();
@@ -254,8 +266,8 @@ export default class Body {
 			const resolution = this.surfaceRenders.resolutions[0];
 			setColor(1, this.atmosphere.color.hue, this.atmosphere.color.saturation, this.atmosphere.color.lightness + 0.25, 'hsl');
 			const bodySurface = new BodySurface({
-				rnd: `planet_${this.star.id}_${this.id}_${this.parentId}`,
-				size: this.size * 0.001 * TD.scale,
+				rnd: `planet_${this.system.id}_${this.index}_${this.parentId}`,
+				size: this.size * 0.0001 * TD.scale,
 				resolution,
 				detail: 2 - this.surfaceRenders.resolutions.length,
 				biome: this.surfaceRenders.last && this.surfaceRenders.last.biome,
@@ -298,6 +310,14 @@ export default class Body {
 		}
 	}
 
+	hideChildren() {
+		for (const child of this.children) {
+			if (child.object && child.object.high) {
+				child.hide();
+			}
+		}
+	}
+
 	drawLow() {
 		// Set atmosphere color as emmisive
 		if (this.atmosphere && this.isPlanet) {
@@ -318,18 +338,18 @@ export default class Body {
 		this.object.name = 'Planet pivot';
 		this.parent.object.high.add(this.object);
 		this.object.rotation.y = this.seed.rnd(2 * Math.PI) || 0;
-		this.object.translateX(this.distance * 0.001 * TD.scale || 0);
+		this.object.translateX(this.distance * 0.0001 * TD.scale || 0);
 
 		// Planet sphere
 		this.random('star_rotation');
 		const bodySurface = new BodySurface({
-			rnd: `planet_${this.star.id}_${this.id}_${this.parentId}`,
-			size: (this.size * 0.00099) * TD.scale,
-			resolution: 32,
+			rnd: `planet_${this.system.id}_${this.index}_${this.parentId}`,
+			size: (this.size * 0.000099) * TD.scale,
+			resolution: 16,
 			detail: 0,
 		});
 		this.object.low = bodySurface.ground;
-		this.object.low.name = 'Planet low';
+		this.object.low.name = this.isPlanet ? 'Planet low' : 'Moon low';
 		this.object.add(this.object.low);
 
 		// Planet trajectory
@@ -343,9 +363,9 @@ export default class Body {
 			depthTest: false
 		});
 		const trajectoryMesh = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
-		trajectoryMesh.name = 'Planet trajectory';
+		trajectoryMesh.name = this.isPlanet ? 'Planet trajectory' : 'Moon trajectory';
 		trajectoryMesh.rotation.x = Math.PI * 0.5;
-		trajectoryMesh.scale.set(this.distance * 0.001 * TD.scale, this.distance * 0.001 * TD.scale, this.distance * 0.001 * TD.scale);
+		trajectoryMesh.scale.set(this.distance * 0.0001 * TD.scale, this.distance * 0.0001 * TD.scale, this.distance * 0.0001 * TD.scale);
 		trajectoryMesh.castShadow = false;
 		trajectoryMesh.receiveShadow = false;
 		trajectoryMesh.renderOrder = -1;
@@ -354,7 +374,7 @@ export default class Body {
 		// Planet rings
 		if (this.rings) {
 			setColor(1, this.rings.color.r, this.rings.color.g, this.rings.color.b);
-			const ringGeometry = new THREE.RingBufferGeometry(this.rings.size * 0.0006 * TD.scale, this.rings.size * ((this.rings.thickness * 0.0004) + 0.0006) * TD.scale, 64);
+			const ringGeometry = new THREE.RingBufferGeometry(this.rings.size * 0.00006 * TD.scale, this.rings.size * ((this.rings.thickness * 0.00004) + 0.00006) * TD.scale, 64);
 			const ringMaterial = new THREE.MeshPhongMaterial({
 				map: TD.texture.planet.rings,
 				color: MISC.colorHelper,
@@ -404,8 +424,8 @@ export default class Body {
 					setColor(1, this.atmosphere.color.hue, this.atmosphere.color.saturation, this.atmosphere.color.lightness, 'hsl');
 					// eslint-disable-next-line no-unused-vars
 					const atmosphere = new Atmosphere(this.object.high, {
-						size: (this.size * 0.001015) * TD.scale,
-						thickness: (this.atmosphere.size * 0.001015) * TD.scale,
+						size: (this.size * 0.0001015) * TD.scale,
+						thickness: (this.atmosphere.size * 0.0001015) * TD.scale,
 						color: MISC.colorHelper,
 						blending: THREE.AdditiveBlending,
 						opacity: this.atmosphere.color.a

@@ -34,6 +34,7 @@ export default class Atmosphere {
 				name: 'Atmosphere outside',
 				castShadow: false,
 				receiveShadow: false,
+				renderOrder: 0
 			})
 			.add(mesh);
 	};

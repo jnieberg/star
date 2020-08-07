@@ -5,8 +5,23 @@ body {
 
 #biomeCanvas {
 	display: none;
+}
+
+#debug {
+	font-family: 'Montserrat Alternates', sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	color: rgba(192, 224, 256, 1);
 	position: absolute;
 	top: 0;
+	background-color: rgba(0, 32, 64, 0.75);
+	border: solid 1px rgba(192, 224, 256, 1);
+	margin: 4px;
+	padding: 4px;
+}
+#debug span {
+	float: right;
+	padding-left: 8px;
 }
 
 .label {
@@ -27,9 +42,23 @@ body {
 	pointer-events: none;
 	transition: opacity 0.2s;
 }
+.label span {
+	float: right;
+	padding-left: 8px;
+}
 .label ol {
 	margin: 0;
-	padding: 0 0 0 20px;
+	padding: 0;
+	counter-reset: item;
+}
+.label li {
+	display: block;
+}
+.label li::before {
+	content: counter(item) ". ";
+  counter-increment: item;
+  width: 20px;
+  display: inline-block;
 }
 .label--h1 {
 	font-size: 18px;

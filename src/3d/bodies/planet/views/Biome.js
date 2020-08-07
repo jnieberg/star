@@ -377,7 +377,7 @@ class Biome {
 
 	randRange(low, high) {
 		const range = high - low;
-		const n = window.rng() * range;
+		const n = window.seed.rnd() * range;
 		return low + n;
 	}
 

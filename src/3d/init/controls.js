@@ -35,7 +35,7 @@ const FirstPersonControls = function(object) {
 
 	this.mouseDragOn = false;
 
-	this.acceleration = false;
+	this.acceleration = true;
 
 	// internals
 	this.speedFactorStar = 1.0;
@@ -237,15 +237,16 @@ const FirstPersonControls = function(object) {
 			}
 
 			if (this.rollLeft) {
-				this.accRoll = this.acceleration ? this.accRoll + 5 : actualMoveSpeed;
+				this.accRoll = this.acceleration ? this.accRoll + 0.0005 : actualMoveSpeed;
 			}
 			if (this.rollRight) {
-				this.accRoll = this.acceleration ? this.accRoll - 5 : -actualMoveSpeed;
+				this.accRoll = this.acceleration ? this.accRoll - 0.0005 : -actualMoveSpeed;
 			}
+
 			this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
 			this.object.translateY(this.accU * this.speedFactorStar * this.speedFactorPlanet);
-			this.object.rotateZ(this.accRoll * this.speedFactorStar * this.speedFactorPlanet);
+			this.object.rotateZ(this.accRoll);
 			this.accF = this.accF * brakeFactor;
 			this.accL = this.accL * brakeFactor;
 			this.accU = this.accU * brakeFactor;

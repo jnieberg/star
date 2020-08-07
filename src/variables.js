@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import ThingList from './object/ThingList';
-import random from './misc/random';
+import Debug from './misc/debug';
 
 export const TD = {
 	stargrid: {
@@ -8,12 +8,13 @@ export const TD = {
 		radius: 2,
 		density: 0.0005
 	},
-	scale: 10000,
+	scale: 100000,
 	camera: {
 		object: undefined,
-		near: 0.000001,
+		near: 0.0000001,
 		fade: 190,
 		far: 200,
+		orbit: undefined,
 		coordinate: {
 			x: undefined,
 			y: undefined,
@@ -42,8 +43,10 @@ export const TD = {
 		grid: undefined
 	},
 	stars: {},
+	system: undefined,
 	star: undefined,
 	planet: undefined,
+	moon: undefined,
 	label: undefined
 };
 
@@ -56,17 +59,16 @@ export const EVENT = {
 export const MISC = {
 	interrupt: false,
 	timers: {},
+	timeStart: Date.now(),
+	time: 0.0001,
+	started: false,
 	things: new ThingList(),
-	rnd: random('foo'),
 	colorHelper: new THREE.Color(),
 	colorHelper2: new THREE.Color(),
 	colorHelper3: new THREE.Color(),
 	reload: false,
-	status: {
-		IDLE: 0,
-		STARTED: 1,
-		PAUSED: 2
-	}
+	debug: new Debug(),
+	interval: 200
 };
 
 export const STAR = {

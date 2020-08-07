@@ -1,10 +1,10 @@
-import { saveCamera } from '../init/camera';
+import { saveStorage } from '../init/init';
 import { TD } from '../../variables';
 import { getMouse, getKeys } from './controls';
 
 export default function initEvents() {
 	window.onbeforeunload = () => {
-		saveCamera();
+		saveStorage();
 	};
 
 	window.addEventListener('resize', () => {
