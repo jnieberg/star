@@ -4,6 +4,17 @@ import { labelHide } from '../label/label';
 import { deleteThree } from './init';
 import { resetCamera } from './camera';
 
+function fingersTouching() {
+	return event.changedTouches && event.changedTouches.length;
+}
+
+function getClick(event) {
+	return {
+		x: (fingersTouching() && event.changedTouches[0].clientX) || event.clientX,
+		y: (fingersTouching() && event.changedTouches[0].clientY) || event.clientY
+	}
+}
+
 const FirstPersonControls = function(object) {
 	if (TD.canvas === undefined) {
 		console.warn('THREE.FirstPersonControls: The second parameter "TD.canvas" is now mandatory.');
@@ -80,9 +91,16 @@ const FirstPersonControls = function(object) {
 
 		if (this.activeLook) {
 			switch (event.button) {
-			case 0: this.moveForward = true; this.rotate = true; break;
-			case 2: this.moveBackward = true; this.rotate = true; break;
-			default: break;
+				case 0: this.moveForward = true; this.rotate = true; break;
+				case 2: this.moveBackward = true; this.rotate = true; break;
+				default: 
+				if(fingersTouching() === 1) { // tablet
+					this.moveForward = true; 
+				} else {
+					this.moveBackward = true;
+				}
+				this.rotate = true; this.onMouseMove(event);
+				break;
 			}
 		}
 
@@ -95,9 +113,16 @@ const FirstPersonControls = function(object) {
 
 		if (this.activeLook) {
 			switch (event.button) {
-			case 0: this.moveForward = false; this.rotate = false; break;
-			case 2: this.moveBackward = false; this.rotate = false; break;
-			default: break;
+				case 0: this.moveForward = false; this.rotate = false; break;
+				case 2: this.moveBackward = false; this.rotate = false; break;
+				default:
+				if(fingersTouching() === 1) { // tablet
+					this.moveForward = false;
+				} else {
+					this.moveBackward = false;
+				}
+				this.rotate = false;
+				break;
 			}
 		}
 
@@ -106,8 +131,9 @@ const FirstPersonControls = function(object) {
 
 	this.onMouseMove = function(event) {
 		// if (TD.canvas === document) {
-		this.mouseX = event.pageX - window.innerWidth / 2;
-		this.mouseY = event.pageY - window.innerHeight / 2;
+		const {x, y} = getClick(event);
+		this.mouseX = x - window.innerWidth / 2;
+		this.mouseY = y - window.innerHeight / 2;
 		// } else {
 		// 	this.mouseX = event.pageX - TD.canvas.offsetLeft - this.viewHalfX;
 		// 	this.mouseY = event.pageY - TD.canvas.offsetTop - this.viewHalfY;
@@ -281,9 +307,12 @@ const FirstPersonControls = function(object) {
 
 	this.dispose = function() {
 		TD.canvas.removeEventListener('contextmenu', contextmenu, false);
-		TD.canvas.removeEventListener('mousedown', _onMouseDown, false);
 		TD.canvas.removeEventListener('mousemove', _onMouseMove, false);
+		TD.canvas.removeEventListener('mousedown', _onMouseDown, false);
 		TD.canvas.removeEventListener('mouseup', _onMouseUp, false);
+		TD.canvas.removeEventListener('touchstart', _onMouseDown, false);
+		TD.canvas.removeEventListener('touchend', _onMouseUp, false);
+		TD.canvas.removeEventListener('touchmove', _onMouseMove, false);
 
 		window.removeEventListener('keydown', _onKeyDown, false);
 		window.removeEventListener('keyup', _onKeyUp, false);
@@ -293,6 +322,9 @@ const FirstPersonControls = function(object) {
 	TD.canvas.addEventListener('mousemove', _onMouseMove, false);
 	TD.canvas.addEventListener('mousedown', _onMouseDown, false);
 	TD.canvas.addEventListener('mouseup', _onMouseUp, false);
+	TD.canvas.addEventListener('touchstart', _onMouseDown, false);
+	TD.canvas.addEventListener('touchend', _onMouseUp, false);
+	TD.canvas.addEventListener('touchmove', _onMouseMove, false);
 
 	window.addEventListener('keydown', _onKeyDown, false);
 	window.addEventListener('keyup', _onKeyUp, false);
@@ -315,17 +347,18 @@ export function to3DCoordinate(x, y) {
 }
 
 export function getMouse(event) {
-	event.preventDefault();
-	EVENT.mouse2d.x = event.clientX;
-	EVENT.mouse2d.y = event.clientY;
-	EVENT.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	EVENT.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	const {x, y} = getClick(event);
+	EVENT.mouse2d.x = x;
+	EVENT.mouse2d.y = y;
+	EVENT.mouse.x = (x / window.innerWidth) * 2 - 1;
+	EVENT.mouse.y = -(y / window.innerHeight) * 2 + 1;
 }
 
 export function getKeys(e) {
 	switch (e.which) {
 	case 49: // 1
 		resetCamera();
+		EVENT.controls.speedFactorStar = 1.0;
 		EVENT.controls.speedFactorPlanet = 1.0;
 		EVENT.controls.accF = 0;
 		EVENT.controls.accL = 0;

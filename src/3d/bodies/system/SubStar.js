@@ -6,24 +6,13 @@ import { deleteThree } from '../../init/init';
 import setColor, { getColor } from '../../../misc/color';
 import Atmosphere from '../planet/Atmosphere';
 import { toSize, toSizeString } from '../../../misc/size';
-import { toRoman } from '../../../misc/to-roman';
 import { toCelcius } from '../../../misc/temperature';
 import Body from '../planet/Body';
-import getTime from '../../../misc/time';
-import SubStar from './SubStar';
 
-export default class Star {
-	constructor({ index, system, parent = system }) {
-		this.random = new Random(`star_${system.id}_${index}`);
-		this.type = 'star';
-		this.index = index;
-		this.system = system;
-		this.parent = parent;
-		this.object = {
-			low: undefined,
-			high: undefined
-		};
-		this.drawLow();
+export default class SubStar extends Body {
+	constructor({ index, system, parent }) {
+		super({ index, system, parent, type: 'substar' });
+		this.random = new Random(`substar_${system.id}_${parent.id}_${index}`);
 	}
 
 	get textShort() {
@@ -31,36 +20,24 @@ export default class Star {
 	}
 
 	get text() {
-		const stars = this.children.filter(child => child.type === 'substar');
-		const children = this.children.filter(child => child.type !== 'substar');
 		return `
 			<div class="label--h1">${this.name}</div>
-			${this.parent.children > 1 ? `<div class="label--h2">Star #${this.index + 1} of ${this.parent.name}</div>` : ''}
+			${this.system.children > 1 ? `<div class="label--h2">Star #${this.index + 1} of ${this.system.name}</div>` : ''}
 			<div>${this.color.text} ${this.size.text}</div>
 			<div>Size:<span>${toSize(this.size)}</span></div>
 			<div>Temperature:<span>${toCelcius(this.temperature.min)}</span></div>
-		${stars && stars.length > 0 ?
-		`<div class="label--h3">Stars<span>Planets</span></div>
-		<ol>
-			${stars.map(body => `<li>${body.textShort}</li>`).join('\n')}
-		</ol>` :
-		''}
-		${children && children.length > 0 ?
+		${this.children && this.children.length > 0 ?
 		`<div class="label--h3">Planets<span>Moons</span></div>
 		<ol>
-			${children.map(body => `<li>${body.textShort}</li>`).join('\n')}
+			${this.children.map(body => `<li>${body.textShort}</li>`).join('\n')}
 		</ol>` :
 		''}`;
-	}
-
-	get name() {
-		return `${this.parent.name}${this.parent.children.length > 1 ? ` ${toRoman(this.index + 1)}` : ''}`;
 	}
 
 	get size() {
 		if (!this._size) {
 			this.random.seed = 'size';
-			const sizeOff = this.random.rnd(0.3, 0.4);
+			const sizeOff = this.random.rnd(0.25, 0.5);
 			const size = this.parent.size * sizeOff;
 			this._size = this._size = {
 				valueOf: () => size,
@@ -73,16 +50,14 @@ export default class Star {
 	get color() {
 		if (!this._color) {
 			this.random.seed = 'color';
-			const hueOff = this.random.rnd(-0.05, 0.05);
-			const brightOff = this.random.rnd(0.9, 1.1);
-			const hue = Number(this.parent.color.hue) + hueOff;
-			const lightness = Number(this.parent.color.lightness) * brightOff;
+			const hue = this.random.rnd(0.05);
+			const lightness = this.random.rnd(0.1, 0.4);
 			this._color = getColor({ hue, lightness });
 		}
 		return this._color;
 	}
 
-	// Star temperature in Kelvin
+	// Sub star temperature in Kelvin
 	get temperature() {
 		this.random.seed = 'temperature';
 		for (const tempColor in STAR.temperature) {
@@ -116,17 +91,11 @@ export default class Star {
 			const children = [];
 			const temperature = this.temperature.min;
 			this.random.seed = 'planets';
-			// number of planets depends on star temperature and number of stars
-			const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.1 / this.parent.children.length);
+			const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.1);
 			if (childrenLength > 0) {
 				for (let index = 0; index < childrenLength; index++) {
-					const canHaveSubStar = index === 0 && (this.size.text === 'Supergiant' || this.size.text === 'Hypergiant');
-					let child = undefined;
-					if (canHaveSubStar && this.random.rndInt(5) === 0) {
-						child = new SubStar({ system: this.system, index, parent: this });
-					} else {
-						child = new Body({ system: this.system, index, parent: this });
-					}
+					const child = new Body({ system: this.system, index, parent: this });
+					const _foo = child.children;
 					children.push(child);
 				}
 			}
@@ -135,46 +104,7 @@ export default class Star {
 		return this._children;
 	}
 
-	hideChildren() {
-		for (const child of this.children) {
-			if (child.object && child.object.high) {
-				if (child.type !== 'substar') {
-					child.hide();
-				}
-			}
-		}
-	}
-
-	// temperature + size?
-	get rotationSpeedAroundAxis() {
-		const temperature = this.temperature.min;
-		this.random.seed = 'rotation_speed';
-		return (this.random.rndInt(2) === 0 ? -1 : 1) * this.random.rnd(temperature * 0.0000003, temperature * 0.0000004);
-	}
-
-	drawRotation() {
-		if (this.object && this.object.rotation) {
-			this.object.rotation.set(0, 0, 0);
-			this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
-			if (this.children) {
-				for (const child of this.children) {
-					child.drawRotation();
-				}
-			}
-		}
-	}
-
 	drawLow() {
-		const pos = this.system.universe;
-		setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
-		const id = `${this.system.coordinate.x}_${this.system.coordinate.y}_${this.system.coordinate.z}`;
-		TD.stars[id].this.push(this);
-		TD.stars[id].positions.push(pos.xr, pos.yr, pos.zr);
-		TD.stars[id].colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
-		TD.stars[id].sizes.push(this.size * 0.5 * TD.scale);
-	}
-
-	drawHigh() {
 		const size = this.size * 0.0001 * TD.scale;
 		deleteThree(this.object); // WIP. Maybe we can hide it?
 		const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
@@ -183,7 +113,7 @@ export default class Star {
 		setColor(3, this.color.hue, 0.5, this.color.lightness, 'hsl');
 		this.random.seed = 'rotation';
 
-		// Star pivot
+		// Sub star pivot
 		this.object = new THREE.Object3D();
 		const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
 		const material = new THREE.MeshBasicMaterial({
@@ -193,12 +123,12 @@ export default class Star {
 			alphaTest: 0,
 		});
 		this.object.low = new THREE.Mesh(geometry, material);
-		this.object.low.name = 'Star low';
+		this.object.low.name = 'Sub star low';
 		this.object.low.castShadow = false;
 		this.object.low.receiveShadow = false;
 		this.object.add(this.object.low);
 
-		// Star spots
+		// Sub star spots
 		const materialSpots = new THREE.MeshBasicMaterial({
 			map: TD.texture.star.surface,
 			color: MISC.colorHelper,
@@ -208,28 +138,28 @@ export default class Star {
 			alphaTest: 0,
 		});
 		this.object.high = new THREE.Mesh(geometry, materialSpots);
-		this.object.high.name = 'Star high';
+		this.object.high.name = 'Sub star high';
 		this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
 		this.object.high.castShadow = false;
 		this.object.high.receiveShadow = false;
 		this.object.add(this.object.high);
 
-		// Star corona
+		// Sub star corona
 		const _foo = new Atmosphere(this.object.high, {
 			size: size * 1.01,
 			thickness: size * 1.5,
 			color: MISC.colorHelper2,
 			colorInner: MISC.colorHelper,
 			blending: THREE.AdditiveBlending,
-			opacity: 0.75
+			opacity: 1
 		});
 
-		// Star point light
+		// Sub star point light
 		const near = TD.camera.near * 100 * TD.scale;
 		const far = TD.camera.far * 0.0001 * TD.scale;
-		this.light = new THREE.PointLight(new THREE.Color(1, 1, 1));// MISC.colorHelper3
-		this.light.name = 'Star light';
-		this.light.power = 30;
+		this.light = new THREE.PointLight(MISC.colorHelper3);
+		this.light.name = 'Sub star light';
+		this.light.power = 50;
 		this.light.decay = 2;
 		this.light.distance = far;
 		this.light.castShadow = true;
@@ -244,6 +174,25 @@ export default class Star {
 		this.light.shadow.needsUpdate = true;
 		this.object.high.add(this.light);
 
+		// Planet trajectory
+		const trajectoryGeometry = new THREE.RingBufferGeometry(1.0 - (0.2 / this.distance), 1.0 + (0.2 / this.distance), 128, 1);
+		const trajectoryMaterial = new THREE.MeshBasicMaterial({
+			color: 0x0044ff,
+			side: THREE.DoubleSide,
+			blending: THREE.AdditiveBlending,
+			transparent: false,
+			opacity: this.type === 'moon' ? 0.15 : 0.25,
+			depthTest: false
+		});
+		const trajectoryMesh = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
+		trajectoryMesh.name = 'Sub star trajectory';
+		trajectoryMesh.rotation.x = Math.PI * 0.5;
+		trajectoryMesh.scale.set(this.distance * 0.0001 * TD.scale, this.distance * 0.0001 * TD.scale, this.distance * 0.0001 * TD.scale);
+		trajectoryMesh.castShadow = false;
+		trajectoryMesh.receiveShadow = false;
+		trajectoryMesh.renderOrder = -1;
+		this.parent.object.high.add(trajectoryMesh);
+
 		// Draw planets of star
 		if (this.children && this.children.length) {
 			for (let c = 0; c < this.children.length; c++) {
@@ -253,11 +202,15 @@ export default class Star {
 		}
 
 		// Set star position
-		this.object.rotateY(2 * Math.PI / this.parent.children.length * this.index);
-		this.object.translateX(this.parent.starDistance * TD.scale);
+		this.object.rotateY(2 * Math.PI / this.system.children.length * this.index);
+		this.object.translateX(this.system.starDistance * TD.scale);
 
 		// Add star to scene
 		this.parent.object.add(this.object);
 		this.object.low.this = this;
+	}
+
+	drawHigh() {
+
 	}
 }

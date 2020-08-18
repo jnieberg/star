@@ -14,6 +14,7 @@ export default function initEvents() {
 	}, false);
 
 	window.addEventListener('mousemove', getMouse, false);
+	window.addEventListener('touchmove', getMouse, false);
 	window.addEventListener('keypress', getKeys, false);
 	window.dispatchEvent(new MouseEvent('mousemove'));
 }

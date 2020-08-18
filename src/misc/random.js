@@ -2,11 +2,12 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable vars-on-top */
 export default class Random {
-	constructor() {
-		this.set('_foo');
+	constructor(seedSuffix = 'foo', seedString = '') {
+		this.seedSuffix = seedSuffix;
+		this.seed = seedString;
 	}
 
-	setSeed(str) {
+	_setSeed(str) {
 		for (var i = 0, h = 1779033703 ^ str.length; i < str.length; i++) {
 			h = Math.imul(h ^ str.charCodeAt(i), 3432918353),
 			h = h << 13 | h >>> 19;
@@ -18,9 +19,13 @@ export default class Random {
 		};
 	}
 
-	set(str) {
-		this.seedString = str;
-		this._seedAdd = this.setSeed(str)();
+	get seed() {
+		return this.seedSuffix;
+	}
+
+	set seed(seedString) {
+		this._seedString = `${seedString}_${this.seedSuffix}`;
+		this._seedAdd = this._setSeed(this._seedString)();
 		this._rnd = function() {
 			var t = this._seedAdd = this._seedAdd + 0x6D2B79F5;
 			t = Math.imul(t ^ t >>> 15, t | 1);

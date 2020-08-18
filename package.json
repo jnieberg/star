@@ -18,7 +18,7 @@
 	},
 	"scripts": {
 		"start": "node server",
-		"dev": "node index"
+		"dev": "source $HOME/.nvm/nvm.sh; nvm use && node index"
 	},
 	"type": "module",
 	"devDependencies": {

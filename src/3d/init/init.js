@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import animate, { interval } from '../animate';
+import animate, { interval, intervalShadow } from '../animate';
 import { initCamera, getWorldCamera, resetCamera } from './camera';
 import initScene from './scene';
 import { initStars } from '../bodies/system/stars';
@@ -70,5 +70,6 @@ export default function init3d() {
 		initEvents();
 		animate();
 		interval();
+		intervalShadow();
 	});
 }

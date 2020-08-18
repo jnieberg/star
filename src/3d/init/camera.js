@@ -81,9 +81,32 @@ export function cameraLookDir() {
 	return vector;
 }
 
+function getFixedToCamera(x, y, z) {
+	const posC = getWorldCamera();
+	const grid = TD.stargrid.size * TD.scale;
+	const posOff = {
+		x: (x - posC.x),
+		y: (y - posC.y),
+		z: (z - posC.z),
+	};
+	const posSet = {
+		x: posOff.x < -grid * 0.5 ? x + grid : posOff.x >= grid * 0.5 ? x - grid : x,
+		y: posOff.y < -grid * 0.5 ? y + grid : posOff.y >= grid * 0.5 ? y - grid : y,
+		z: posOff.z < -grid * 0.5 ? z + grid : posOff.z >= grid * 0.5 ? z - grid : z
+	};
+	return posSet;
+}
+
 export function distanceToCamera(x, y, z) {
-	const pos = getWorldCamera();
-	return Math.sqrt((x - pos.x) * (x - pos.x) + (y - pos.y) * (y - pos.y) + (z - pos.z) * (z - pos.z)) / TD.scale;
+	const posC = getWorldCamera();
+	const pos = getFixedToCamera(x, y, z);
+	return Math.sqrt((pos.x - posC.x) * (pos.x - posC.x) + (pos.y - posC.y) * (pos.y - posC.y) + (pos.z - posC.z) * (pos.z - posC.z)) / TD.scale;
+}
+
+export function fixObjectToCamera(obj) {
+	const posSet = getFixedToCamera(obj.position.x, obj.position.y, obj.position.z);
+	obj.position.set(posSet.x, posSet.y, posSet.z);
+	return posSet;
 }
 
 export function initCamera() {

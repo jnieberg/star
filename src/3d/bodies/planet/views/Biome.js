@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Color } from 'three';
 
 class Biome {
-	constructor() {
+	constructor({ metal, fluid }) {
 		this.canvas = document.createElement('canvas');
 		this.canvas.id = 'biomeCanvas';
 		this.canvas.width = 512;
@@ -10,20 +10,22 @@ class Biome {
 		this.width = this.canvas.width;
 		this.height = this.canvas.height;
 		this.ctx = this.canvas.getContext('2d');
+		this.metal = metal;
+		this.fluid = fluid;
 
 		// if (document.body) {
 		// 	document.body.appendChild(this.canvas);
 		// }
-		// this.toggleCanvasDisplay(false);
+		// this.toggleCanvasDisplay(true);
 	}
 
 	generateTexture(props) {
 		this.waterLevel = props.waterLevel;
 
-		const h = this.randRange(0.0, 1.0);
-		const s = this.randRange(0.0, 0.7);
-		const l = this.randRange(0.0, 0.6);
-		this.baseColor = new THREE.Color().setHSL(h, s, l);
+		// const h = this.randRange(0.0, 1.0);
+		// const s = this.randRange(0.0, 0.7);
+		// const l = this.randRange(0.0, 0.6);
+		this.baseColor = new THREE.Color().setHSL(this.metal.hue, this.metal.saturation, this.metal.lightness);
 		this.colorAngle = this.randRange(0.2, 0.4);
 		this.satRange = this.randRange(0.3, 0.5);
 		this.lightRange = this.randRange(0.3, 0.5);
@@ -43,8 +45,8 @@ class Biome {
 		this.drawDetail();
 		this.drawInland();
 		this.drawBeach();
+		this.drawRivers();
 		this.drawWater();
-		// this.drawRivers();
 
 		this.texture = new THREE.CanvasTexture(this.canvas);
 	}
@@ -87,20 +89,25 @@ class Biome {
 		}
 	}
 
+	// rivers
 	drawRivers() {
-		// rivers
-		const c = this.randomColor();
+		const c = {
+			hue: Math.floor(this.fluid.hue * 360),
+			saturation: Math.floor(this.fluid.saturation * 100),
+			lightness: Math.floor(this.fluid.lightness * 100)
+		};
 		const falloff = 1.3;
 		const opacity = 0.9;
 		// this.ctx.strokeStyle = 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', 0.5)';
-		this.ctx.strokeStyle = 'rgba(' + Math.round(c.r * falloff) + ', ' + Math.round(c.g * falloff) + ', ' + Math.round(c.b * falloff) + ', ' + opacity + ')';
+		this.ctx.strokeStyle = 'hsla(' + Math.round(c.hue) + ', ' + Math.round(c.saturation) + '%, ' + Math.round(c.lightness) + '%, ' + opacity + ')';
 
 		let x = this.randRange(0, this.width);
 		let y = this.randRange(0, this.height);
 		let prevX = x;
 		let prevY = y;
+		let riverLength =  this.randRange(0, 8);
 
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < riverLength; i++) {
 			x = this.randRange(0, this.width);
 			y = this.randRange(0, this.height);
 
@@ -192,18 +199,26 @@ class Biome {
 
 
 		// const c = this.randomColor();
-		const c = this.randomWaterColor();
-
+		// const c = this.randomWaterColor();
+		const c = {
+			hue: Math.floor(this.fluid.hue * 360),
+			saturation: Math.floor(this.fluid.saturation * 100),
+			lightness: Math.floor(this.fluid.lightness * 100)
+		};
 		const falloff = 1.3;
 		const falloff2 = 1.0;
 		const falloff3 = 0.7;
 		const falloff4 = 0.5;
-		const opacity = 0.9;
+		const opacity = 1;
 		// gradient.addColorStop(0.0, "rgba("+cr+", "+cg+", "+cb+", "+0+")");
-		gradient.addColorStop(0.0, 'rgba(' + Math.round(c.r * falloff) + ', ' + Math.round(c.g * falloff) + ', ' + Math.round(c.b * falloff) + ', ' + opacity + ')');
-		gradient.addColorStop(0.2, 'rgba(' + Math.round(c.r * falloff2) + ', ' + Math.round(c.g * falloff2) + ', ' + Math.round(c.b * falloff2) + ', ' + opacity + ')');
-		gradient.addColorStop(0.6, 'rgba(' + Math.round(c.r * falloff3) + ', ' + Math.round(c.g * falloff3) + ', ' + Math.round(c.b * falloff3) + ', ' + opacity + ')');
-		gradient.addColorStop(0.8, 'rgba(' + Math.round(c.r * falloff4) + ', ' + Math.round(c.g * falloff4) + ', ' + Math.round(c.b * falloff4) + ', ' + opacity + ')');
+		// gradient.addColorStop(0.0, 'rgba(' + Math.round(c.r * falloff) + ', ' + Math.round(c.g * falloff) + ', ' + Math.round(c.b * falloff) + ', ' + opacity + ')');
+		// gradient.addColorStop(0.2, 'rgba(' + Math.round(c.r * falloff2) + ', ' + Math.round(c.g * falloff2) + ', ' + Math.round(c.b * falloff2) + ', ' + opacity + ')');
+		// gradient.addColorStop(0.6, 'rgba(' + Math.round(c.r * falloff3) + ', ' + Math.round(c.g * falloff3) + ', ' + Math.round(c.b * falloff3) + ', ' + opacity + ')');
+		// gradient.addColorStop(0.8, 'rgba(' + Math.round(c.r * falloff4) + ', ' + Math.round(c.g * falloff4) + ', ' + Math.round(c.b * falloff4) + ', ' + opacity + ')');
+		gradient.addColorStop(0.0, 'hsla(' + Math.round(c.hue) + ', ' + Math.round(c.saturation) + '%, ' + Math.round(c.lightness * falloff) + '%, ' + opacity + ')');
+		gradient.addColorStop(0.2, 'hsla(' + Math.round(c.hue) + ', ' + Math.round(c.saturation) + '%, ' + Math.round(c.lightness * falloff2) + '%, ' + opacity + ')');
+		gradient.addColorStop(0.6, 'hsla(' + Math.round(c.hue) + ', ' + Math.round(c.saturation) + '%, ' + Math.round(c.lightness * falloff3) + '%, ' + opacity + ')');
+		gradient.addColorStop(0.8, 'hsla(' + Math.round(c.hue) + ', ' + Math.round(c.saturation) + '%, ' + Math.round(c.lightness * falloff4) + '%, ' + opacity + ')');
 
 		this.ctx.fillStyle = gradient;
 		this.ctx.fillRect(x1, y1, this.width, this.height);
@@ -271,38 +286,36 @@ class Biome {
 		this.ctx.fillRect(0, 0, this.width, this.height);
 	}
 
-	randomWaterColor() {
-		const newColor = this.baseColor.clone();
+	// randomWaterColor() {
+	// 	const newColor = this.baseColor.clone();
 
-		let hOffset = 0.0;
-		const range = 0.1;
-		const n = this.randRange(0, 1);
-		if (n < 0.33) {
-			hOffset = 0.0 + this.randRange(-range, range);
-		} else if (n < 0.66) {
-			hOffset = this.colorAngle + this.randRange(-range, range);
-		} else {
-			hOffset = -this.colorAngle + this.randRange(-range, range);
-		}
+	// 	let hOffset = 0.0;
+	// 	const range = 0.1;
+	// 	const n = this.randRange(0, 1);
+	// 	if (n < 0.33) {
+	// 		hOffset = 0.0 + this.randRange(-range, range);
+	// 	} else if (n < 0.66) {
+	// 		hOffset = this.colorAngle + this.randRange(-range, range);
+	// 	} else {
+	// 		hOffset = -this.colorAngle + this.randRange(-range, range);
+	// 	}
 
-		const sOffset = this.randRange(-this.satRange, this.satRange);
-		const lOffset = this.randRange(-this.lightRange, this.lightRange);
+	// 	const sOffset = this.randRange(-this.satRange, this.satRange);
+	// 	const lOffset = this.randRange(-this.lightRange, this.lightRange);
 
-		const c = new Color();
-		newColor.getHSL(c);
-		c.h = this.randRange(0.0, 1.0);
-		c.s = c.s + this.randRange(0.0, 0.6);
-		// console.log("sat = " + c.s);
-		c.l = c.l + this.randRange(0.1, 0.4);
+	// 	const c = new Color();
+	// 	newColor.getHSL(c);
+	// 	c.h = this.randRange(0.0, 1.0);
+	// 	c.s = c.s + this.randRange(0.0, 0.6);
+	// 	// console.log("sat = " + c.s);
+	// 	c.l = c.l + this.randRange(0.1, 0.4);
 
-		newColor.setHSL(c.h, c.s, c.l);
+	// 	newColor.setHSL(c.h, c.s, c.l);
 
-		newColor.offsetHSL(hOffset, sOffset, lOffset);
+	// 	newColor.offsetHSL(hOffset, sOffset, lOffset);
 
-		return { r: Math.round(newColor.r * 255),
-			g: Math.round(newColor.g * 255),
-			b: Math.round(newColor.b * 255) };
-	}
+	// 	return { r: Math.round(newColor.r * 255), g: Math.round(newColor.g * 255), b: Math.round(newColor.b * 255) };
+	// }
 
 	randomColor() {
 		const newColor = this.baseColor.clone();
@@ -337,7 +350,8 @@ class Biome {
 		// c.s = this.randRange(0.0, 0.7);
 		// c.l = this.randRange(0.0, 1.0);
 
-		newColor.setHSL(c.h, c.s, c.l);
+		// newColor.setHSL(c.h, c.s, c.l);
+		newColor.setHSL(this.metal.hue + this.randRange(-0.1, 0.1), this.metal.saturation + this.randRange(-0.1, 0.1), this.metal.lightness + this.randRange(-0.1, 0.1));
 
 		// newColor.offsetHSL(hOffset, sOffset, lOffset);
 

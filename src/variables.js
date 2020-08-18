@@ -8,7 +8,7 @@ export const TD = {
 		radius: 2,
 		density: 0.0005
 	},
-	scale: 100000,
+	scale: 10000,
 	camera: {
 		object: undefined,
 		near: 0.0000001,
@@ -68,26 +68,11 @@ export const MISC = {
 	colorHelper3: new THREE.Color(),
 	reload: false,
 	debug: new Debug(),
-	interval: 200
+	interval: 200,
+	intervalShadow: 200
 };
 
 export const STAR = {
-	color: {
-		hue:  {
-			Purple: 0.9,
-			Blue: 0.77,
-			Green: 0.5,
-			Yellow: 0.2,
-			Orange: 0.15,
-			Red: 0.05
-		},
-		brightness: {
-			'White': 1,
-			'Bright': 0.9,
-			'': 0.7,
-			'Dark': 0.4
-		}
-	},
 	temperature: {
 		Red: { min: 2400, max: 3700 },
 		Orange: { min: 3700, max: 5200 },
@@ -96,6 +81,29 @@ export const STAR = {
 		Green: { min: 7500, max: 10000 },
 		Blue: { min: 10000, max: 30000 },
 		Purple: { min: 30000, max: 40000 },
+	}
+};
+
+export const COLOR = {
+	hue:  {
+		Purple: 0.9,
+		Blue: 0.77,
+		Green: 0.5,
+		Yellow: 0.2,
+		Orange: 0.15,
+		Red: 0.05
+	},
+	saturation: {
+		'': 1,
+		'Pale': 0.3,
+		'Grey': 0.1
+	},
+	lightness: {
+		'White': 1,
+		'Bright': 0.95,
+		'': 0.7,
+		'Dark': 0.3,
+		'Black': 0.05
 	}
 };
 

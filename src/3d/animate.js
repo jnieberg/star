@@ -31,6 +31,14 @@ export function interval() {
 	}, MISC.interval);
 }
 
+export function intervalShadow() {
+	setInterval(() => {
+		if (TD.system) {
+			TD.system.updateShadows();
+		}
+	}, MISC.intervalShadow);
+}
+
 export default function animate() {
 	MISC.animation = requestAnimationFrame(animate);
 	loop();

@@ -10,7 +10,7 @@ import Random from '../../../../misc/Random';
 import wait from '../../../tools/wait';
 
 class BodySurface {
-	constructor({ rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor }, callback) {
+	constructor({ rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor, metal, fluid }, callback) {
 		MISC.interrupt = false;// true
 		this.seedString = rnd || 'lorem';
 		this.initSeed();
@@ -25,6 +25,8 @@ class BodySurface {
 		this.normalScale = 3.0;
 		this.size = size || 1;
 		this.hasClouds = hasClouds && this.detail === 0;
+		this.metal = metal;
+		this.fluid = fluid;
 
 		this.heightMaps = [];
 		this.moistureMaps = [];
@@ -40,7 +42,10 @@ class BodySurface {
 		}
 		wait(this.timerBank, () => {
 			this.initSeed();
-			this.biome = biome || new Biome();
+			this.biome = biome || new Biome({
+				metal: this.metal,
+				fluid: this.fluid
+			});
 			wait(this.timerBank, () => {
 				this.createScene();
 				this.render(resolution, callback);
@@ -57,8 +62,7 @@ class BodySurface {
 	}
 
 	initSeed() {
-		const seed = new Random().set(this.seedString);
-		window.seed = seed;
+		window.seed = new Random(this.seedString, 'surface');
 	}
 
 	createScene() {
@@ -86,7 +90,7 @@ class BodySurface {
 			});
 			this.materials[i] = material;
 		}
-		const geo = new THREE.BoxGeometry(1, 1, 1, this.segments, this.segments, this.segments);
+		const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);// this.segments, this.segments, this.segments);
 		const radius = this.size;
 		for (const vertex of geo.vertices) {
   		vertex.normalize().multiplyScalar(radius);
@@ -114,7 +118,6 @@ class BodySurface {
 	renderScene(callback) {
 		this.initSeed();
 		this.seed = this.randRange(0, 1) * 100000.0;
-		this.waterLevel = this.randRange(0.0, 1.0);
 		this.updateNormalScaleForRes(this.resolution);
 
 		this.renderBiomeTexture();
@@ -164,7 +167,7 @@ class BodySurface {
 					this.normalMap.render({
 						timerBank: this.timerBank,
 						resolution: this.resolution,
-						waterLevel: this.waterLevel,
+						waterLevel: this.fluid.level,
 						heightMaps: this.heightMaps,
 						textureMaps: this.textureMaps
 					}, () => {
@@ -173,12 +176,12 @@ class BodySurface {
 							timerBank: this.timerBank,
 							resolution: this.resolution,
 							heightMaps: this.heightMaps,
-							waterLevel: this.waterLevel
+							waterLevel: this.fluid.level
 						}, () => {
 							if (this.hasClouds) {
 								this.clouds.render({
 									timerBank: this.timerBank,
-									waterLevel: this.waterLevel
+									waterLevel: this.fluid.level
 								}, () => {
 									this.renderCallback('CALLBACK', callback);
 								});
@@ -210,7 +213,7 @@ class BodySurface {
 
 	renderBiomeTexture() {
 		if (!this.biome.texture) {
-			this.biome.generateTexture({ waterLevel: this.waterLevel });
+			this.biome.generateTexture({ waterLevel: this.fluid.level });
 		}
 	}
 

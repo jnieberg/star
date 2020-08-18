@@ -109,8 +109,7 @@ class Clouds {
 	}
 
 	initSeed() {
-		const seed = new Random().set(this.seedString);
-		window.seed = seed;
+		window.seed = new Random(this.seedString, 'clouds');
 	}
 
 	updateMaterial() {

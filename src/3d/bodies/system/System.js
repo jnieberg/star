@@ -1,36 +1,32 @@
 import Word from '../../../misc/Word';
-import { TD } from '../../../variables';
+import { TD, MISC } from '../../../variables';
 import * as THREE from 'three';
 import { deleteThree } from '../../init/init';
 import Random from '../../../misc/Random';
 import Star from './Star';
-import getTime from '../../../misc/time';
+import { toSizeString } from '../../../misc/size';
+import { getColor } from '../../../misc/color';
 
 export default class System {
-	constructor({ x, y, z, index }) {
-		this.seed = new Random();
-		this.isSystem = true;
-		this.index = index;
+	constructor({ index, x, y, z }) {
 		this.coordinate = { x, y, z };
+		this.type = 'system';
+		this.index = index;
 		this.id = {
 			text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
 			toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`
 		};
+		this.random = new Random(`system_${this.id}`);
 		this.object = {
 			low: undefined,
 			high: undefined
 		};
 	}
 
-	random(seed) {
-		this.seed.set(`system_${seed}_${this.id}`);
-		return this.seed;
-	}
-
 	get name() {
 		if (!this._name) {
-			this.random('name');
-			this._name = new Word(this.seed, {
+			this.random.seed = 'name';
+			this._name = new Word(this.random, {
 				syllablesMin: 3,
 				syllablesMax: 7
 			});
@@ -40,39 +36,59 @@ export default class System {
 
 	get position() {
 		if (!this._position) {
-			this.random('position', true);
-			const position = {
-				x: this.seed.rnd(TD.stargrid.size),
-				y: this.seed.rnd(TD.stargrid.size),
-				z: this.seed.rnd(TD.stargrid.size)
+			this.random.seed = 'position';
+			this._position = {
+				x: this.random.rnd(TD.stargrid.size),
+				y: this.random.rnd(TD.stargrid.size),
+				z: this.random.rnd(TD.stargrid.size)
 			};
-			this.random('position_offset');
-			position.x = position.x + this.seed.rnd(-0.00001 * TD.scale, 0.00001 * TD.scale);
-			position.y = position.y + this.seed.rnd(-0.00001 * TD.scale, 0.00001 * TD.scale);
-			position.z = position.z + this.seed.rnd(-0.00001 * TD.scale, 0.00001 * TD.scale);
-			this._position = position;
 		}
 		return this._position;
 	}
 
 	get universe() {
 		return {
-			x: (this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size) * TD.scale,
-			y: (this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size) * TD.scale,
-			z: (this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * TD.stargrid.size) * TD.scale
+			x: (this.position.x + this.coordinate.x * TD.stargrid.size) * TD.scale, // absolute
+			y: (this.position.y + this.coordinate.y * TD.stargrid.size) * TD.scale,
+			z: (this.position.z + this.coordinate.z * TD.stargrid.size) * TD.scale,
+			xr: (this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size) * TD.scale, // relative
+			yr: (this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size) * TD.scale,
+			zr: (this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * TD.stargrid.size) * TD.scale
 		};
+	}
+
+	get size() {
+		if (!this._size) {
+			this.random.seed = 'size';
+			const size = this.random.rnd(0.3, 15);
+			this._size = {
+				valueOf: () => size,
+				text: toSizeString(size)
+			};
+		}
+		return this._size;
+	}
+
+	get color() {
+		if (!this._color) {
+			this.random.seed = 'color';
+			const hue = this.random.rnd();
+			const lightness = this.random.rnd(0.1, 1.0);
+			this._color = getColor({ hue, lightness });
+		}
+		return this._color;
 	}
 
 	get starDistance() {
 		if (this.children.length > 1) {
-			return this.seed.rnd(0.005, 0.01);
+			return this.random.rnd(0.005, 0.01);
 		}
 		return 0;
 	}
 
 	get children() {
 		if (!this._children) {
-			this.random('stars');
+			this.random.seed = 'stars';
 			const children = [];
 			do {
 				children.push(
@@ -81,7 +97,7 @@ export default class System {
 						index: children.length
 					})
 				);
-			} while (this.seed.rndInt(5) === 0);
+			} while (this.random.rndInt(15) === 0); // chance on multinary stars
 			this._children = children;
 		}
 		return this._children;
@@ -103,7 +119,7 @@ export default class System {
 		return `
 		<div class="label--h1">${this.name}</div>
 		<div class="label--h2">${this.children.length > 1 ? 'Multinary system' : 'System'} #${this.id}</div>
-		<div class="label--h3">Stars<span>Planets</span></div>
+		<div class="label--h3">Stars<span>Bodies</span></div>
 		<ol>
 			${this.children.map(star => `<li>${star.textShort}</li>`).join('\n')}
 		</ol>`;
@@ -116,29 +132,37 @@ export default class System {
 			this.children.forEach(child => {
 				temperature = temperature + child.temperature.min;
 			});
-			this.random('rotation_speed');
-			return (this.seed.rndInt(2) === 0 ? -1 : 1) * this.seed.rnd(temperature * 0.00002, temperature * 0.00004);
+			this.random.seed = 'rotation_speed';
+			return (this.random.rndInt(2) === 0 ? -1 : 1) * this.random.rnd(temperature * 0.00002, temperature * 0.00004);
 		}
 		return 0;
 	}
 
 	drawRotation() {
 		if (this.object && this.object.rotation) {
-			this.object.rotation.y = getTime() * this.rotationSpeedAroundAxis;
+			this.object.rotateY(this.rotationSpeedAroundAxis * MISC.time);
 		}
-		this.children.forEach(child => child.drawRotation());
+		this.children.forEach(child => {
+			child.drawRotation();
+		});
 	}
 
 	hideChildren() {
 		this.children.forEach(child => child.hideChildren());
 	}
 
+	updateShadows() {
+		this.children.forEach(child => {
+			child.light.shadow.needsUpdate = true;
+		});
+	}
+
 	// Draw all stars and bodies here
 	draw() {
-		this.random('rotation');
+		this.random.seed = 'rotation';
 		this.object = new THREE.Object3D();
 		this.object.position.set(this.position.x * TD.scale, this.position.y * TD.scale, this.position.z * TD.scale);
-		this.object.rotation.set(this.seed.rnd(2 * Math.PI), this.seed.rnd(2 * Math.PI), this.seed.rnd(2 * Math.PI));
+		this.object.rotation.set(this.random.rnd(2 * Math.PI), this.random.rnd(2 * Math.PI), this.random.rnd(2 * Math.PI));
 		this.children.forEach(child => child.drawHigh());
 		TD.scene.add(this.object);
 	}

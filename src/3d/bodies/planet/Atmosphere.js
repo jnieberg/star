@@ -8,7 +8,7 @@ export default class Atmosphere {
 		this.color = new THREE.Color(colorS);
 		this.colorInner = new THREE.Color(colorInnerS);
 		this.atmosphereIn = new Thing('glowInside')
-			.geometry(new THREE.SphereBufferGeometry(size, 64, 64))
+			.geometry(new THREE.SphereBufferGeometry(size, 32, 32))
 			.material(this.atmosphereMaterial(blending), {
 				'uniforms.b.value': opacity * 0.5 + 0.75 - size * 0.01,
 				'uniforms.p.value': power,
@@ -23,7 +23,7 @@ export default class Atmosphere {
 			})
 			.add(mesh);
 		this.atmosphereOut = new Thing('glowOutside')
-			.geometry(new THREE.SphereBufferGeometry(size + thickness, 64, 64))
+			.geometry(new THREE.SphereBufferGeometry(size + thickness, 32, 32))
 			.material(this.atmosphereMaterial(blending), {
 				'uniforms.b.value' : -0.085,
 				'uniforms.p.value' : (thickness / size) * (1.1 - opacity * 0.5) * 20,

@@ -1,9 +1,10 @@
 body {
 	background: black;
-  margin: 0;
+	margin: 0;
+	overflow: hidden;
 }
 
-#biomeCanvas {
+#biomeCanvas, #planet {
 	display: none;
 }
 
@@ -49,16 +50,15 @@ body {
 .label ol {
 	margin: 0;
 	padding: 0;
-	counter-reset: item;
+}
+.label ol .index {
+	padding-left: 0;
+	width: 20px;
+	display: block;
+	float: left;
 }
 .label li {
 	display: block;
-}
-.label li::before {
-	content: counter(item) ". ";
-  counter-increment: item;
-  width: 20px;
-  display: inline-block;
 }
 .label--h1 {
 	font-size: 18px;

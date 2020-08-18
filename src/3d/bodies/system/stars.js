@@ -16,18 +16,20 @@ function updateStars(off) {
 	if (TD.stars) {
 		for (const i of Object.keys(TD.stars)) {
 			if (!TD.stars[i].object) {
+				// Star cluster
 				TD.stars[i].geometry = new THREE.BufferGeometry();
 				TD.stars[i].geometry.setAttribute('position', new THREE.Float32BufferAttribute(TD.stars[i].positions, 3));
-				TD.stars[i].geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars[i].colors, 3)); // .setUsage(THREE.DynamicDrawUsage)
+				TD.stars[i].geometry.setAttribute('color', new THREE.Float32BufferAttribute(TD.stars[i].colors, 3));
 				TD.stars[i].geometry.setAttribute('size', new THREE.Float32BufferAttribute(TD.stars[i].sizes, 1));
 				TD.stars[i].geometry.verticesNeedUpdate = false;
 				TD.stars[i].geometry.computeBoundingSphere();
-				// deleteThree(TD.stars[i].object);
 				TD.stars[i].object = new THREE.Points(TD.stars[i].geometry, TD.material.stars);
 				TD.stars[i].object.name = i;
 				TD.stars[i].object.castShadow = false;
 				TD.stars[i].object.receiveShadow = false;
 				TD.stars[i].object.matrixAutoUpdate = true;
+
+				// Star grid
 				const coor = getRealCoordinate(TD.stars[i].x, TD.stars[i].y, TD.stars[i].z);
 				const points = [
 					new THREE.Vector3(coor.x, coor.y, coor.z),
@@ -37,6 +39,7 @@ function updateStars(off) {
 				];
 				TD.stars[i].grid = {};
 				TD.stars[i].grid.geometry = new THREE.BufferGeometry().setFromPoints(points);
+				TD.stars[i].grid.geometry.verticesNeedUpdate = false;
 				TD.stars[i].grid.object = new THREE.Line(TD.stars[i].grid.geometry, TD.material.grid);
 				TD.stars[i].grid.object.castShadow = false;
 				TD.stars[i].grid.object.receiveShadow = false;
@@ -96,30 +99,6 @@ export default function drawStars() {
 
 export function eventStars() {
 	if (TD.system) {
-		// const cameraPositionOld = undefined;
-		// const cameraRotationOld = undefined;
-		// if (TD.planet) {
-		// 	const position1 = TD.planet.object.getWorldPosition(); // new THREE.Vector3();
-		// 	console.log('planet', position1);
-		// 	console.log('camera old', TD.camera.object.position);
-		// 	cameraPositionOld = new THREE.Vector3(
-		// 		position1.x - TD.camera.object.position.x,
-		// 		position1.y - TD.camera.object.position.y,
-		// 		position1.z - TD.camera.object.position.z
-		// 	);
-		// 	cameraRotationOld = TD.camera.object.rotation;
-		// }
 		TD.system.drawRotation();
-		// if (TD.planet) {
-		// 	const position2 = TD.planet.object.getWorldPosition();
-		// 	TD.camera.object.position.set(position2.x, position2.y, position2.z);
-		// 	// TD.camera.object.rotation.set(0, 0, 0);
-		// 	TD.camera.object.translateX(cameraPositionOld.x);
-		// 	TD.camera.object.translateY(cameraPositionOld.y);
-		// 	TD.camera.object.translateZ(cameraPositionOld.z);
-		// 	// TD.camera.object.rotation.set(cameraRotationOld._x, cameraRotationOld._y, cameraRotationOld._z);
-		// 	console.log(cameraRotationOld);
-		// 	console.log('camera', cameraPositionOld, TD.camera.object.position);
-		// }
 	}
 }
