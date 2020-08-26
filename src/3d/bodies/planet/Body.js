@@ -10,7 +10,6 @@ import Random from '../../../misc/Random';
 import { toSize } from '../../../misc/size';
 import Word from '../../../misc/Word';
 import toPercent from '../../../misc/percent';
-import { toScreenPosition } from '../../init/scene';
 
 export default class Body {
   constructor({

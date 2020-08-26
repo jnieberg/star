@@ -264,7 +264,7 @@ class Biome {
     this.ctx.fillRect(0, 0, this.width, this.height);
   }
 
-  randomColor(hueOff = 0.0, saturationOff = 0.0, lightnessOff = 0.0) {
+  randomColor(hueOff = 0.0) {
     // const newColor = this.baseColor.clone();
     // const sOffset = Biome.randRange(-this.satRange, this.satRange);
     // const lOffset = Biome.randRange(-this.lightRange, this.lightRange);
