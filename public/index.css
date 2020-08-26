@@ -1,4 +1,5 @@
 body {
+	font-family: 'Montserrat Alternates', sans-serif;
 	background: black;
 	margin: 0;
 	overflow: hidden;
@@ -10,42 +11,45 @@ body {
 
 #debug {
 	font-family: 'Montserrat Alternates', sans-serif;
-	font-size: 12px;
+	font-size: 1.2vmax;
 	font-weight: 400;
 	color: rgba(192, 224, 256, 1);
 	position: absolute;
 	top: 0;
 	background-color: rgba(0, 32, 64, 0.75);
-	border: solid 1px rgba(192, 224, 256, 1);
-	margin: 4px;
-	padding: 4px;
+	border: solid .1vmax rgba(192, 224, 256, 1);
+	margin: .4vmax;
+  padding: .4vmax;
+  transform: translate(-25%, -25%) scale(0.5);
+	pointer-events: none;
 }
 #debug span {
 	float: right;
-	padding-left: 8px;
+	padding-left: .8vmax;
 }
 
 .label {
-	font-family: 'Montserrat Alternates', sans-serif;
-	font-size: 12px;
+	font-size: 1.2vmax;
 	font-weight: 400;
-	padding: 8px;
+	padding: .8vmax;
 	color: #fff;
-	border: solid 1px #fff;
-	border-radius: 4px;
+	border: solid .1vmax #fff;
+	border-radius: .4vmax;
 	position: absolute;
 	top: 0;
 	left: 0;
 	background-color: rgba(0, 32, 64, 0.5);
+	box-shadow: 0 0 .1vmax .1vmax rgba(0, 32, 64, 0.5);
 	opacity: 0;
 	white-space: nowrap;
 	z-index: 999;
 	pointer-events: none;
 	transition: opacity 0.2s;
+  transform: translate(-25%, -25%) scale(0.5);
 }
 .label span {
 	float: right;
-	padding-left: 8px;
+	padding-left: .8vmax;
 }
 .label ol {
 	margin: 0;
@@ -53,7 +57,7 @@ body {
 }
 .label ol .index {
 	padding-left: 0;
-	width: 20px;
+	width: 2vmax;
 	display: block;
 	float: left;
 }
@@ -61,13 +65,65 @@ body {
 	display: block;
 }
 .label--h1 {
-	font-size: 18px;
+	font-size: 1.8vmax;
 }
 .label--h2 {
-	font-size: 14px;
+	font-size: 1.4vmax;
 	font-weight: 700;
 }
 .label--h3 {
 	font-weight: 700;
-	margin-top: 8px;
+	margin-top: .8vmax;
+}
+
+.label-body {
+  position: absolute;
+  font-size: 0.7vmax;
+  top: 0;
+  left: 0;
+  color: #fff;
+  text-shadow: 0 0 .1vmax rgba(0, 32, 64, 1);
+  margin-top: -.5vmax;
+  margin-left: -.6vmax;
+  line-height: 1vmax;
+	pointer-events: none;
+}
+
+.label-body .index {
+  position: relative;
+  font-size: 0.5vmax;
+  display: inline-block;
+  text-align: center;
+  background-color: rgba(0, 32, 64, 0.5);
+  border: solid .05vmax #fff;
+  box-shadow: 0 0 .1vmax rgba(0, 32, 64, 1);
+  border-radius: 50%;
+  top: -.1vmax;
+  margin-right: .2vmax;
+  width: 1vmax;
+  height: 1vmax;
+  line-height: 1vmax;
+}
+
+.label-body .children {
+  display: none;
+}
+
+.label-body.label-moon {
+  color: #8ac;
+}
+.label-body.label-moon .index {
+  border-color: #8ac;
+}
+
+@media (max-width: 768px) {
+	#debug {
+		display: none;
+    transform: translate(-12.5%, -12.5%) scale(0.75);
+  }
+  .label {
+    top: .4vmax !important;
+    left: .4vmax !important;
+    transform: translate(-12.5%, -12.5%) scale(0.75);
+  }
 }

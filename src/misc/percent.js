@@ -1,3 +1,3 @@
-export function toPercent(value) {
-	return `${Math.round(value * 100)}%`;
+export default function toPercent(value) {
+  return `${Math.round(value * 100)}%`;
 }
