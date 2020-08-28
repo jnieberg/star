@@ -68,6 +68,6 @@ export function getColor({ hue, saturation, lightness }) {
       valueOf: () => lightness,
       text: lightnessString,
     },
-    text: `${saturationString} ${lightnessString} ${hueString}`.replace(/^ +| +$|(Grey|White|Black).*$/g, '$1'),
+    text: `${saturationString} ${lightnessString} ${hueString}`.replace(/^.*(Grey|White|Black).*$/g, '$1'),
   };
 }

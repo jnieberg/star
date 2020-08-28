@@ -46,7 +46,8 @@ function checkOrbitBody(body, inOrbit) {
       TD.camera.orbit = body;
       setCameraParent(body.object);
       return true;
-    } if (TD.camera.orbit === body) {
+    }
+    if (TD.camera.orbit === body) {
       TD.camera.orbit = undefined;
       setCameraParent(TD.scene);
     }
@@ -61,7 +62,7 @@ export default function raycastBody() {
     const { distance, body } = getNearestBody(bodies);
     const bodyRadius = body ? (body.size * 0.0001) * 0.5 : 0;
     const distanceOrbitStar = 0.02 + bodyRadius;
-    const distanceOrbitPlanet = 0.0002 + bodyRadius;
+    const distanceOrbitPlanet = 0.0005 + bodyRadius;
     const distanceOrbitMoon = 0.00005 + bodyRadius;
     if (distance >= distanceMax) {
       if (TD.planet && TD.planet.type === 'planet') {
@@ -74,7 +75,9 @@ export default function raycastBody() {
     } if (distance > 0 && distance < distanceOrbitStar) {
       const obj = bodies.map((bd) => bd.object.low).filter((bd) => bd);
       const intersect = raycastFound(obj, 0.1, 2);
-      EVENT.controls.speedFactorPlanet = distance * 100.0 < 1.0 ? distance * 100.0 : 1.0;
+      EVENT.controls.speedFactorPlanet = (distance * 100.0 < 1.0)
+        ? distance * 100.0
+        : 1.0;
       let moon;
       if (distance < distanceOrbitMoon) {
         moon = body.type === 'moon' && body;
@@ -83,20 +86,19 @@ export default function raycastBody() {
           TD.moon.parent.hideChildren();
           TD.moon.drawHigh();
         }
-      } else {
+      } else if (TD.moon) {
         TD.moon = undefined;
       }
       let planet;
       if (distance < distanceOrbitPlanet) {
         planet = body.type === 'moon' && body.parent;
         planet = planet || (body.type === 'planet' && body);
-
         if (planet && TD.planet !== planet) {
           TD.planet = planet;
           TD.planet.parent.hideChildren();
           TD.planet.drawHigh();
         }
-      } else {
+      } else if (TD.planet) {
         TD.planet = undefined;
       }
       let star;
@@ -107,14 +109,12 @@ export default function raycastBody() {
         if (star && TD.star !== star) {
           TD.star = star;
         }
-      } else {
-        TD.star = undefined;
       }
       if (star || planet || moon) {
         // console.log(
         //   TD.moon && TD.moon.type,
         //   TD.planet && TD.planet.type,
-        //   TD.star && TD.star.type
+        //   TD.star && TD.star.type,
         // );
         if (!checkOrbitBody(TD.moon, distance < distanceOrbitMoon)) {
           if (!checkOrbitBody(TD.planet, distance < distanceOrbitPlanet)) {
@@ -123,6 +123,13 @@ export default function raycastBody() {
         }
       }
       return raycastBodyEvents(intersect);
+    }
+    if (TD.star) {
+      TD.star.parent.hideChildren();
+      TD.star = undefined;
+      TD.camera.orbit = undefined;
+      setCameraParent(TD.scene);
+      return false;
     }
   }
   return true;

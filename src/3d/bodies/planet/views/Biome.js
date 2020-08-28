@@ -237,7 +237,8 @@ class Biome {
     const falloff2 = 0.75;
     const falloff3 = 1.0;
     gradient.addColorStop(0.0, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation * falloff)}%, ${Math.round(c.lightness * falloff1)}%, 1.0)`);
-    gradient.addColorStop(0.5, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation * falloff1)}%, ${Math.round(c2.lightness * falloff2)}%, 1.0)`);
+    gradient.addColorStop(0.3, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation * falloff1)}%, ${Math.round(c2.lightness * falloff2)}%, 1.0)`);
+    gradient.addColorStop(0.7, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation * falloff2)}%, ${Math.round(c2.lightness * falloff3)}%, 1.0)`);
     gradient.addColorStop(1.0, `hsla(${Math.round(c3.hue)}, ${Math.round(c3.saturation * falloff3)}%, ${Math.round(c3.lightness * falloff3)}%, 1.0)`);
 
     this.ctx.fillStyle = gradient;

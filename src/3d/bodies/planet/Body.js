@@ -20,6 +20,7 @@ export default class Body {
     this.parent = parent;
     this.type = type || ((this.parent.type === 'star' || this.parent.type === 'substar') ? 'planet' : 'moon');
     this.random = new Random(`${this.type}_${system.id}_${this.grandParentId}_${this.parentId}_${index}`);
+    this.visible = false;
     this.object = {
       low: undefined,
       high: undefined,
@@ -213,7 +214,7 @@ export default class Body {
       const children = [];
       const { size } = this;
       this.random.seed = 'moons';
-      const childrenLength = this.random.rndInt(size * 10);
+      const childrenLength = this.random.rndInt(Math.sqrt(size) * 10);
       if (this.type === 'planet' && childrenLength) {
         for (let index = 0; index < childrenLength; index += 1) {
           const child = new Body({ system: this.system, index, parent: this });
@@ -264,19 +265,24 @@ export default class Body {
   }
 
   setLabel() {
-    if (!this.label) {
-      this.label = document.createElement('div');
-      this.label.id = 'label-body';
-      this.label.classList.add('label-body', `label-${this.type}`);
-      this.label.innerHTML = this.textShort;
-
-      document.body.appendChild(this.label);
+    if (this.visible) {
+      if (!this.label) {
+        this.label = document.createElement('div');
+        this.label.id = 'label-body';
+        this.label.classList.add('label-body', `label-${this.type}`);
+        this.label.innerHTML = this.textShort;
+        document.body.appendChild(this.label);
+      }
+      this.label.style.transform = `translate(${this.screenPosition.x}px, ${this.screenPosition.y}px)`;
+    } else {
+      this.removeLabel();
     }
   }
 
   removeLabel() {
     if (this.label) {
       this.label.remove();
+      this.label = undefined;
     }
   }
 
@@ -325,7 +331,6 @@ export default class Body {
         }
       }
       this.setLabel();
-      this.label.style.transform = `translate(${this.screenPosition.x}px, ${this.screenPosition.y}px)`;
     }
   }
 
@@ -370,28 +375,48 @@ export default class Body {
   }
 
   show() {
-    if (this.object && this.object.high) {
-      this.object.high.visible = true;
-    }
+    this.object.visible = true;
+    this.visible = true;
   }
 
   hide() {
+    this.object.visible = false;
+    this.visible = false;
+  }
+
+  // show high detailed body
+  showHigh() {
+    if (this.object && this.object.high) {
+      this.object.high.visible = true;
+      for (let c = 0; c < this.children.length; c += 1) {
+        const child = this.children[c];
+        child.show();
+      }
+    }
+  }
+
+  // hide high detailed body
+  hideHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = false;
+      for (let c = 0; c < this.children.length; c += 1) {
+        const child = this.children[c];
+        child.hide();
+      }
     }
   }
 
   hideChildren() {
     for (let c = 0; c < this.children.length; c += 1) {
       const child = this.children[c];
-      if (child.object && child.object.high) {
-        child.hide();
-      }
+      child.hideHigh();
     }
   }
 
   drawLow() {
-    // Set gas color as emmisive
+    this.show();
+
+    // Set gas color as emissive
     if (this.gas && this.type === 'planet') {
       setColor(2, this.gas.color.hue, this.gas.color.saturation, this.gas.color.lightness, 'hsl');
     }
@@ -494,7 +519,7 @@ export default class Body {
     if (this.object) {
       if (this.object.high) {
         this.drawSurface();
-        this.show();
+        this.showHigh();
       } else {
         this.object.high = new THREE.Object3D();
         this.object.high.name = 'Planet high pivot';
@@ -527,11 +552,11 @@ export default class Body {
   }
 
   remove() {
+    this.removeLabel();
     this.children.forEach((child) => {
       child.remove();
     });
     deleteThree(this.object);
-    this.removeLabel();
     delete this;
   }
 }

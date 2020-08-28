@@ -18,7 +18,7 @@ export default class SubStar extends Body {
   }
 
   get textShort() {
-    return `${this.name}${this.children && this.children.length ? `<span>${this.children.length}</span>` : ''}`;
+    return `${this.name}${this.children && this.children.length ? `<span class="children">${this.children.length}</span>` : ''}`;
   }
 
   get text() {

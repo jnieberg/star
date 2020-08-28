@@ -22,9 +22,8 @@ export default function initScene() {
   TD.renderer.shadowMap.enabled = false; // true;
   TD.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   TD.renderer.shadowMap.needsUpdate = true;
-  TD.renderer.gammaFactor = 2.2;
-  TD.renderer.gammaOutput = THREE.GammaEncoding;
-  // TD.renderer.outputEncoding = THREE.sRGBEncoding;
+  // TD.renderer.gammaFactor = 2.2;
+  TD.renderer.ouputEncoding = THREE.sRGBEncoding;
 
   TD.renderer.setPixelRatio(window.devicePixelRatio);
   TD.renderer.setSize(window.innerWidth, window.innerHeight);

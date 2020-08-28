@@ -89,7 +89,7 @@ export function initStars() {
   });
 }
 
-function newStarsCanBeRendered(force) {
+function newStarsCanBeRendered(force = false) {
   const offset = getCoordinateOffset();
   return force || typeof TD.camera.coordinate.x === 'undefined' || offset.x !== 0 || offset.y !== 0 || offset.z !== 0;
 }

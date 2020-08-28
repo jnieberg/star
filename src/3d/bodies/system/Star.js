@@ -27,7 +27,7 @@ export default class Star {
   }
 
   get textShort() {
-    return `${this.name}${this.children && this.children.length ? `<span>${this.children.length}</span>` : ''}`;
+    return `${this.name}${this.children && this.children.length ? `<span class="children">${this.children.length}</span>` : ''}`;
   }
 
   get text() {
@@ -148,10 +148,8 @@ export default class Star {
   hideChildren() {
     for (let c = 0; c < this.children.length; c += 1) {
       const child = this.children[c];
-      if (child.object && child.object.high) {
-        if (child.type !== 'substar') {
-          child.hide();
-        }
+      if (child.type !== 'substar' && child.object && child.object.high) {
+        child.hideHigh();
       }
     }
   }
@@ -160,8 +158,8 @@ export default class Star {
   get rotationSpeedAroundAxis() {
     const temperature = this.temperature.min;
     this.random.seed = 'rotation_speed';
-    return (this.random.rndInt(2) === 0 ? -1 : 1) * this.random.rnd(temperature * 0.0000003,
-      temperature * 0.0000004);
+    return (this.random.rndInt(2) === 0 ? -1 : 1)
+      * this.random.rnd(temperature * 0.0000003, temperature * 0.0000004);
   }
 
   update() {
@@ -240,7 +238,7 @@ export default class Star {
 
     // Star point light
     const near = TD.camera.near * 100 * TD.scale;
-    const far = TD.camera.far * 0.0002 * TD.scale;
+    const far = TD.camera.far * 0.0003 * TD.scale;
     this.light = new THREE.PointLight(new THREE.Color(1, 1, 1));// MISC.colorHelper3
     this.light.name = 'Star light';
     this.light.power = 30;

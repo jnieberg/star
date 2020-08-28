@@ -86,7 +86,7 @@ body {
   margin-top: -.5vmax;
   margin-left: -.6vmax;
   line-height: 1vmax;
-	pointer-events: none;
+  pointer-events: none;
 }
 
 .label-body .index {

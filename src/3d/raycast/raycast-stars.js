@@ -41,6 +41,9 @@ export default function raycastStars() {
       TD.system.object.position.y,
       TD.system.object.position.z,
     );
+    EVENT.controls.speedFactorStar = (distanceCam / (distance * 2) < 1.0)
+      ? distanceCam / (distance * 2)
+      : 1.0;
     if (distanceCam >= distance) {
       TD.system.remove();
       TD.system = undefined;
@@ -51,9 +54,6 @@ export default function raycastStars() {
       EVENT.controls.speedFactorPlanet = 1.0;
       return false;
     }
-    EVENT.controls.speedFactorStar = distanceCam / (distance * 2) < 1.0
-      ? distanceCam / (distance * 2)
-      : 1.0;
   }
   const obj = Object.values(TD.stars).map((star) => star.object);
   const intersect = raycastFound(obj, distance, 0.1);

@@ -1,5 +1,6 @@
 import { TD, MISC } from '../variables';
 import wait from '../3d/tools/wait';
+import { getWorldCamera } from '../3d/init/camera';
 
 export default class Debug {
   constructor() {
@@ -21,11 +22,13 @@ export default class Debug {
   }
 
   update() {
+    const pos = getWorldCamera();
     wait('debug', () => {
       this.view.innerHTML = `
         <div>FPS:<span>${this.fps}</span></div>
         <div>Objects:<span>${Debug.meshes}</span></div>
         <div>Coordinate:<span>${TD.camera.coordinate.x}, ${TD.camera.coordinate.y}, ${TD.camera.coordinate.z}</span></div>
+        <div>Position:<span>${Math.floor(pos.x / TD.scale)}, ${Math.floor(pos.y / TD.scale)}, ${Math.floor(pos.z / TD.scale)}</span></div>
     `;
     });
   }
