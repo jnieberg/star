@@ -7,7 +7,7 @@ export const TD = {
     radius: 2,
     density: 0.0005,
   },
-  scale: 1000,
+  scale: 10000,
   camera: {
     object: undefined,
     near: 0.0000001,
@@ -29,8 +29,8 @@ export const TD = {
     manager: undefined,
     star: {
       small: undefined,
-      large: undefined,
       surface: undefined,
+      rings: undefined,
     },
     planet: {
       surface: [],
@@ -86,7 +86,7 @@ export const STAR = {
 export const COLOR = {
   hue: {
     Purple: 0.9,
-    Blue: 0.77,
+    Blue: 0.7,
     Green: 0.5,
     Yellow: 0.2,
     Orange: 0.15,

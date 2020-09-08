@@ -1,8 +1,10 @@
+import * as THREE from 'three';
 import { TD, EVENT, MISC } from '../variables';
 import drawStars, { eventStars } from './bodies/system/stars';
 import { eventLabel, labelHide } from './label/label';
 import raycastStars from './raycast/raycast-stars';
 import raycastBody from './raycast/raycast-planets';
+import { resetCamera } from './init/camera';
 
 export function render() {
   TD.renderer.render(TD.scene, TD.camera.object);
@@ -15,6 +17,23 @@ export function loop() {
   eventLabel();
 }
 
+export function loadStorage() {
+  let item = localStorage.getItem('camera');
+  item = JSON.parse(item);
+  if (item && item.coordinate && item.position && item.rotation) {
+    const quaternion = new THREE.Quaternion(
+      item.rotation.x, item.rotation.y, item.rotation.z, item.rotation.w,
+    );
+    TD.camera.coordinate = item.coordinate;
+    TD.camera.object.position.set(item.position.x, item.position.y, item.position.z);
+    TD.camera.object.rotation.setFromQuaternion(quaternion);
+    MISC.reload = true;
+  } else {
+    resetCamera();
+  }
+  MISC.timeStart = Date.now() - Number(localStorage.getItem('time'));
+}
+
 export function interval() {
   setInterval(() => {
     drawStars();
@@ -25,7 +44,7 @@ export function interval() {
     }
     MISC.debug.update();
     if (!MISC.started) {
-      MISC.timeStart = Date.now() - Number(localStorage.getItem('time'));
+      loadStorage();
       MISC.started = true;
     }
   }, MISC.interval);

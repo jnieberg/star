@@ -1,6 +1,5 @@
-import * as THREE from 'three';
 import animate, { interval, intervalShadow } from '../animate';
-import { initCamera, getWorldCamera, resetCamera } from './camera';
+import { initCamera, getWorldCamera } from './camera';
 import initScene from './scene';
 import { initStars } from '../bodies/system/stars';
 import initControls, { getMouse, getKeys } from './controls';
@@ -18,23 +17,6 @@ export function saveStorage() {
     },
   }));
   localStorage.setItem('time', Date.now() - MISC.timeStart);
-}
-
-function loadStorage() {
-  let item = localStorage.getItem('camera');
-  item = JSON.parse(item);
-  if (item && item.coordinate && item.position && item.rotation) {
-    const quaternion = new THREE.Quaternion(
-      item.rotation.x, item.rotation.y, item.rotation.z, item.rotation.w,
-    );
-    TD.camera.coordinate = item.coordinate;
-    TD.camera.object.position.set(item.position.x, item.position.y, item.position.z);
-    TD.camera.object.rotation.setFromQuaternion(quaternion);
-    MISC.reload = true;
-  } else {
-    resetCamera();
-  }
-  MISC.timeStart = Date.now() - Number(localStorage.getItem('time'));
 }
 
 function initEvents() {
@@ -62,7 +44,7 @@ export default function init3d() {
   initTextures(() => {
     initScene();
     initCamera();
-    loadStorage();
+    // loadStorage();
     initControls();
     initStars();
     initEvents();

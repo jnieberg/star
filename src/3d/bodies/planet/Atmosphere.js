@@ -12,7 +12,7 @@ export default class Atmosphere {
     this.atmosphereIn = new Thing('glowInside')
       .geometry(new THREE.SphereBufferGeometry(size, 32, 32))
       .material(Atmosphere.atmosphereMaterial(blending), {
-        'uniforms.b.value': opacity * 0.5 + 0.75 - size * 0.01,
+        'uniforms.b.value': opacity * 0.75 + 0.75 - size * 0.01,
         'uniforms.p.value': power,
         'uniforms.glowColor.value': this.colorInner,
         side: THREE.FrontSide,
@@ -57,6 +57,7 @@ export default class Atmosphere {
       lights: true,
       transparent: true,
       depthWrite: false,
+      alphaTest: 0.5,
     });
     return material;
   }

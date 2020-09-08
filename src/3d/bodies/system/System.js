@@ -6,19 +6,20 @@ import Random from '../../../misc/Random';
 import Star from './Star';
 import { toSizeString } from '../../../misc/size';
 import { getColor } from '../../../misc/color';
+import getTime from '../../../misc/time';
 
 export default class System {
   constructor({
     index, x, y, z,
   }) {
     this.coordinate = { x, y, z };
-    this.type = 'system';
     this.index = index;
     this.id = {
       text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
       toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
     };
     this.random = new Random(`system_${this.id}`);
+    this.type = this.random.rndInt(1000) === 0 ? 'black hole' : 'system';
     this.object = {
       low: undefined,
       high: undefined,
@@ -30,7 +31,7 @@ export default class System {
       this.random.seed = 'name';
       this._name = new Word(this.random, {
         syllablesMin: 3,
-        syllablesMax: 7,
+        syllablesMax: 6,
       });
     }
     return this._name;
@@ -53,9 +54,9 @@ export default class System {
       x: (this.position.x + this.coordinate.x * TD.stargrid.size) * TD.scale, // absolute
       y: (this.position.y + this.coordinate.y * TD.stargrid.size) * TD.scale,
       z: (this.position.z + this.coordinate.z * TD.stargrid.size) * TD.scale,
-      xr: (
+      xr: ( // relative
         this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size
-      ) * TD.scale, // relative
+      ) * TD.scale,
       yr: (
         this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size
       ) * TD.scale,
@@ -68,7 +69,9 @@ export default class System {
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const size = this.random.rnd(0.3, 15);
+      const size = this.type === 'black hole'
+        ? this.random.rnd(25, 100)
+        : this.random.rnd(0.3, 15);
       this._size = {
         valueOf: () => size,
         text: toSizeString(size),
@@ -89,7 +92,7 @@ export default class System {
 
   get starDistance() {
     if (this.children.length > 1) {
-      return this.random.rnd(0.005, 0.01);
+      return this.random.rnd(5, 10) + this.size;
     }
     return 0;
   }
@@ -149,7 +152,7 @@ export default class System {
 
   update() {
     if (this.object && this.object.rotation) {
-      this.object.rotateY(this.rotationSpeedAroundAxis * MISC.time);
+      this.object.rotation.y = (getTime() * this.rotationSpeedAroundAxis * MISC.time);
     }
     this.children.forEach((child) => {
       child.update();
@@ -162,8 +165,10 @@ export default class System {
 
   updateShadows() {
     this.children.forEach((child) => {
+      if (child.light) {
       // eslint-disable-next-line no-param-reassign
-      child.light.shadow.needsUpdate = true;
+        child.light.shadow.needsUpdate = true;
+      }
     });
   }
 

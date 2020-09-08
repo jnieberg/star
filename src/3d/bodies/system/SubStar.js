@@ -8,6 +8,7 @@ import Atmosphere from '../planet/Atmosphere';
 import { toSize, toSizeString } from '../../../misc/size';
 import toCelcius from '../../../misc/temperature';
 import Body from '../planet/Body';
+import getTime from '../../../misc/time';
 
 export default class SubStar extends Body {
   constructor({ index, system, parent }) {
@@ -224,8 +225,8 @@ export default class SubStar extends Body {
     }
 
     // Set star position
-    this.object.rotateY(((2 * Math.PI) / this.system.children.length) * this.index);
-    this.object.translateX(this.system.starDistance * TD.scale);
+    this.object.rotateY(getTime() * ((2 * Math.PI) / this.system.children.length) * this.index);
+    this.object.translateX(this.system.starDistance * 0.0001 * TD.scale);
 
     // Add star to scene
     this.parent.object.add(this.object);

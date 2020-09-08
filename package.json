@@ -11,9 +11,10 @@
 		"glslify-fancy-imports": "^1.0.1",
 		"glslify-hex": "^2.1.1",
 		"path": "^0.12.7",
+		"postprocessing": "^6.17.3",
 		"seedrandom": "^3.0.5",
 		"simplex-noise": "^2.4.0",
-		"three": "^0.119.0",
+		"three": "^0.119.1",
 		"three-text2d": "^0.6.0"
 	},
 	"scripts": {

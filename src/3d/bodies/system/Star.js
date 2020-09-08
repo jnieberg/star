@@ -11,14 +11,15 @@ import toCelcius from '../../../misc/temperature';
 import Body from '../planet/Body';
 import getTime from '../../../misc/time';
 import SubStar from './SubStar';
+import BlackHole from './BlackHole';
 
 export default class Star {
   constructor({ index, system, parent = system }) {
     this.random = new Random(`star_${system.id}_${index}`);
-    this.type = 'star';
     this.index = index;
     this.system = system;
     this.parent = parent;
+    this.type = 'star';
     this.object = {
       low: undefined,
       high: undefined,
@@ -157,15 +158,26 @@ export default class Star {
   // temperature + size?
   get rotationSpeedAroundAxis() {
     const temperature = this.temperature.min;
+    const direction = this.random.rndInt(2) === 0 ? -1 : 1;
+    const speed = this.system.type === 'black hole'
+      ? this.random.rnd(temperature * 0.0003, temperature * 0.0004)
+      : this.random.rnd(temperature * 0.000003, temperature * 0.000004);
     this.random.seed = 'rotation_speed';
-    return (this.random.rndInt(2) === 0 ? -1 : 1)
-      * this.random.rnd(temperature * 0.0000003, temperature * 0.0000004);
+    return direction * speed;
   }
 
   update() {
     if (this.object && this.object.rotation) {
       this.object.rotation.set(0, 0, 0);
       this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
+      if (this.object.ring) {
+        this.object.ring.rotateZ(
+          -Math.sign(this.rotationSpeedAroundAxis) * 0.005 * this.rotationSpeedAroundAxis,
+        );
+        this.object.ring2.rotateZ(
+          -Math.sign(this.rotationSpeedAroundAxis) * 0.005 * this.rotationSpeedAroundAxis,
+        );
+      }
       if (this.children) {
         for (let c = 0; c < this.children.length; c += 1) {
           const child = this.children[c];
@@ -196,50 +208,56 @@ export default class Star {
 
     // Star pivot
     this.object = new THREE.Object3D();
+
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
-    const material = new THREE.MeshBasicMaterial({
-      color: MISC.colorHelper2,
-      side: THREE.BackSide,
-      transparent: true,
-      alphaTest: 0,
-    });
-    this.object.low = new THREE.Mesh(geometry, material);
-    this.object.low.name = 'Star low';
-    this.object.low.castShadow = false;
-    this.object.low.receiveShadow = false;
-    this.object.add(this.object.low);
+    if (this.system.type === 'black hole') {
+      this.blackHole = new BlackHole(this, geometry);
+    } else {
+      // Star inner
+      const material = new THREE.MeshBasicMaterial({
+        color: MISC.colorHelper2,
+        side: THREE.BackSide,
+        transparent: true,
+        alphaTest: 0,
+      });
+      this.object.low = new THREE.Mesh(geometry, material);
+      this.object.low.name = 'Star low';
+      this.object.low.castShadow = false;
+      this.object.low.receiveShadow = false;
+      this.object.add(this.object.low);
 
-    // Star spots
-    const materialSpots = new THREE.MeshBasicMaterial({
-      map: TD.texture.star.surface,
-      color: MISC.colorHelper,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      opacity: 1,
-      alphaTest: 0,
-    });
-    this.object.high = new THREE.Mesh(geometry, materialSpots);
-    this.object.high.name = 'Star high';
-    this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
-    this.object.high.castShadow = false;
-    this.object.high.receiveShadow = false;
-    this.object.add(this.object.high);
+      // Star spots
+      const materialSpots = new THREE.MeshBasicMaterial({
+        map: TD.texture.star.rings,
+        color: MISC.colorHelper,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        opacity: 1,
+        alphaTest: 0,
+      });
+      this.object.high = new THREE.Mesh(geometry, materialSpots);
+      this.object.high.name = 'Star high';
+      this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
+      this.object.high.castShadow = false;
+      this.object.high.receiveShadow = false;
+      this.object.add(this.object.high);
 
-    // Star corona
-    // eslint-disable-next-line no-unused-vars
-    const _ = new Atmosphere(this.object.high, {
-      size: size * 1.01,
-      thickness: size * 1.5,
-      color: MISC.colorHelper2,
-      colorInner: MISC.colorHelper,
-      blending: THREE.AdditiveBlending,
-      opacity: 0.75,
-    });
+      // Star corona
+      // eslint-disable-next-line no-unused-vars
+      const _ = new Atmosphere(this.object.high, {
+        size: size * 1.01,
+        thickness: size * 1.5,
+        color: MISC.colorHelper2,
+        colorInner: MISC.colorHelper,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.75,
+      });
+    }
 
     // Star point light
     const near = TD.camera.near * 100 * TD.scale;
     const far = TD.camera.far * 0.0003 * TD.scale;
-    this.light = new THREE.PointLight(new THREE.Color(1, 1, 1));// MISC.colorHelper3
+    this.light = new THREE.PointLight(MISC.colorHelper3);
     this.light.name = 'Star light';
     this.light.power = 30;
     this.light.decay = 2;
@@ -266,7 +284,7 @@ export default class Star {
 
     // Set star position
     this.object.rotateY(((2 * Math.PI) / this.parent.children.length) * this.index);
-    this.object.translateX(this.parent.starDistance * TD.scale);
+    this.object.translateX(this.parent.starDistance * 0.0001 * TD.scale);
 
     // Add star to scene
     this.parent.object.add(this.object);

@@ -253,9 +253,9 @@ export default class Body {
 
   get rotationSpeedAroundParent() {
     this.random.seed = 'rotation_speed_parent';
-    const speed = this.type === 'moon' ? this.random.rnd(10.0, 15.0) : this.random.rnd(0.000001, 0.0000015);
+    const speed = this.type === 'moon' ? this.random.rnd(10.0, 15.0) : this.random.rnd(0.00000001, 0.000000015);// this.random.rnd(0.000001, 0.0000015);
     return this.parent.rotationSpeedAroundAxis
-      / ((this.distance ** 5) * speed + 1.0)
+      / ((this.distance ** 6) * speed + 1.0)
       - this.parent.rotationSpeedAroundAxis;
   }
 
@@ -358,11 +358,11 @@ export default class Body {
       }, () => {
         console.log('INTERRUPT SUCCESS!!!');
       });
-      bodySurface.ground.name = `Planet high ${resolution}`;
+      bodySurface.ground.name = `${this.type} high ${resolution}`;
       this.object.high.add(bodySurface.ground);
       // this.object.high = bodySurface.ground;
       if (bodySurface.clouds) {
-        bodySurface.clouds.sphere.name = 'Planet clouds';
+        bodySurface.clouds.sphere.name = `${this.type} clouds`;
         this.object.high.add(bodySurface.clouds.sphere);
       }
     } else {
@@ -433,7 +433,7 @@ export default class Body {
 
     // Planet pivot
     this.object = new THREE.Object3D();
-    this.object.name = 'Planet pivot';
+    this.object.name = `${this.type} pivot`;
     this.parent.object.high.add(this.object);
     this.object.rotation.y = this.random.rnd(2 * Math.PI) || 0;
     this.object.translateX(this.distance * 0.0001 * TD.scale || 0);
@@ -515,14 +515,13 @@ export default class Body {
   }
 
   drawHigh() {
-    // Hide other high detail planets
     if (this.object) {
       if (this.object.high) {
         this.drawSurface();
         this.showHigh();
       } else {
         this.object.high = new THREE.Object3D();
-        this.object.high.name = 'Planet high pivot';
+        this.object.high.name = `${this.type} high pivot`;
         this.object.add(this.object.high);
         this.drawSurface();
 
