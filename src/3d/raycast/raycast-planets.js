@@ -11,7 +11,6 @@ function getNearestBody(bodies) {
     const body = bodies[b];
     if (body.object && body.object.matrixWorld) {
       const position = new THREE.Vector3();
-      // position.setFromMatrixPosition(body.object.matrixWorld);
       body.object.getWorldPosition(position);
       const distanceThis = distanceToCamera(position.x, position.y, position.z);
       if (distanceBody === 0 || distanceBody > distanceThis) {

@@ -13,7 +13,7 @@ import getTime from '../../../misc/time';
 export default class SubStar extends Body {
   constructor({ index, system, parent }) {
     super({
-      index, system, parent, type: 'substar',
+      index, system, parent, type: 'sub-star',
     });
     this.random = new Random(`substar_${system.id}_${parent.id}_${index}`);
   }
@@ -40,7 +40,7 @@ export default class SubStar extends Body {
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const sizeOff = this.random.rnd(0.25, 0.5);
+      const sizeOff = this.random.rnd(0.2, 0.4);
       const size = this.parent.size * sizeOff;
       this._size = {
         valueOf: () => size,
@@ -53,8 +53,8 @@ export default class SubStar extends Body {
   get color() {
     if (!this._color) {
       this.random.seed = 'color';
-      const hue = this.random.rnd(0.05);
-      const lightness = this.random.rnd(0.1, 0.4);
+      const hue = this.parent.special === 'black-hole' ? this.random.rnd() : this.random.rnd(0.08);
+      const lightness = this.parent.special === 'black-hole' ? this.random.rnd(0.1, 1.0) : this.random.rnd(0.1, 0.4);
       this._color = getColor({ hue, lightness });
     }
     return this._color;
@@ -123,7 +123,7 @@ export default class SubStar extends Body {
     const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
     setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
     setColor(2, hue2, 1.0, this.color.lightness + 0.25, 'hsl');
-    setColor(3, this.color.hue, 0.5, this.color.lightness, 'hsl');
+    setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
     this.random.seed = 'rotation';
 
     // Sub star pivot
@@ -160,7 +160,7 @@ export default class SubStar extends Body {
     // Sub star corona
     // eslint-disable-next-line no-unused-vars
     const _ = new Atmosphere(this.object.high, {
-      size: size * 1.01,
+      size: size * 1.005,
       thickness: size * 1.5,
       color: MISC.colorHelper2,
       colorInner: MISC.colorHelper,
@@ -170,7 +170,7 @@ export default class SubStar extends Body {
 
     // Sub star point light
     const near = TD.camera.near * 100 * TD.scale;
-    const far = TD.camera.far * 0.00005 * TD.scale;
+    const far = TD.camera.far * 0.001 * TD.scale;
     this.light = new THREE.PointLight(MISC.colorHelper3);
     this.light.name = 'Sub star light';
     this.light.power = 30;
@@ -190,10 +190,7 @@ export default class SubStar extends Body {
 
     // Planet trajectory
     const trajectoryGeometry = new THREE.RingBufferGeometry(
-      1.0 - (0.2 / this.distance),
-      1.0 + (0.2 / this.distance),
-      128,
-      1,
+      1.0 - this.size / this.distance, 1.0 + this.size / this.distance, 128, 1,
     );
     const trajectoryMaterial = new THREE.MeshBasicMaterial({
       color: 0x0044ff,
@@ -226,7 +223,7 @@ export default class SubStar extends Body {
 
     // Set star position
     this.object.rotateY(getTime() * ((2 * Math.PI) / this.system.children.length) * this.index);
-    this.object.translateX(this.system.starDistance * 0.0001 * TD.scale);
+    this.object.translateX(this.distance * 0.0001 * TD.scale);
 
     // Add star to scene
     this.parent.object.add(this.object);

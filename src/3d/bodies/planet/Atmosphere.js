@@ -10,9 +10,9 @@ export default class Atmosphere {
     this.color = new THREE.Color(colorS);
     this.colorInner = new THREE.Color(colorInnerS);
     this.atmosphereIn = new Thing('glowInside')
-      .geometry(new THREE.SphereBufferGeometry(size, 32, 32))
+      .geometry(new THREE.SphereBufferGeometry(size, 64, 64))
       .material(Atmosphere.atmosphereMaterial(blending), {
-        'uniforms.b.value': opacity * 0.75 + 0.75 - size * 0.01,
+        'uniforms.b.value': opacity * 0.35 + 0.75 - size * 0.001,
         'uniforms.p.value': power,
         'uniforms.glowColor.value': this.colorInner,
         side: THREE.FrontSide,
@@ -25,7 +25,7 @@ export default class Atmosphere {
       })
       .add(mesh);
     this.atmosphereOut = new Thing('glowOutside')
-      .geometry(new THREE.SphereBufferGeometry(size + thickness, 32, 32))
+      .geometry(new THREE.SphereBufferGeometry(size + thickness, 64, 64))
       .material(Atmosphere.atmosphereMaterial(blending), {
         'uniforms.b.value': -0.085,
         'uniforms.p.value': (thickness / size) * (1.1 - opacity * 0.5) * 20,
@@ -57,7 +57,7 @@ export default class Atmosphere {
       lights: true,
       transparent: true,
       depthWrite: false,
-      alphaTest: 0.5,
+      alphaTest: 0,
     });
     return material;
   }

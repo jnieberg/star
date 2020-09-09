@@ -31,6 +31,7 @@ export const TD = {
       small: undefined,
       surface: undefined,
       rings: undefined,
+      aura: undefined,
     },
     planet: {
       surface: [],

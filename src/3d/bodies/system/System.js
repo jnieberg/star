@@ -5,7 +5,7 @@ import deleteThree from '../../tools/delete';
 import Random from '../../../misc/Random';
 import Star from './Star';
 import { toSizeString } from '../../../misc/size';
-import { getColor } from '../../../misc/color';
+import setColor, { getColor } from '../../../misc/color';
 import getTime from '../../../misc/time';
 
 export default class System {
@@ -19,11 +19,12 @@ export default class System {
       toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
     };
     this.random = new Random(`system_${this.id}`);
-    this.type = this.random.rndInt(1000) === 0 ? 'black hole' : 'system';
+    this.type = 'system';
     this.object = {
       low: undefined,
       high: undefined,
     };
+    this.drawLow();
   }
 
   get name() {
@@ -69,7 +70,7 @@ export default class System {
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const size = this.type === 'black hole'
+      const size = this.type === 'black-hole'
         ? this.random.rnd(25, 100)
         : this.random.rnd(0.3, 15);
       this._size = {
@@ -92,7 +93,8 @@ export default class System {
 
   get starDistance() {
     if (this.children.length > 1) {
-      return this.random.rnd(5, 10) + this.size;
+      const size = this.children.map((child) => child.size).reduce((acc, cur) => acc + cur);
+      return size * this.random.rnd(2, 15);
     }
     return 0;
   }
@@ -150,9 +152,22 @@ export default class System {
     return 0;
   }
 
+  get rotation() {
+    if (!this._rotation) {
+      this.random.seed = 'rotation';
+      this._rotation = {
+        x: this.random.rnd(2 * Math.PI),
+        y: this.random.rnd(2 * Math.PI),
+        z: this.random.rnd(2 * Math.PI),
+      };
+    }
+    return this._rotation;
+  }
+
   update() {
     if (this.object && this.object.rotation) {
-      this.object.rotation.y = (getTime() * this.rotationSpeedAroundAxis * MISC.time);
+      this.object.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+      this.object.rotateY(getTime() * this.rotationSpeedAroundAxis * MISC.time);
     }
     this.children.forEach((child) => {
       child.update();
@@ -166,7 +181,6 @@ export default class System {
   updateShadows() {
     this.children.forEach((child) => {
       if (child.light) {
-      // eslint-disable-next-line no-param-reassign
         child.light.shadow.needsUpdate = true;
       }
     });
@@ -174,20 +188,24 @@ export default class System {
 
   // Draw all stars and bodies here
   draw() {
-    this.random.seed = 'rotation';
     this.object = new THREE.Object3D();
     this.object.position.set(
       this.position.x * TD.scale,
       this.position.y * TD.scale,
       this.position.z * TD.scale,
     );
-    this.object.rotation.set(
-      this.random.rnd(2 * Math.PI),
-      this.random.rnd(2 * Math.PI),
-      this.random.rnd(2 * Math.PI),
-    );
     this.children.forEach((child) => child.drawHigh());
     TD.scene.add(this.object);
+  }
+
+  drawLow() {
+    const pos = this.universe;
+    setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
+    const id = `${this.coordinate.x}_${this.coordinate.y}_${this.coordinate.z}`;
+    TD.stars[id].this.push(this);
+    TD.stars[id].positions.push(pos.xr, pos.yr, pos.zr);
+    TD.stars[id].colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
+    TD.stars[id].sizes.push(this.size * 0.2 * TD.scale);
   }
 
   remove() {

@@ -11,12 +11,12 @@ function raycastStarsEvents(intersect) {
   const id = intersect.index;
   let system;
   if (TD.stars[tag] && TD.stars[tag].this && id) {
-    system = TD.stars[tag].this[id].system;
+    system = TD.stars[tag].this[id];
   }
   if (system) {
     if (intersect.distance / TD.scale < distanceFar) {
       if (!TD.system || TD.system.id !== system.id) {
-        deleteThree(TD.system && TD.system.object);
+        if (TD.system) TD.system.remove();
         TD.system = system;
         TD.system.draw();
         const starInfo = TD.system.text;

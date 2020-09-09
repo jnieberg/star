@@ -1,4 +1,4 @@
-import animate, { interval, intervalShadow } from '../animate';
+import animate, { interval } from '../animate';
 import { initCamera, getWorldCamera } from './camera';
 import initScene from './scene';
 import { initStars } from '../bodies/system/stars';
@@ -50,6 +50,6 @@ export default function init3d() {
     initEvents();
     animate();
     interval();
-    intervalShadow();
+    // intervalShadow();
   });
 }

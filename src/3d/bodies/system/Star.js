@@ -20,11 +20,12 @@ export default class Star {
     this.system = system;
     this.parent = parent;
     this.type = 'star';
+    this.parent.random.seed = 'black-hole';
+    this.special = this.parent.random.rndInt(1000) === 0 ? 'black-hole' : '';
     this.object = {
       low: undefined,
       high: undefined,
     };
-    this.drawLow();
   }
 
   get textShort() {
@@ -32,8 +33,8 @@ export default class Star {
   }
 
   get text() {
-    const stars = this.children.filter((child) => child.type === 'substar');
-    const children = this.children.filter((child) => child.type !== 'substar');
+    const stars = this.children.filter((child) => child.type === 'sub-star');
+    const children = this.children.filter((child) => child.type !== 'sub-star');
     return `
       <div class="label--h1">${this.name}</div>
       ${this.parent.children > 1 ? `<div class="label--h2">Star #${this.index + 1} of ${this.parent.name}</div>` : ''}
@@ -61,7 +62,7 @@ export default class Star {
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const sizeOff = this.random.rnd(0.3, 0.4);
+      const sizeOff = this.special === 'black-hole' ? this.random.rnd(1, 2) : this.random.rnd(0.3, 0.4);
       const size = this.parent.size * sizeOff;
       this._size = {
         valueOf: () => size,
@@ -121,24 +122,45 @@ export default class Star {
     return this._temperature;
   }
 
+  // temperature + size?
+  get rotationSpeedAroundAxis() {
+    const temperature = this.temperature.min;
+    const direction = this.random.rndInt(2) === 0 ? -1 : 1;
+    const speed = this.special === 'black-hole'
+      ? this.random.rnd(temperature * 0.0003, temperature * 0.0004)
+      : this.random.rnd(temperature * 0.000003, temperature * 0.000004);
+    this.random.seed = 'rotation_speed';
+    return direction * speed;
+  }
+
   get children() {
     if (!this._children) {
       const children = [];
       const temperature = this.temperature.min;
       this.random.seed = 'planets';
       // number of planets depends on star temperature and number of stars
-      const childrenLength = (this.random.rndInt(Math.sqrt(temperature) * 0.1)
-        / this.parent.children.length);
+      let childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.02)
+        / this.parent.children.length;
+      childrenLength = this.special === 'black-hole'
+        ? childrenLength
+        : this.random.rndInt(Math.sqrt(temperature) * 0.1) / this.parent.children.length;
       if (childrenLength > 0) {
+        this.hasSubStar = false;
+        this.random.seed = 'sub-star';
         for (let index = 0; index < childrenLength; index += 1) {
-          const canHaveSubStar = index === 0 && (this.size.text === 'Supergiant' || this.size.text === 'Hypergiant');
+          const subStar = (this.size.text === 'Supergiant' || this.size.text === 'Hypergiant') && this.random.rndInt(5) === 0;
           let child;
-          if (canHaveSubStar && this.random.rndInt(5) === 0) {
+          if (this.special === 'black-hole') {
+            child = new SubStar({ system: this.system, index, parent: this });
+          } else if (subStar) {
+            this.hasSubStar = true;
             child = new SubStar({ system: this.system, index, parent: this });
           } else {
             child = new Body({ system: this.system, index, parent: this });
           }
-          children.push(child);
+          if (this.system.starDistance === 0 || child.distance < this.system.starDistance) {
+            children.push(child);
+          }
         }
       }
       this._children = children;
@@ -149,21 +171,10 @@ export default class Star {
   hideChildren() {
     for (let c = 0; c < this.children.length; c += 1) {
       const child = this.children[c];
-      if (child.type !== 'substar' && child.object && child.object.high) {
+      if (child.type !== 'sub-star' && child.object && child.object.high) {
         child.hideHigh();
       }
     }
-  }
-
-  // temperature + size?
-  get rotationSpeedAroundAxis() {
-    const temperature = this.temperature.min;
-    const direction = this.random.rndInt(2) === 0 ? -1 : 1;
-    const speed = this.system.type === 'black hole'
-      ? this.random.rnd(temperature * 0.0003, temperature * 0.0004)
-      : this.random.rnd(temperature * 0.000003, temperature * 0.000004);
-    this.random.seed = 'rotation_speed';
-    return direction * speed;
   }
 
   update() {
@@ -171,12 +182,11 @@ export default class Star {
       this.object.rotation.set(0, 0, 0);
       this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
       if (this.object.ring) {
-        this.object.ring.rotateZ(
-          -Math.sign(this.rotationSpeedAroundAxis) * 0.005 * this.rotationSpeedAroundAxis,
-        );
-        this.object.ring2.rotateZ(
-          -Math.sign(this.rotationSpeedAroundAxis) * 0.005 * this.rotationSpeedAroundAxis,
-        );
+        const rotate = -((0.5 * getTime() * this.rotationSpeedAroundAxis) % (2 * Math.PI));
+        const rotateInner = -((1 * getTime() * this.rotationSpeedAroundAxis) % (2 * Math.PI));
+        this.object.ring.rotation.z = rotate;
+        this.object.ring2.rotation.z = rotateInner;
+        this.object.aura.material.rotation = rotate;
       }
       if (this.children) {
         for (let c = 0; c < this.children.length; c += 1) {
@@ -187,30 +197,20 @@ export default class Star {
     }
   }
 
-  drawLow() {
-    const pos = this.system.universe;
-    setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
-    const id = `${this.system.coordinate.x}_${this.system.coordinate.y}_${this.system.coordinate.z}`;
-    TD.stars[id].this.push(this);
-    TD.stars[id].positions.push(pos.xr, pos.yr, pos.zr);
-    TD.stars[id].colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
-    TD.stars[id].sizes.push(this.size * 0.5 * TD.scale);
-  }
-
   drawHigh() {
     const size = this.size * 0.0001 * TD.scale;
     deleteThree(this.object); // WIP. Maybe we can hide it?
     const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
     setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
     setColor(2, hue2, 1.0, this.color.lightness + 0.25, 'hsl');
-    setColor(3, this.color.hue, 0.5, this.color.lightness, 'hsl');
+    setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
     this.random.seed = 'rotation';
 
     // Star pivot
     this.object = new THREE.Object3D();
 
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
-    if (this.system.type === 'black hole') {
+    if (this.special === 'black-hole') {
       this.blackHole = new BlackHole(this, geometry);
     } else {
       // Star inner
@@ -228,7 +228,7 @@ export default class Star {
 
       // Star spots
       const materialSpots = new THREE.MeshBasicMaterial({
-        map: TD.texture.star.rings,
+        map: TD.texture.star.surface,
         color: MISC.colorHelper,
         transparent: true,
         blending: THREE.AdditiveBlending,
@@ -245,9 +245,9 @@ export default class Star {
       // Star corona
       // eslint-disable-next-line no-unused-vars
       const _ = new Atmosphere(this.object.high, {
-        size: size * 1.01,
+        size: size * 1.005,
         thickness: size * 1.5,
-        color: MISC.colorHelper2,
+        color: MISC.colorHelper,
         colorInner: MISC.colorHelper,
         blending: THREE.AdditiveBlending,
         opacity: 0.75,
@@ -256,7 +256,7 @@ export default class Star {
 
     // Star point light
     const near = TD.camera.near * 100 * TD.scale;
-    const far = TD.camera.far * 0.0003 * TD.scale;
+    const far = TD.camera.far * 0.001 * TD.scale;
     this.light = new THREE.PointLight(MISC.colorHelper3);
     this.light.name = 'Star light';
     this.light.power = 30;

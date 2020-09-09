@@ -18,7 +18,7 @@ export default class Body {
     this.index = index;
     this.system = system;
     this.parent = parent;
-    this.type = type || ((this.parent.type === 'star' || this.parent.type === 'substar') ? 'planet' : 'moon');
+    this.type = type || ((this.parent.type === 'star' || this.parent.type === 'sub-star') ? 'planet' : 'moon');
     this.random = new Random(`${this.type}_${system.id}_${this.grandParentId}_${this.parentId}_${index}`);
     this.visible = false;
     this.object = {
@@ -68,10 +68,6 @@ export default class Body {
     return star || null;
   }
 
-  get subStar() {
-    return this.star.children && this.star.children[0].type === 'substar';
-  }
-
   get distanceStar() {
     let distance = this.type === 'planet' && this.distance;
     distance = distance || (this.parent.type === 'planet' && this.parent.distance);
@@ -80,16 +76,15 @@ export default class Body {
 
   get distance() {
     if (!this._distance) {
-      const isSubStarSystem = Boolean(this.subStar);
-      const size = this.parent.size * 2;
-      const scale = this.type !== 'moon' && this.parent.type === 'star' ? 5 : 0.5;
-      let id = this.type === 'moon' && 1;
-      id = id || (this.type === 'substar' && 3);
-      id = id || (isSubStarSystem && 4);
-      id = id || 2;
-      id += this.index;
+      let factor = this.type === 'moon' && 1; // moon around planet
+      factor = factor || (this.type === 'sub-star' && 0.5); // substar around star
+      factor = factor || (this.parent.type === 'sub-star' && 1); // planets around a substar
+      factor = factor || (this.star.hasSubStar && 0.5); // planets around star, in a substar system
+      factor = factor || 4; // planets around star
+      const size = this.parent.size * factor * 6;
+      factor *= (this.parent.size * (this.index + this.random.rnd(0.8, 1.2)));
       this.random.seed = 'distance';
-      this._distance = size + (id * id * 0.3 + (this.random.rnd(0.5, 1.0))) * scale;
+      this._distance = size + (factor ** 2 + 1.0);
     }
     return this._distance;
   }
@@ -253,9 +248,12 @@ export default class Body {
 
   get rotationSpeedAroundParent() {
     this.random.seed = 'rotation_speed_parent';
-    const speed = this.type === 'moon' ? this.random.rnd(10.0, 15.0) : this.random.rnd(0.00000001, 0.000000015);// this.random.rnd(0.000001, 0.0000015);
+    const velocity = (1.0 / this.parent.size) * this.distance;
+    let speed = (this.parent.type === 'planet' && this.random.rnd(10, 15));
+    speed = speed || (this.parent.type === 'sub-star' && this.random.rnd(0.1, 0.15));
+    speed = speed || this.random.rnd(0.01, 0.015);
     return this.parent.rotationSpeedAroundAxis
-      / ((this.distance ** 6) * speed + 1.0)
+      / ((velocity ** 2) * speed)
       - this.parent.rotationSpeedAroundAxis;
   }
 
@@ -454,7 +452,9 @@ export default class Body {
     this.object.add(this.object.low);
 
     // Planet trajectory
-    const trajectoryGeometry = new THREE.RingBufferGeometry(1.0 - ((this.type === 'moon' ? 0.01 : 0.05) / this.distance), 1.0 + ((this.type === 'moon' ? 0.01 : 0.05) / this.distance), 128, 1);
+    const trajectoryGeometry = new THREE.RingBufferGeometry(
+      1.0 - this.size / this.distance, 1.0 + this.size / this.distance, 128, 1,
+    ); // (this.type === 'moon' ? 0.01 : 0.05)
     const trajectoryMaterial = new THREE.MeshBasicMaterial({
       color: 0x0044ff,
       side: THREE.DoubleSide,
@@ -530,8 +530,8 @@ export default class Body {
           setColor(1, this.gas.color.hue, this.gas.color.saturation, this.gas.color.lightness, 'hsl');
           // eslint-disable-next-line no-unused-vars
           const _ = new Atmosphere(this.object.high, {
-            size: (this.size * 0.0001017) * TD.scale,
-            thickness: (this.gas.size * 0.0001017) * TD.scale,
+            size: (this.size * 0.0001002) * TD.scale,
+            thickness: (this.gas.size * 0.0001) * TD.scale,
             color: MISC.colorHelper,
             // blending: THREE.AdditiveBlending,
             transparent: true,
