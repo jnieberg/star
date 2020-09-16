@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+
 import { TD } from '../../variables';
 
 export function setCameraParent(parent) {
@@ -22,33 +23,33 @@ export function resetCamera() {
   TD.camera.coordinate = { x: undefined, y: undefined, z: undefined };
   setCameraParent(TD.scene);
   TD.camera.object.position.set(
-    TD.stargrid.size * TD.scale * 0.5,
-    TD.stargrid.size * TD.scale * 0.5,
-    TD.stargrid.size * TD.scale * 0.5,
+    TD.entity.system.size * TD.scale * 0.5,
+    TD.entity.system.size * TD.scale * 0.5,
+    TD.entity.system.size * TD.scale * 0.5,
   );
   TD.camera.object.rotation.set(0, 0, 0);
 }
 
-function getCameraPosition() {
+function getCameraPosition(config = TD.entity.system) {
   const position = getWorldCamera();
   return {
-    x: position.x / TD.scale + (TD.camera.coordinate.x || 0) * TD.stargrid.size,
-    y: position.y / TD.scale + (TD.camera.coordinate.y || 0) * TD.stargrid.size,
-    z: position.z / TD.scale + (TD.camera.coordinate.z || 0) * TD.stargrid.size,
+    x: position.x / TD.scale + (TD.camera.coordinate.x || 0) * config.size,
+    y: position.y / TD.scale + (TD.camera.coordinate.y || 0) * config.size,
+    z: position.z / TD.scale + (TD.camera.coordinate.z || 0) * config.size,
   };
 }
 
-function getCameraCoordinate() {
-  const camera = getCameraPosition();
+function getCameraCoordinate(config = TD.entity.system) {
+  const camera = getCameraPosition(config);
   return {
-    x: Math.floor(camera.x / TD.stargrid.size),
-    y: Math.floor(camera.y / TD.stargrid.size),
-    z: Math.floor(camera.z / TD.stargrid.size),
+    x: Math.floor(camera.x / config.size),
+    y: Math.floor(camera.y / config.size),
+    z: Math.floor(camera.z / config.size),
   };
 }
 
 export function setCameraPosition() {
-  const grid = TD.stargrid.size * TD.scale;
+  const grid = TD.entity.system.size * TD.scale;
   const coordOld = getCameraCoordinate();
   TD.camera.object.position.set(
     (TD.camera.object.position.x + grid) % grid,
@@ -63,8 +64,8 @@ export function setCameraPosition() {
   };
 }
 
-export function getCoordinateOffset() {
-  const camera = getCameraCoordinate();
+export function getCoordinateOffset(config = TD.entity.system) {
+  const camera = getCameraCoordinate(config);
   return {
     x: camera.x - (TD.camera.coordinate.x || 0),
     y: camera.y - (TD.camera.coordinate.y || 0),
@@ -72,7 +73,7 @@ export function getCoordinateOffset() {
   };
 }
 
-export function updateCoordinatesByOffset() {
+export function updateCameraCoordinatesByOffset() {
   const offset = getCoordinateOffset();
   TD.camera.coordinate.x = (TD.camera.coordinate.x || 0) + offset.x;
   TD.camera.coordinate.y = (TD.camera.coordinate.y || 0) + offset.y;
@@ -87,7 +88,7 @@ export function cameraLookDir() {
 
 function getFixedToCamera(x, y, z) {
   const posC = getWorldCamera();
-  const grid = TD.stargrid.size * TD.scale;
+  const grid = TD.entity.system.size * TD.scale;
   const posOff = {
     x: (x - posC.x),
     y: (y - posC.y),

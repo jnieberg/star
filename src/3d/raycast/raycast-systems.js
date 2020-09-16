@@ -2,16 +2,15 @@ import { EVENT, TD } from '../../variables';
 import setLabel, { labelShow } from '../label/label';
 import { distanceToCamera, fixObjectToCamera } from '../init/camera';
 import raycastFound from './raycast-found';
-import deleteThree from '../tools/delete';
 
-function raycastStarsEvents(intersect) {
+function raycastSystemEvents(intersect) {
   const distanceFar = 10;
   const distanceNear = 0.1;
   const tag = intersect.object.name;
   const id = intersect.index;
   let system;
-  if (TD.stars[tag] && TD.stars[tag].this && id) {
-    system = TD.stars[tag].this[id];
+  if (TD.galaxy.star.group[tag] && TD.galaxy.star.group[tag].this && id) {
+    system = TD.galaxy.star.group[tag].this[id];
   }
   if (system) {
     if (intersect.distance / TD.scale < distanceFar) {
@@ -32,7 +31,7 @@ function raycastStarsEvents(intersect) {
   return false;
 }
 
-export default function raycastStars() {
+export default function raycastSystem() {
   const distance = 10;
   if (TD.system && TD.system.object) {
     fixObjectToCamera(TD.system.object);
@@ -55,10 +54,10 @@ export default function raycastStars() {
       return false;
     }
   }
-  const obj = Object.values(TD.stars).map((star) => star.object);
+  const obj = Object.values(TD.galaxy.star.group).map((sys) => sys.object).filter((sys) => sys);
   const intersect = raycastFound(obj, distance, 0.1);
   if (intersect && intersect.object && intersect.object.name) {
-    return raycastStarsEvents(intersect);
+    return raycastSystemEvents(intersect);
   }
   return false;
 }

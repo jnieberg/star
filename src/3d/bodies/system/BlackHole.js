@@ -44,6 +44,7 @@ export default class BlackHole {
     // Black hole inner
     const material2 = new THREE.MeshBasicMaterial({
       color: 0x000000,
+      blending: THREE.MultiplyBlending,
       alphaTest: 0,
     });
     this.star.object.high = new THREE.Mesh(geometry, material2);

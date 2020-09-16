@@ -148,7 +148,7 @@ export default class Star {
         this.hasSubStar = false;
         this.random.seed = 'sub-star';
         for (let index = 0; index < childrenLength; index += 1) {
-          const subStar = (this.size.text === 'Supergiant' || this.size.text === 'Hypergiant') && this.random.rndInt(5) === 0;
+          const subStar = (this.size.text === 'Supergiant' && this.random.rndInt(20) === 0) || (this.size.text === 'Hypergiant' && this.random.rndInt(10) === 0);
           let child;
           if (this.special === 'black-hole') {
             child = new SubStar({ system: this.system, index, parent: this });
@@ -200,9 +200,9 @@ export default class Star {
   drawHigh() {
     const size = this.size * 0.0001 * TD.scale;
     deleteThree(this.object); // WIP. Maybe we can hide it?
-    const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
+    const hue2 = this.color.hue - 0.08 > 0 ? this.color.hue - 0.08 : 0;
     setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
-    setColor(2, hue2, 1.0, this.color.lightness + 0.25, 'hsl');
+    setColor(2, hue2, 1.0, this.color.lightness + 0.15, 'hsl');
     setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
     this.random.seed = 'rotation';
 
@@ -217,8 +217,7 @@ export default class Star {
       const material = new THREE.MeshBasicMaterial({
         color: MISC.colorHelper2,
         side: THREE.BackSide,
-        transparent: true,
-        alphaTest: 0,
+        alphaTest: 0.5,
       });
       this.object.low = new THREE.Mesh(geometry, material);
       this.object.low.name = 'Star low';
@@ -232,22 +231,38 @@ export default class Star {
         color: MISC.colorHelper,
         transparent: true,
         blending: THREE.AdditiveBlending,
-        opacity: 1,
-        alphaTest: 0,
+        alphaTest: 0.5,
       });
       this.object.high = new THREE.Mesh(geometry, materialSpots);
       this.object.high.name = 'Star high';
-      this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
+      this.object.high.scale.set(1, 1, 1);
       this.object.high.castShadow = false;
       this.object.high.receiveShadow = false;
       this.object.add(this.object.high);
+
+      // Sub star flare
+      const materialFlare = new THREE.SpriteMaterial({
+        map: TD.texture.star.large,
+        color: MISC.colorHelper,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        alphaTest: 0,
+        depthTest: false,
+        rotation: Math.PI * 0.25,
+      });
+      const objectFlare = new THREE.Sprite(materialFlare);
+      objectFlare.name = 'Star flare';
+      objectFlare.scale.set(size * 8, size * 8, size * 8);
+      objectFlare.castShadow = false;
+      objectFlare.receiveShadow = false;
+      this.object.add(objectFlare);
 
       // Star corona
       // eslint-disable-next-line no-unused-vars
       const _ = new Atmosphere(this.object.high, {
         size: size * 1.005,
         thickness: size * 1.5,
-        color: MISC.colorHelper,
+        color: MISC.colorHelper2,
         colorInner: MISC.colorHelper,
         blending: THREE.AdditiveBlending,
         opacity: 0.75,

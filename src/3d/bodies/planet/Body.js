@@ -24,6 +24,7 @@ export default class Body {
     this.object = {
       low: undefined,
       high: undefined,
+      trajectory: undefined,
     };
     this.surfaceRenders = {
       resolutions: [128, 512], // 1024
@@ -77,12 +78,12 @@ export default class Body {
   get distance() {
     if (!this._distance) {
       let factor = this.type === 'moon' && 1; // moon around planet
-      factor = factor || (this.type === 'sub-star' && 0.5); // substar around star
+      factor = factor || (this.type === 'sub-star' && 3); // substar around star
       factor = factor || (this.parent.type === 'sub-star' && 1); // planets around a substar
-      factor = factor || (this.star.hasSubStar && 0.5); // planets around star, in a substar system
-      factor = factor || 4; // planets around star
-      const size = this.parent.size * factor * 6;
-      factor *= (this.parent.size * (this.index + this.random.rnd(0.8, 1.2)));
+      factor = factor || (this.star.hasSubStar && 3); // planets around star, in a substar system
+      factor = factor || 2; // planets around star
+      const size = this.parent.size * factor * 4;
+      factor *= (this.index + this.random.rnd(0.8, 1.2));
       this.random.seed = 'distance';
       this._distance = size + (factor ** 2 + 1.0);
     }
@@ -386,6 +387,8 @@ export default class Body {
   showHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = true;
+      this.object.trajectory.visible = false;
+      this.object.low.material.opacity = 0;
       for (let c = 0; c < this.children.length; c += 1) {
         const child = this.children[c];
         child.show();
@@ -397,6 +400,8 @@ export default class Body {
   hideHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = false;
+      this.object.trajectory.visible = true;
+      this.object.low.material.opacity = 1;
       for (let c = 0; c < this.children.length; c += 1) {
         const child = this.children[c];
         child.hide();
@@ -452,29 +457,31 @@ export default class Body {
     this.object.add(this.object.low);
 
     // Planet trajectory
+    const trajectoryThickness = this.type === 'moon' ? 0.1 : 0.5;
+    const trajectoryOpacity = this.type === 'moon' ? 0.15 : 0.25;
     const trajectoryGeometry = new THREE.RingBufferGeometry(
-      1.0 - this.size / this.distance, 1.0 + this.size / this.distance, 128, 1,
-    ); // (this.type === 'moon' ? 0.01 : 0.05)
+      1.0 - trajectoryThickness / this.distance, 1.0 + trajectoryThickness / this.distance, 128, 1,
+    );
     const trajectoryMaterial = new THREE.MeshBasicMaterial({
       color: 0x0044ff,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       transparent: false,
-      opacity: this.type === 'moon' ? 0.15 : 0.25,
+      opacity: trajectoryOpacity,
       depthTest: false,
     });
-    const trajectoryMesh = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
-    trajectoryMesh.name = this.type === 'planet' ? 'Planet trajectory' : 'Moon trajectory';
-    trajectoryMesh.rotation.x = Math.PI * 0.5;
-    trajectoryMesh.scale.set(
+    this.object.trajectory = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
+    this.object.trajectory.name = this.type === 'planet' ? 'Planet trajectory' : 'Moon trajectory';
+    this.object.trajectory.rotation.x = Math.PI * 0.5;
+    this.object.trajectory.scale.set(
       this.distance * 0.0001 * TD.scale,
       this.distance * 0.0001 * TD.scale,
       this.distance * 0.0001 * TD.scale,
     );
-    trajectoryMesh.castShadow = false;
-    trajectoryMesh.receiveShadow = false;
-    trajectoryMesh.renderOrder = -1;
-    this.parent.object.high.add(trajectoryMesh);
+    this.object.trajectory.castShadow = false;
+    this.object.trajectory.receiveShadow = false;
+    this.object.trajectory.renderOrder = -1;
+    this.parent.object.high.add(this.object.trajectory);
 
     // Planet rings
     if (this.rings) {
@@ -516,6 +523,8 @@ export default class Body {
 
   drawHigh() {
     if (this.object) {
+      this.object.trajectory.visible = false;
+      this.object.low.material.opacity = 0;
       if (this.object.high) {
         this.drawSurface();
         this.showHigh();

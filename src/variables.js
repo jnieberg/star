@@ -2,17 +2,24 @@ import * as THREE from 'three';
 import ThingList from './object/ThingList';
 
 export const TD = {
-  stargrid: {
-    size: 100,
-    radius: 2,
-    density: 0.0005,
+  entity: {
+    system: {
+      size: 100,
+      radius: 2,
+      density: 0.0005,
+    },
+    nebula: {
+      size: 100,
+      radius: 10,
+      density: 256,
+    },
   },
-  scale: 10000,
+  scale: 100000,
   camera: {
     object: undefined,
     near: 0.0000001,
-    fade: 190,
-    far: 200,
+    fade: 400,
+    far: 700,
     orbit: undefined,
     coordinate: {
       x: undefined,
@@ -34,15 +41,18 @@ export const TD = {
       aura: undefined,
     },
     planet: {
-      surface: [],
       rings: undefined,
+    },
+    misc: {
+      nebula: [],
     },
   },
   material: {
     stars: undefined,
+    nebulas: undefined,
     grid: undefined,
   },
-  stars: {},
+  galaxy: undefined,
   system: undefined,
   star: undefined,
   planet: undefined,
@@ -123,7 +133,7 @@ export const SHADER = {
         #else
           float depth = 300.0 * gl_FragCoord.z / gl_FragCoord.w;
         #endif
-        fogFactor = smoothstep( fogFar, 0.0, depth );
+        fogFactor = smoothstep( fogFar, 0.0, depth ); // fogFar
         gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
       #endif
       gl_FragColor = gl_FragColor * texture2D( texture2, gl_PointCoord );

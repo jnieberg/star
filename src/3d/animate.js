@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { TD, EVENT, MISC } from '../variables';
-import drawStars, { eventStars } from './bodies/system/stars';
 import { eventLabel, labelHide } from './label/label';
-import raycastStars from './raycast/raycast-stars';
+import raycastSystem from './raycast/raycast-systems';
 import raycastBody from './raycast/raycast-planets';
 import { resetCamera } from './init/camera';
 
@@ -13,7 +12,7 @@ export function render() {
 
 export function loop() {
   EVENT.controls.update(TD.clock.getDelta());
-  eventStars();
+  TD.galaxy.update();
   eventLabel();
 }
 
@@ -36,8 +35,8 @@ export function loadStorage() {
 
 export function interval() {
   setInterval(() => {
-    drawStars();
-    let keepLabel = raycastStars();
+    TD.galaxy.draw();
+    let keepLabel = raycastSystem();
     keepLabel = raycastBody() || keepLabel;
     if (!keepLabel && TD.label && TD.label.visible) {
       labelHide();

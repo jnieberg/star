@@ -1,11 +1,11 @@
 import animate, { interval } from '../animate';
 import { initCamera, getWorldCamera } from './camera';
 import initScene from './scene';
-import { initStars } from '../bodies/system/stars';
 import initControls, { getMouse, getKeys } from './controls';
 import initTextures from './texture';
 import { TD, MISC } from '../../variables';
 import Debug from '../../misc/debug';
+import Galaxy from '../bodies/Galaxy';
 
 export function saveStorage() {
   const coord = getWorldCamera();
@@ -46,7 +46,7 @@ export default function init3d() {
     initCamera();
     // loadStorage();
     initControls();
-    initStars();
+    TD.galaxy = new Galaxy();
     initEvents();
     animate();
     interval();

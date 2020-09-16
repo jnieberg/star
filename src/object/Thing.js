@@ -16,7 +16,7 @@ export default class Thing {
     return this;
   }
 
-  material(materialClass, params) {
+  material(materialClass, params = {}) {
     this.material = materialClass;
     this.material = Thing.setParameters(this.material, params);
     return this;

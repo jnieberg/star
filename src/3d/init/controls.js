@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { TD, EVENT } from '../../variables';
-import deleteThree from '../tools/delete';
 import { resetCamera } from './camera';
 import { labelHide } from '../label/label';
+import Galaxy from '../bodies/Galaxy';
 
 function fingersTouching(event) {
   return event.changedTouches && event.changedTouches.length;
@@ -360,10 +360,8 @@ export function getKeys(e) {
       EVENT.controls.accF = 0;
       EVENT.controls.accL = 0;
       EVENT.controls.accU = 0;
-      Object.keys(TD.stars).forEach((i) => {
-        deleteThree(TD.stars[i].object);
-      });
-      TD.stars = {};
+      TD.galaxy.remove();
+      TD.galaxy = new Galaxy();
       if (TD.system) {
         TD.system.remove();
       }

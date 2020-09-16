@@ -10,8 +10,11 @@ import getTime from '../../../misc/time';
 
 export default class System {
   constructor({
-    index, x, y, z,
+    parent, index, x, y, z,
   }) {
+    this.parent = parent;
+    this.type = 'system';
+    this.config = TD.entity[this.type];
     this.coordinate = { x, y, z };
     this.index = index;
     this.id = {
@@ -19,7 +22,6 @@ export default class System {
       toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
     };
     this.random = new Random(`system_${this.id}`);
-    this.type = 'system';
     this.object = {
       low: undefined,
       high: undefined,
@@ -42,9 +44,9 @@ export default class System {
     if (!this._position) {
       this.random.seed = 'position';
       this._position = {
-        x: this.random.rnd(TD.stargrid.size),
-        y: this.random.rnd(TD.stargrid.size),
-        z: this.random.rnd(TD.stargrid.size),
+        x: this.random.rnd(this.config.size),
+        y: this.random.rnd(this.config.size),
+        z: this.random.rnd(this.config.size),
       };
     }
     return this._position;
@@ -52,17 +54,17 @@ export default class System {
 
   get universe() {
     return {
-      x: (this.position.x + this.coordinate.x * TD.stargrid.size) * TD.scale, // absolute
-      y: (this.position.y + this.coordinate.y * TD.stargrid.size) * TD.scale,
-      z: (this.position.z + this.coordinate.z * TD.stargrid.size) * TD.scale,
+      x: (this.position.x + this.coordinate.x * this.config.size) * TD.scale, // absolute
+      y: (this.position.y + this.coordinate.y * this.config.size) * TD.scale,
+      z: (this.position.z + this.coordinate.z * this.config.size) * TD.scale,
       xr: ( // relative
-        this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * TD.stargrid.size
+        this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * this.config.size
       ) * TD.scale,
       yr: (
-        this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * TD.stargrid.size
+        this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * this.config.size
       ) * TD.scale,
       zr: (
-        this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * TD.stargrid.size
+        this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * this.config.size
       ) * TD.scale,
     };
   }
@@ -102,15 +104,19 @@ export default class System {
   get children() {
     if (!this._children) {
       this.random.seed = 'stars';
+      let childrenLength = 0;
+      do { // chance on multinary stars
+        childrenLength += 1;
+      } while (this.random.rndInt(15) === 0);
       const children = [];
-      do {
+      for (let i = 0; i < childrenLength; i += 1) {
         children.push(
           new Star({
             system: this,
             index: children.length,
           }),
         );
-      } while (this.random.rndInt(15) === 0); // chance on multinary stars
+      }
       this._children = children;
     }
     return this._children;
@@ -202,10 +208,12 @@ export default class System {
     const pos = this.universe;
     setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
     const id = `${this.coordinate.x}_${this.coordinate.y}_${this.coordinate.z}`;
-    TD.stars[id].this.push(this);
-    TD.stars[id].positions.push(pos.xr, pos.yr, pos.zr);
-    TD.stars[id].colors.push(MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b);
-    TD.stars[id].sizes.push(this.size * 0.2 * TD.scale);
+    this.parent.group[id].this.push(this);
+    this.parent.group[id].positions.push(pos.xr, pos.yr, pos.zr);
+    this.parent.group[id].colors.push(
+      MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b,
+    );
+    this.parent.group[id].sizes.push(this.size * 0.2 * TD.scale);
   }
 
   remove() {

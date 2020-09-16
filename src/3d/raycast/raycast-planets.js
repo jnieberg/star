@@ -60,7 +60,7 @@ export default function raycastBody() {
     const distanceMax = 0.1;
     const { distance, body } = getNearestBody(bodies);
     const bodyRadius = body ? (body.size * 0.0001) * 0.5 : 0;
-    const distanceOrbitStar = 0.02 + bodyRadius;
+    const distanceOrbitStar = 0.01 + bodyRadius;
     const distanceOrbitPlanet = 0.0005 + bodyRadius;
     const distanceOrbitMoon = 0.00005 + bodyRadius;
     if (distance >= distanceMax) {
@@ -96,9 +96,15 @@ export default function raycastBody() {
           TD.planet = planet;
           TD.planet.parent.hideChildren();
           TD.planet.drawHigh();
+          // TD.camera.object.near = TD.camera.near * TD.scale * 0.01;
+          // TD.camera.object.far = TD.camera.far * TD.scale * 0.01;
+          // TD.camera.object.updateProjectionMatrix();
         }
       } else if (TD.planet) {
         TD.planet = undefined;
+        // TD.camera.object.near = TD.camera.near * TD.scale;
+        // TD.camera.object.far = TD.camera.far * TD.scale;
+        // TD.camera.object.updateProjectionMatrix();
       }
       let star;
       if (distance < distanceOrbitStar) {

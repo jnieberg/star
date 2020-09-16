@@ -12,10 +12,9 @@ export default function initScene() {
     canvas: TD.canvas,
     precision: 'highp',
     powerPreference: 'high-performance',
-    // stencil: false,
-    // failIfMajorPerformanceCaveat: true,
     alpha: true,
     antialias: true,
+    stencil: false,
     physicallyCorrectLights: true,
   });
   TD.renderer.autoClear = true;

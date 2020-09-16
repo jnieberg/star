@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 
 import Random from '../../../misc/Random';
-import { STAR, TD, MISC } from '../../../variables';
+import {
+  STAR, TD, MISC, COLOR,
+} from '../../../variables';
 import deleteThree from '../../tools/delete';
 import setColor, { getColor } from '../../../misc/color';
 import Atmosphere from '../planet/Atmosphere';
@@ -53,8 +55,8 @@ export default class SubStar extends Body {
   get color() {
     if (!this._color) {
       this.random.seed = 'color';
-      const hue = this.parent.special === 'black-hole' ? this.random.rnd() : this.random.rnd(0.08);
-      const lightness = this.parent.special === 'black-hole' ? this.random.rnd(0.1, 1.0) : this.random.rnd(0.1, 0.4);
+      const hue = this.parent.special === 'black-hole' ? this.random.rnd() : this.random.rnd(COLOR.hue.Orange);
+      const lightness = this.parent.special === 'black-hole' ? this.random.rnd(COLOR.lightness.Black, 1.0) : this.random.rnd(COLOR.lightness.Black, COLOR.lightness.Dark);
       this._color = getColor({ hue, lightness });
     }
     return this._color;
@@ -103,7 +105,7 @@ export default class SubStar extends Body {
       const children = [];
       const temperature = this.temperature.min;
       this.random.seed = 'planets';
-      const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.1);
+      const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.05);
       if (childrenLength > 0) {
         for (let index = 0; index < childrenLength; index += 1) {
           const child = new Body({ system: this.system, index, parent: this });
@@ -120,9 +122,9 @@ export default class SubStar extends Body {
   drawLow() {
     const size = this.size * 0.0001 * TD.scale;
     deleteThree(this.object); // WIP. Maybe we can hide it?
-    const hue2 = this.color.hue - 0.05 > 0 ? this.color.hue - 0.05 : 0;
+    const hue2 = this.color.hue - 0.08 > 0 ? this.color.hue - 0.08 : 0;
     setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
-    setColor(2, hue2, 1.0, this.color.lightness + 0.25, 'hsl');
+    setColor(2, hue2, 1.0, this.color.lightness + 0.15, 'hsl');
     setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
     this.random.seed = 'rotation';
 
@@ -132,7 +134,6 @@ export default class SubStar extends Body {
     const material = new THREE.MeshBasicMaterial({
       color: MISC.colorHelper2,
       side: THREE.BackSide,
-      transparent: true,
       alphaTest: 0,
     });
     this.object.low = new THREE.Mesh(geometry, material);
@@ -147,15 +148,31 @@ export default class SubStar extends Body {
       color: MISC.colorHelper,
       transparent: true,
       blending: THREE.AdditiveBlending,
-      opacity: 1,
       alphaTest: 0,
     });
     this.object.high = new THREE.Mesh(geometry, materialSpots);
     this.object.high.name = 'Sub star high';
-    this.object.high.scale.set(1, 1, 1);// 0.98, 0.98, 0.98);
+    this.object.high.scale.set(1, 1, 1);
     this.object.high.castShadow = false;
     this.object.high.receiveShadow = false;
     this.object.add(this.object.high);
+
+    // Sub star flare
+    const materialFlare = new THREE.SpriteMaterial({
+      map: TD.texture.star.large,
+      color: MISC.colorHelper,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      alphaTest: 0,
+      depthTest: false,
+      rotation: Math.PI * 0.25,
+    });
+    const objectFlare = new THREE.Sprite(materialFlare);
+    objectFlare.name = 'Sub star flare';
+    objectFlare.scale.set(size * 8, size * 8, size * 8);
+    objectFlare.castShadow = false;
+    objectFlare.receiveShadow = false;
+    this.object.add(objectFlare);
 
     // Sub star corona
     // eslint-disable-next-line no-unused-vars
@@ -165,7 +182,7 @@ export default class SubStar extends Body {
       color: MISC.colorHelper2,
       colorInner: MISC.colorHelper,
       blending: THREE.AdditiveBlending,
-      opacity: 1,
+      opacity: 0.75,
     });
 
     // Sub star point light
@@ -189,15 +206,17 @@ export default class SubStar extends Body {
     this.object.high.add(this.light);
 
     // Planet trajectory
+    const trajectoryThickness = 1.0;
+    const trajectoryOpacity = 0.25;
     const trajectoryGeometry = new THREE.RingBufferGeometry(
-      1.0 - this.size / this.distance, 1.0 + this.size / this.distance, 128, 1,
+      1.0 - trajectoryThickness / this.distance, 1.0 + trajectoryThickness / this.distance, 128, 1,
     );
     const trajectoryMaterial = new THREE.MeshBasicMaterial({
       color: 0x0044ff,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       transparent: false,
-      opacity: this.type === 'moon' ? 0.15 : 0.25,
+      opacity: trajectoryOpacity,
       depthTest: false,
     });
     const trajectoryMesh = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);

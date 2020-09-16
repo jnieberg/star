@@ -29,8 +29,11 @@ export default function initTextures(callback = () => {}) {
   };
 
   TD.texture.star.small = loadTexture('/public/star/star3.png', false);
-  TD.texture.star.surface = loadTexture('/public/star/surface3.jpg');
-  TD.texture.star.aura = loadTexture('/public/star/black-hole.png');
+  TD.texture.star.large = loadTexture('/public/star/star2.png', false);
+  TD.texture.star.surface = loadTexture('/public/star/surface4.jpg');
   TD.texture.star.rings = loadTexture('/public/star/black-hole2.png');
+  TD.texture.star.aura = loadTexture('/public/star/black-hole.png');
   TD.texture.planet.rings = loadTexture('/public/planet/rings.png');
+  TD.texture.misc.nebula[0] = loadTexture('/public/misc/nebula.png', false);
+  TD.texture.misc.nebula[1] = loadTexture('/public/misc/nebula2.png', false);
 }

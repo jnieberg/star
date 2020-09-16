@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+
 import vertShader from '../../../shaders/atmosphere.vert';
 import fragShader from '../../../shaders/atmosphere.frag';
 import Thing from '../../../object/Thing';
@@ -54,9 +55,8 @@ export default class Atmosphere {
       vertexShader: vertShader,
       fragmentShader: fragShader,
       blending,
-      lights: true,
+      lights: false,
       transparent: true,
-      depthWrite: false,
       alphaTest: 0,
     });
     return material;
