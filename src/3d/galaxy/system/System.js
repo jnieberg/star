@@ -3,7 +3,8 @@ import Word from '../../../misc/Word';
 import { TD, MISC } from '../../../variables';
 import deleteThree from '../../tools/delete';
 import Random from '../../../misc/Random';
-import Star from './Star';
+import MainStar from './MainStar';
+import BlackHole from './BlackHole';
 import { toSizeString } from '../../../misc/size';
 import setColor, { getColor } from '../../../misc/color';
 import getTime from '../../../misc/time';
@@ -69,11 +70,19 @@ export default class System {
     };
   }
 
+  get special() {
+    this.random.seed = 'special';
+    if (this.random.rndInt(1000) === 0) { // black hole
+      return 'black-hole';
+    }
+    return undefined;
+  }
+
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const size = this.type === 'black-hole'
-        ? this.random.rnd(25, 100)
+      const size = this.special === 'black-hole'
+        ? this.random.rnd(15, 50)
         : this.random.rnd(0.3, 15);
       this._size = {
         valueOf: () => size,
@@ -110,6 +119,7 @@ export default class System {
       } while (this.random.rndInt(15) === 0);
       const children = [];
       for (let i = 0; i < childrenLength; i += 1) {
+        const Star = this.special === 'black-hole' ? BlackHole : MainStar;
         children.push(
           new Star({
             system: this,
@@ -146,16 +156,19 @@ export default class System {
 
   // temperature + size?
   get rotationSpeedAroundAxis() {
-    if (this.children.length > 1) {
-      let temperature = 0;
-      this.children.forEach((child) => {
-        temperature += child.temperature.min;
-      });
-      this.random.seed = 'rotation_speed';
-      return (this.random.rndInt(2) === 0 ? -1 : 1)
+    if (!this._rotationSpeedAroundAxis) {
+      if (this.children.length > 1) {
+        let temperature = 0;
+        this.children.forEach((child) => {
+          temperature += child.temperature.min;
+        });
+        this.random.seed = 'rotation_speed';
+        this._rotationSpeedAroundAxis = (this.random.rndInt(2) === 0 ? -1 : 1)
         * this.random.rnd(temperature * 0.00002, temperature * 0.00004);
+      }
+      this._rotationSpeedAroundAxis = 0;
     }
-    return 0;
+    return this._rotationSpeedAroundAxis;
   }
 
   get rotation() {

@@ -29,7 +29,7 @@ export default function initTextures(callback = () => {}) {
   };
 
   TD.texture.star.small = loadTexture('/public/star/star3.png', false);
-  TD.texture.star.large = loadTexture('/public/star/star2.png', false);
+  TD.texture.star.large = loadTexture('/public/star/star.png', false);
   TD.texture.star.surface = loadTexture('/public/star/surface4.jpg');
   TD.texture.star.rings = loadTexture('/public/star/black-hole2.png');
   TD.texture.star.aura = loadTexture('/public/star/black-hole.png');

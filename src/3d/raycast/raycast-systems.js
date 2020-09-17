@@ -20,7 +20,7 @@ function raycastSystemEvents(intersect) {
         TD.system.draw();
         const starInfo = TD.system.text;
         setLabel(starInfo);
-        console.log(TD.system);
+        // console.log(TD.system);
       }
     }
     if (intersect.distance > distanceNear * TD.scale) {

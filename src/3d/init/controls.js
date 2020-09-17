@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { TD, EVENT } from '../../variables';
 import { resetCamera } from './camera';
 import { labelHide } from '../label/label';
-import Galaxy from '../bodies/Galaxy';
+import Galaxy from '../galaxy/Galaxy';
 
 function fingersTouching(event) {
   return event.changedTouches && event.changedTouches.length;

@@ -32,8 +32,8 @@ body {
 	font-size: 1.2vmax;
 	font-weight: 400;
 	padding: .8vmax;
-	color: #fff;
-	border: solid .1vmax #fff;
+	color: #bbb;
+	border: solid .1vmax #bbb;
 	border-radius: .4vmax;
 	position: absolute;
 	top: 0;
@@ -64,6 +64,15 @@ body {
 .label li {
 	display: block;
 }
+.label li.star {
+  color: #fff;
+}
+.label li.planet {
+  color: #fe8;
+}
+.label li.moon {
+  color: #8ae;
+}
 .label--h1 {
 	font-size: 1.8vmax;
 }
@@ -81,7 +90,7 @@ body {
   font-size: 0.7vmax;
   top: 0;
   left: 0;
-  color: #fff;
+  color: #fe8;
   text-shadow: 0 0 .1vmax rgba(0, 32, 64, 1);
   margin-top: -.5vmax;
   margin-left: -.6vmax;
@@ -94,11 +103,10 @@ body {
   font-size: 0.5vmax;
   display: inline-block;
   text-align: center;
-  background-color: rgba(0, 32, 64, 0.5);
-  border: solid .05vmax #fff;
+  border: solid .05vmax #fe8;
   box-shadow: 0 0 .1vmax rgba(0, 32, 64, 1);
   border-radius: 50%;
-  top: -.1vmax;
+  top: -.05vmax;
   margin-right: .2vmax;
   width: 1vmax;
   height: 1vmax;
@@ -110,10 +118,21 @@ body {
 }
 
 .label-body.label-moon {
-  color: #8ac;
+  color: #8ae;
 }
 .label-body.label-moon .index {
-  border-color: #8ac;
+  border-color: #8ae;
+}
+
+.label-body.label-star .index {
+  visibility: hidden;
+}
+
+.label-body.label-star, .label-body.label-sub-star {
+  color: #fff;
+}
+.label-body.label-star .index, .label-body.label-sub-star .index {
+  border-color: #fff;
 }
 
 @media (max-width: 768px) {

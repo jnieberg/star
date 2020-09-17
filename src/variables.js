@@ -6,12 +6,12 @@ export const TD = {
     system: {
       size: 100,
       radius: 2,
-      density: 0.0005,
+      density: 0.0003,
     },
     nebula: {
       size: 100,
       radius: 10,
-      density: 256,
+      density: 512,
     },
   },
   scale: 100000,

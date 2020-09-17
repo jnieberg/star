@@ -15,7 +15,6 @@ export default class Word {
         'r', 'r', 'r', 'r', 'r', 'r',
         's', 's', 's', 's', 's', 's',
         't', 't', 't', 't', 't',
-        'v', 'v', 'v',
         'x',
         'ch', 'sh', 'sp', 'st', 'th',
       ],
@@ -23,6 +22,7 @@ export default class Word {
         'b', 'b', 'b', 'b',
         'h', 'h', 'h', 'h',
         'j', 'j', 'j',
+        'v', 'v', 'v',
         'w', 'w', 'w',
         'z',
         'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'kl', 'kn', 'kr', 'kw', 'pl', 'pr',
@@ -39,7 +39,7 @@ export default class Word {
         'o', 'o', 'o', 'o', 'o', 'o',
         'u', 'u', 'u', 'u',
         'y',
-        'au', 'ea', 'ee', 'ei', 'eu', 'ie', 'oa', 'oe', 'oi', 'oo', 'ou', 'ue', 'ui', // REMOVE?
+        'au', 'ea', 'ee', 'ei', 'eu', 'ie', 'oa', 'oe', 'oi', 'oo', 'ou', 'ue', 'ui',
       ],
       vowE: [
         'ay', 'ey', 'uy',

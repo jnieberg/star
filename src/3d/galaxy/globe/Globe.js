@@ -4,28 +4,25 @@ import setColor, { getColorMix, getColor } from '../../../misc/color';
 import toCelcius from '../../../misc/temperature';
 import deleteThree from '../../tools/delete';
 import getTime from '../../../misc/time';
-import BodySurface from './views/BodySurface';
+import GlobeSurface from './surface/GlobeSurface';
 import Atmosphere from './Atmosphere';
 import Random from '../../../misc/Random';
 import { toSize } from '../../../misc/size';
 import Word from '../../../misc/Word';
 import toPercent from '../../../misc/percent';
+import Body from '../Body';
 
-export default class Body {
+export default class Globe extends Body {
   constructor({
     system, index, parent, type,
   }) {
+    super();
     this.index = index;
     this.system = system;
     this.parent = parent;
     this.type = type || ((this.parent.type === 'star' || this.parent.type === 'sub-star') ? 'planet' : 'moon');
     this.random = new Random(`${this.type}_${system.id}_${this.grandParentId}_${this.parentId}_${index}`);
     this.visible = false;
-    this.object = {
-      low: undefined,
-      high: undefined,
-      trajectory: undefined,
-    };
     this.surfaceRenders = {
       resolutions: [128, 512], // 1024
       last: undefined,
@@ -209,11 +206,11 @@ export default class Body {
     if (!this._children) {
       const children = [];
       const { size } = this;
-      this.random.seed = 'moons';
+      this.random.seed = 'children';
       const childrenLength = this.random.rndInt(Math.sqrt(size) * 10);
       if (this.type === 'planet' && childrenLength) {
         for (let index = 0; index < childrenLength; index += 1) {
-          const child = new Body({ system: this.system, index, parent: this });
+          const child = new Globe({ system: this.system, index, parent: this });
           children.push(child);
         }
       }
@@ -242,7 +239,7 @@ export default class Body {
     ? `<div>&nbsp;</div>
     <div class="label--h3">Moons</div>
     <ol>
-      ${this.children.map((body) => `<li>${body.textShort}</li>`).join('\n')}
+      ${this.children.map((body) => `<li class="moon">${body.textShort}</li>`).join('\n')}
     </ol>`
     : ''}`;
   }
@@ -259,52 +256,11 @@ export default class Body {
   }
 
   get rotationSpeedAroundAxis() {
-    this.random.seed = 'rotation_speed';
-    return this.random.rnd(0.01, 0.20);
-  }
-
-  setLabel() {
-    if (this.visible) {
-      if (!this.label) {
-        this.label = document.createElement('div');
-        this.label.id = 'label-body';
-        this.label.classList.add('label-body', `label-${this.type}`);
-        this.label.innerHTML = this.textShort;
-        document.body.appendChild(this.label);
-      }
-      this.label.style.transform = `translate(${this.screenPosition.x}px, ${this.screenPosition.y}px)`;
-    } else {
-      this.removeLabel();
+    if (!this._rotationSpeedAroundAxis) {
+      this.random.seed = 'rotation_speed';
+      this._rotationSpeedAroundAxis = this.random.rnd(0.01, 0.20);
     }
-  }
-
-  removeLabel() {
-    if (this.label) {
-      this.label.remove();
-      this.label = undefined;
-    }
-  }
-
-  get screenPosition() {
-    if (this.object) {
-      const position = new THREE.Vector3();
-      this.object.getWorldPosition(position);
-      const p = new THREE.Vector3(position.x, position.y, position.z);
-      const vector = p.project(TD.camera.object);
-      const width = parseInt(TD.renderer.domElement.style.width, 10)
-        || TD.renderer.domElement.width;
-      const height = parseInt(TD.renderer.domElement.style.height, 10)
-        || TD.renderer.domElement.height;
-      vector.x = (vector.x + 1) * width * 0.5;
-      vector.y = -(vector.y - 1) * height * 0.5;
-      if (vector.z <= 1) {
-        return vector;
-      }
-    }
-    return {
-      x: -9999,
-      y: -9999,
-    };
+    return this._rotationSpeedAroundAxis;
   }
 
   update() {
@@ -337,7 +293,7 @@ export default class Body {
     if (this.surfaceRenders.resolutions.length > 0 && this.object) {
       const resolution = this.surfaceRenders.resolutions[0];
       setColor(1, this.gas.color.hue, this.gas.color.saturation, this.gas.color.lightness + 0.25, 'hsl');
-      const bodySurface = new BodySurface({
+      const globeSurface = new GlobeSurface({
         rnd: this.random.seed,
         size: this.size * 0.0001 * TD.scale,
         resolution,
@@ -352,17 +308,17 @@ export default class Body {
           deleteThree(this.surfaceRenders.last.ground);
         }
         this.surfaceRenders.resolutions.shift();
-        this.surfaceRenders.last = bodySurface;
+        this.surfaceRenders.last = globeSurface;
         this.drawSurface();
       }, () => {
         console.log('INTERRUPT SUCCESS!!!');
       });
-      bodySurface.ground.name = `${this.type} high ${resolution}`;
-      this.object.high.add(bodySurface.ground);
-      // this.object.high = bodySurface.ground;
-      if (bodySurface.clouds) {
-        bodySurface.clouds.sphere.name = `${this.type} clouds`;
-        this.object.high.add(bodySurface.clouds.sphere);
+      globeSurface.ground.name = `${this.type} high ${resolution}`;
+      this.object.high.add(globeSurface.ground);
+      // this.object.high = globeSurface.ground;
+      if (globeSurface.clouds) {
+        globeSurface.clouds.sphere.name = `${this.type} clouds`;
+        this.object.high.add(globeSurface.clouds.sphere);
       }
     } else {
       this.setSurfaceRender();
@@ -383,7 +339,7 @@ export default class Body {
     this.visible = false;
   }
 
-  // show high detailed body
+  // show high detailed globe
   showHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = true;
@@ -396,7 +352,7 @@ export default class Body {
     }
   }
 
-  // hide high detailed body
+  // hide high detailed globe
   hideHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = false;
@@ -442,7 +398,7 @@ export default class Body {
     this.object.translateX(this.distance * 0.0001 * TD.scale || 0);
 
     // Planet sphere
-    const bodySurface = new BodySurface({
+    const globeSurface = new GlobeSurface({
       rnd: this.random.seed,
       size: (this.size * 0.000099) * TD.scale,
       resolution: 16,
@@ -450,38 +406,11 @@ export default class Body {
       metal: this.metal,
       fluid: this.fluid,
     });
-    this.object.low = bodySurface.ground;
+    this.object.low = globeSurface.ground;
     this.object.low.name = this.type === 'planet' ? 'Planet low' : 'Moon low';
     this.object.low.castShadow = true;
     this.object.low.receiveShadow = false;
     this.object.add(this.object.low);
-
-    // Planet trajectory
-    const trajectoryThickness = this.type === 'moon' ? 0.1 : 0.5;
-    const trajectoryOpacity = this.type === 'moon' ? 0.15 : 0.25;
-    const trajectoryGeometry = new THREE.RingBufferGeometry(
-      1.0 - trajectoryThickness / this.distance, 1.0 + trajectoryThickness / this.distance, 128, 1,
-    );
-    const trajectoryMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0044ff,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      transparent: false,
-      opacity: trajectoryOpacity,
-      depthTest: false,
-    });
-    this.object.trajectory = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
-    this.object.trajectory.name = this.type === 'planet' ? 'Planet trajectory' : 'Moon trajectory';
-    this.object.trajectory.rotation.x = Math.PI * 0.5;
-    this.object.trajectory.scale.set(
-      this.distance * 0.0001 * TD.scale,
-      this.distance * 0.0001 * TD.scale,
-      this.distance * 0.0001 * TD.scale,
-    );
-    this.object.trajectory.castShadow = false;
-    this.object.trajectory.receiveShadow = false;
-    this.object.trajectory.renderOrder = -1;
-    this.parent.object.high.add(this.object.trajectory);
 
     // Planet rings
     if (this.rings) {
@@ -503,20 +432,19 @@ export default class Body {
       });
       const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
       ringMesh.name = 'Planet rings';
-      ringMesh.customDepthMaterial = new THREE.MeshDepthMaterial({
-        depthPacking: THREE.RGBADepthPacking,
-        map: TD.texture.planet.rings,
-        side: THREE.DoubleSide,
-        opacity: this.rings.color.a,
-        alphaTest: 0,
-      });
-      ringMesh.renderOrder = 2;
+      ringMesh.renderOrder = 1;
       ringMesh.rotateX(Math.PI * 0.5);
       ringMesh.castShadow = true;
       ringMesh.receiveShadow = true;
       ringMesh.material.needsUpdate = true;
       this.object.low.add(ringMesh);
     }
+
+    this.drawTrajectory({
+      thickness: this.type === 'moon' ? 0.1 : 0.5,
+      opacity: this.type === 'moon' ? 0.15 : 0.25,
+    });
+
     this.object.low.this = this;
     return this.object.low;
   }
@@ -557,14 +485,5 @@ export default class Body {
         }
       }
     }
-  }
-
-  remove() {
-    this.removeLabel();
-    this.children.forEach((child) => {
-      child.remove();
-    });
-    deleteThree(this.object);
-    delete this;
   }
 }

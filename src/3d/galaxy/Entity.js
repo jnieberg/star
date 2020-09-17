@@ -80,7 +80,7 @@ export default class Entity {
                 depthTest: false,
               });
               const object = new THREE.Mesh(this.group[i].geometry, material);
-              object.renderOrder = -1;
+              object.renderOrder = -2;
               if (typeof this.group[i].sizes[v * 2 + 1] !== 'undefined') {
                 object.scale.set(
                   this.group[i].sizes[v * 2],
@@ -105,6 +105,7 @@ export default class Entity {
               this.group[i].object.add(object);
             }
           }
+          this.group[i].object.renderOrder = -2;
           this.group[i].object.name = i;
           this.group[i].object.castShadow = false;
           this.group[i].object.receiveShadow = false;

@@ -5,7 +5,7 @@ import initControls, { getMouse, getKeys } from './controls';
 import initTextures from './texture';
 import { TD, MISC } from '../../variables';
 import Debug from '../../misc/debug';
-import Galaxy from '../bodies/Galaxy';
+import Galaxy from '../galaxy/Galaxy';
 
 export function saveStorage() {
   const coord = getWorldCamera();

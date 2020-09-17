@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { TD, EVENT, MISC } from '../variables';
 import { eventLabel, labelHide } from './label/label';
 import raycastSystem from './raycast/raycast-systems';
-import raycastBody from './raycast/raycast-planets';
+import raycastBody from './raycast/raycast-bodies';
 import { resetCamera } from './init/camera';
 
 export function render() {

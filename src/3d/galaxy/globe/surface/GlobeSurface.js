@@ -10,7 +10,7 @@ import { MISC } from '../../../../variables';
 import Random from '../../../../misc/Random';
 import wait from '../../../tools/wait';
 
-class BodySurface {
+class GlobeSurface {
   constructor({
     rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor, metal, fluid,
   }, callback) {
@@ -99,7 +99,7 @@ class BodySurface {
       const vertex = geo.vertices[v];
       vertex.normalize().multiplyScalar(radius);
     }
-    BodySurface.computeGeometry(geo);
+    GlobeSurface.computeGeometry(geo);
     this.geometry = new THREE.BufferGeometry().fromGeometry(geo);
     geo.dispose();
     this.ground.geometry = this.geometry;
@@ -121,7 +121,7 @@ class BodySurface {
 
   renderScene(callback) {
     this.initSeed();
-    this.seed = BodySurface.randRange(0, 1) * 100000.0;
+    this.seed = GlobeSurface.randRange(0, 1) * 100000.0;
     this.updateNormalScaleForRes(this.resolution);
 
     this.renderBiomeTexture();
@@ -135,16 +135,16 @@ class BodySurface {
       timerBank: this.timerBank,
       seed: this.seed,
       resolution: this.resolution,
-      res1: BodySurface.randRange(resMin, resMax),
-      res2: BodySurface.randRange(resMin, resMax),
-      resMix: BodySurface.randRange(resMin, resMax),
-      mixScale: BodySurface.randRange(0.5, 1.0),
-      doesRidged: Math.floor(BodySurface.randRange(0, 4)),
+      res1: GlobeSurface.randRange(resMin, resMax),
+      res2: GlobeSurface.randRange(resMin, resMax),
+      resMix: GlobeSurface.randRange(resMin, resMax),
+      mixScale: GlobeSurface.randRange(0.5, 1.0),
+      doesRidged: Math.floor(GlobeSurface.randRange(0, 4)),
       // doesRidged: 1
     }, () => {
       this.initSeed();
       // this.updateMaterial();
-      const resMod = BodySurface.randRange(3, 10);
+      const resMod = GlobeSurface.randRange(3, 10);
       resMax *= resMod;
       resMin *= resMod;
 
@@ -152,11 +152,11 @@ class BodySurface {
         timerBank: this.timerBank,
         seed: this.seed + 392.253,
         resolution: this.resolution,
-        res1: BodySurface.randRange(resMin, resMax),
-        res2: BodySurface.randRange(resMin, resMax),
-        resMix: BodySurface.randRange(resMin, resMax),
-        mixScale: BodySurface.randRange(0.5, 1.0),
-        doesRidged: Math.floor(BodySurface.randRange(0, 4)),
+        res1: GlobeSurface.randRange(resMin, resMax),
+        res2: GlobeSurface.randRange(resMin, resMax),
+        resMix: GlobeSurface.randRange(resMin, resMax),
+        mixScale: GlobeSurface.randRange(0.5, 1.0),
+        doesRidged: Math.floor(GlobeSurface.randRange(0, 4)),
         // doesRidged: 0
       }, () => {
         // this.updateMaterial();
@@ -266,4 +266,4 @@ class BodySurface {
   }
 }
 
-export default BodySurface;
+export default GlobeSurface;

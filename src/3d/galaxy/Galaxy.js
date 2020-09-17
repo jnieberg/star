@@ -15,7 +15,7 @@ export default class Galaxy {
       galaxy: this,
       texture: TD.texture.misc.nebula,
     });
-    console.log(this);
+    // console.log(this);
   }
 
   update(off = { x: 0, y: 0, z: 0 }) {

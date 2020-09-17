@@ -75,8 +75,8 @@ export default class Nebula {
     if (!this._color) {
       this.random.seed = 'color';
       const hue = this.random.rnd();
-      const lightness = this.random.rnd(0.0, 0.75);
-      this._color = getColor({ hue, saturation: 1.0, lightness: 0.5 });
+      const lightness = this.random.rnd(0.5, 0.75);
+      this._color = getColor({ hue, saturation: 1.0, lightness });
     }
     return this._color;
   }
