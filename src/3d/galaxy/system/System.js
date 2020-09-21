@@ -59,13 +59,13 @@ export default class System {
       y: (this.position.y + this.coordinate.y * this.config.size) * TD.scale,
       z: (this.position.z + this.coordinate.z * this.config.size) * TD.scale,
       xr: ( // relative
-        this.position.x + (this.coordinate.x - TD.camera.coordinate.x) * this.config.size
+        this.position.x + (this.coordinate.x - (TD.camera.coordinate.x || 0)) * this.config.size
       ) * TD.scale,
       yr: (
-        this.position.y + (this.coordinate.y - TD.camera.coordinate.y) * this.config.size
+        this.position.y + (this.coordinate.y - (TD.camera.coordinate.y || 0)) * this.config.size
       ) * TD.scale,
       zr: (
-        this.position.z + (this.coordinate.z - TD.camera.coordinate.z) * this.config.size
+        this.position.z + (this.coordinate.z - (TD.camera.coordinate.z || 0)) * this.config.size
       ) * TD.scale,
     };
   }

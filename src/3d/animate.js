@@ -19,7 +19,7 @@ export function loop() {
 export function loadStorage() {
   let item = localStorage.getItem('camera');
   item = JSON.parse(item);
-  if (item && item.coordinate && item.position && item.rotation) {
+  if (item && item.coordinate && item.position && item.rotation && typeof item.coordinate.x !== 'undefined') {
     const quaternion = new THREE.Quaternion(
       item.rotation.x, item.rotation.y, item.rotation.z, item.rotation.w,
     );

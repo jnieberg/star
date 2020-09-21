@@ -8,14 +8,25 @@
   <meta name="theme-color" content="#000000" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="/public/index.css">
+  <script src="https://kit.fontawesome.com/f0d1c09578.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" type="text/css" href="/public/style.css">
   <title>Star Leaper</title>
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <canvas id="game" tabindex="1"></canvas>
-  <div id="planet"></div>
+  <span class="crosshair"><i class="fas fa-plus"></i></span>
+  <div class="controls">
+    <div id="control-roll-left"><i class="fas fa-undo"></i></div>
+    <div id="control-forward"><i class="fas fa-arrow-up"></i></div>
+    <div id="control-roll-right"><i class="fas fa-redo"></i></div>
+    <div id="control-left"><i class="fas fa-arrow-left"></i></div>
+    <div id="control-backward"><i class="fas fa-arrow-down"></i></div>
+    <div id="control-right"><i class="fas fa-arrow-right"></i></div>
+
+    <div id="control-rotate"><span></span></div>
+  </div>
   <script src="/dist/bundle.js"></script>
 </body>
 

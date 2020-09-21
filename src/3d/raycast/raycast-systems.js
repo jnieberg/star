@@ -55,7 +55,7 @@ export default function raycastSystem() {
     }
   }
   const obj = Object.values(TD.galaxy.star.group).map((sys) => sys.object).filter((sys) => sys);
-  const intersect = raycastFound(obj, distance, 0.1);
+  const intersect = raycastFound(obj, distance, 0.5);
   if (intersect && intersect.object && intersect.object.name) {
     return raycastSystemEvents(intersect);
   }

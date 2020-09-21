@@ -27,7 +27,7 @@ export default class Debug {
       this.view.innerHTML = `
         <div>FPS:<span>${this.fps}</span></div>
         <div>Objects:<span>${Debug.meshes}</span></div>
-        <div>Coordinate:<span>${TD.camera.coordinate.x}, ${TD.camera.coordinate.y}, ${TD.camera.coordinate.z}</span></div>
+        <div>Coordinate:<span>${TD.camera.coordinate.x || 0}, ${TD.camera.coordinate.y || 0}, ${TD.camera.coordinate.z || 0}</span></div>
         <div>Position:<span>${Math.floor(pos.x / TD.scale)}, ${Math.floor(pos.y / TD.scale)}, ${Math.floor(pos.z / TD.scale)}</span></div>
     `;
     });

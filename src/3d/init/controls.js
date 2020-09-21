@@ -4,15 +4,8 @@ import { resetCamera } from './camera';
 import { labelHide } from '../label/label';
 import Galaxy from '../galaxy/Galaxy';
 
-function fingersTouching(event) {
-  return event.changedTouches && event.changedTouches.length;
-}
-
-function getClick(event) {
-  return {
-    x: (fingersTouching(event) && event.changedTouches[0].clientX) || event.clientX,
-    y: (fingersTouching(event) && event.changedTouches[0].clientY) || event.clientY,
-  };
+function isMobile() {
+  return window.innerWidth <= 1024;
 }
 
 class FirstPersonControls {
@@ -28,9 +21,6 @@ class FirstPersonControls {
     this.lookVertical = true;
     this.autoForward = false;
 
-    this.activeLook = true;
-
-    this.heightSpeed = false;
     this.heightCoef = 1.0;
     this.heightMin = 0.0;
     this.heightMax = 1.0;
@@ -38,8 +28,6 @@ class FirstPersonControls {
     this.constrainVertical = false;
     this.verticalMin = 0;
     this.verticalMax = Math.PI;
-
-    this.mouseDragOn = false;
 
     this.acceleration = true;
 
@@ -57,6 +45,7 @@ class FirstPersonControls {
     this.moveLeft = 0;
     this.moveRight = 0;
     this.rotate = false;
+    this.rotating = false;
 
     this.accF = 0;
     this.accL = 0;
@@ -67,8 +56,6 @@ class FirstPersonControls {
     this.lookDirection = new THREE.Vector3();
     this.spherical = new THREE.Spherical();
     this.target = new THREE.Vector3();
-
-    //
 
     if (TD.canvas !== document) {
       TD.canvas.setAttribute('tabindex', -1);
@@ -81,12 +68,12 @@ class FirstPersonControls {
     this._onKeyUp = this.onKeyUp.bind(this);
 
     document.addEventListener('contextmenu', FirstPersonControls.contextmenu, false);
-    TD.canvas.addEventListener('mousemove', this._onMouseMove, false);
-    TD.canvas.addEventListener('mousedown', this._onMouseDown, false);
-    TD.canvas.addEventListener('mouseup', this._onMouseUp, false);
-    TD.canvas.addEventListener('touchstart', this._onMouseDown, false);
-    TD.canvas.addEventListener('touchend', this._onMouseUp, false);
-    TD.canvas.addEventListener('touchmove', this._onMouseMove, false);
+    document.addEventListener('mousemove', this._onMouseMove, false);
+    document.addEventListener('mousedown', this._onMouseDown, false);
+    document.addEventListener('mouseup', this._onMouseUp, false);
+    document.addEventListener('touchstart', this._onMouseDown, false);
+    document.addEventListener('touchend', this._onMouseUp, false);
+    document.addEventListener('touchmove', this._onMouseMove, false);
 
     window.addEventListener('keydown', this._onKeyDown, false);
     window.addEventListener('keyup', this._onKeyUp, false);
@@ -94,71 +81,118 @@ class FirstPersonControls {
     this.setOrientation();
   }
 
-  //
+  static getMouseActions(event) {
+    let action = {
+      forward: event.button === 0,
+      backward: event.button === 2,
+      left: false,
+      right: false,
+      rollLeft: false,
+      rollRight: false,
+      rotate: {
+        x: event.clientX - window.innerWidth / 2,
+        y: event.clientY - window.innerHeight / 2,
+      },
+    };
+    if (isMobile()) {
+      const { target } = event;
+      if (target) {
+        const bound = target.getBoundingClientRect();
+        action = {
+          forward: target.id === 'control-forward',
+          backward: target.id === 'control-backward',
+          left: target.id === 'control-left',
+          right: target.id === 'control-right',
+          rollLeft: target.id === 'control-roll-left',
+          rollRight: target.id === 'control-roll-right',
+          rotate: target.id === 'control-rotate' && {
+            x: ((event.pageX - bound.left) / bound.width)
+              * window.innerWidth
+              - (window.innerWidth / 2),
+            y: ((event.pageY - bound.top) / bound.height)
+              * window.innerWidth
+              - (window.innerWidth / 2),
+          },
+        };
+      }
+    }
+    return action;
+  }
+
+  setRotateKnob(event) {
+    if (!event || event.target.id === 'control-rotate') {
+      if (this.mouseX / window.innerWidth < -0.5) this.mouseX = -window.innerWidth / 2;
+      if (this.mouseY / window.innerHeight < -0.5) this.mouseY = -window.innerHeight / 2;
+      if (this.mouseX / window.innerWidth > 0.5) this.mouseX = window.innerWidth / 2;
+      if (this.mouseY / window.innerHeight > 0.5) this.mouseY = window.innerHeight / 2;
+      const knob = document.querySelector('#control-rotate > span');
+      knob.style.transform = `translate(${(this.mouseX / window.innerWidth) * 10 + 5}vmax, ${(this.mouseY / window.innerHeight) * 10 + 5}vmax)`;
+    }
+  }
 
   onMouseDown(event) {
     if (TD.canvas !== document) {
       TD.canvas.focus();
     }
-
-    event.preventDefault();
-    event.stopPropagation();
-    if (this.activeLook) {
-      if (event.button === 0) {
+    if (event.cancelable) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const events = (event.touches && [...event.touches]) || [event];
+    for (let e = 0; e < events.length; e += 1) {
+      const action = FirstPersonControls.getMouseActions(events[e]);
+      if (action.forward) {
         this.moveForward = true;
         this.rotate = true;
-      } else if (event.button === 2) {
+      } else if (action.backward) {
         this.moveBackward = true;
         this.rotate = true;
-      } else if (fingersTouching(event) === 1) { // tablet
-        this.moveForward = true;
+      } else if (action.left) {
+        this.moveLeft = true;
         this.rotate = true;
-      } else if (fingersTouching(event) === 2) { // tablet
-        this.moveBackward = true;
+      } else if (action.right) {
+        this.moveRight = true;
+        this.rotate = true;
+      } else if (action.rollLeft) {
+        this.rollLeft = true;
+        this.rotate = true;
+      } else if (action.rollRight) {
+        this.rollRight = true;
         this.rotate = true;
       }
     }
-
-    this.mouseDragOn = true;
+    this.onMouseMove(event);
   }
 
   onMouseUp(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (this.activeLook) {
-      if (event.button === 0) {
-        this.moveForward = false;
-        this.rotate = false;
-      } else if (event.button === 2) {
-        this.moveBackward = false;
-        this.rotate = false;
-      } else if (fingersTouching(event) === 1) { // tablet
-        this.moveForward = false;
-        this.rotate = false;
-      } else if (fingersTouching(event) === 2) { // tablet
-        this.moveBackward = false;
-        this.rotate = false;
-      }
+    if (event.cancelable) {
+      event.preventDefault();
+      event.stopPropagation();
     }
-
-    this.mouseDragOn = false;
+    this.moveForward = false;
+    this.moveBackward = false;
+    this.moveLeft = false;
+    this.moveRight = false;
+    this.rollLeft = false;
+    this.rollRight = false;
+    this.rotate = false;
+    this.rotating = false;
   }
 
   onMouseMove(event) {
-    // if (TD.canvas === document) {
-    const { x, y } = getClick(event);
-    this.mouseX = x - window.innerWidth / 2;
-    this.mouseY = y - window.innerHeight / 2;
-    // } else {
-    //   this.mouseX = event.pageX - TD.canvas.offsetLeft - this.viewHalfX;
-    //   this.mouseY = event.pageY - TD.canvas.offsetTop - this.viewHalfY;
-    // }
+    const events = (event.touches && [...event.touches]) || [event];
+    for (let e = 0; e < events.length; e += 1) {
+      const action = FirstPersonControls.getMouseActions(events[e]);
+      if (action.rotate) {
+        this.mouseX = action.rotate.x;
+        this.mouseY = action.rotate.y;
+        this.rotating = true;
+        this.setRotateKnob(event);
+      }
+    }
   }
 
   onKeyDown(event) {
-    // event.preventDefault();
-
     switch (event.keyCode) {
       case 38: /* up */
       case 87: /* W */ this.moveForward = true; this.rotate = true; break;
@@ -216,12 +250,6 @@ class FirstPersonControls {
     event.preventDefault();
   }
 
-  // bind(fn, ...args) {
-  //   return () => {
-  //     fn.apply(this, ...args);
-  //   };
-  // }
-
   lookAt(x, y, z) {
     if (x.isVector3) {
       this.target.copy(x);
@@ -241,14 +269,7 @@ class FirstPersonControls {
       return;
     }
 
-    if (this.heightSpeed) {
-      const y = THREE.MathUtils.clamp(this.object.position.y, this.heightMin, this.heightMax);
-      const heightDelta = y - this.heightMin;
-
-      this.autoSpeedFactor = delta * (heightDelta * this.heightCoef);
-    } else {
-      this.autoSpeedFactor = 0.0;
-    }
+    this.autoSpeedFactor = 0.0;
     const actualMoveSpeed = delta * this.movementSpeed;
     const brakeFactor = 0.99 ** (delta + 1.0);
     if (!this.acceleration) {
@@ -300,9 +321,6 @@ class FirstPersonControls {
     } else {
       this.actualLookSpeed *= brakeFactor;
     }
-    if (!this.activeLook) {
-      this.actualLookSpeed = 0;
-    }
 
     let verticalLookRatio = 1;
 
@@ -313,16 +331,22 @@ class FirstPersonControls {
       this.object.rotateX(-this.mouseY * this.actualLookSpeed * verticalLookRatio * 0.02);
     }
     this.object.rotateY(-this.mouseX * this.actualLookSpeed * 0.02);
+
+    if (isMobile() && !this.rotating) {
+      this.mouseX *= 0.95;
+      this.mouseY *= 0.95;
+      this.setRotateKnob();
+    }
   }
 
   dispose() {
     document.removeEventListener('contextmenu', FirstPersonControls.contextmenu, false);
-    TD.canvas.removeEventListener('mousemove', this._onMouseMove, false);
-    TD.canvas.removeEventListener('mousedown', this._onMouseDown, false);
-    TD.canvas.removeEventListener('mouseup', this._onMouseUp, false);
-    TD.canvas.removeEventListener('touchstart', this._onMouseDown, false);
-    TD.canvas.removeEventListener('touchend', this._onMouseUp, false);
-    TD.canvas.removeEventListener('touchmove', this._onMouseMove, false);
+    document.removeEventListener('mousemove', this._onMouseMove, false);
+    document.removeEventListener('mousedown', this._onMouseDown, false);
+    document.removeEventListener('mouseup', this._onMouseUp, false);
+    document.removeEventListener('touchstart', this._onMouseDown, false);
+    document.removeEventListener('touchend', this._onMouseUp, false);
+    document.removeEventListener('touchmove', this._onMouseMove, false);
 
     window.removeEventListener('keydown', this._onKeyDown, false);
     window.removeEventListener('keyup', this._onKeyUp, false);
@@ -344,11 +368,10 @@ export function to3DCoordinate(x, y) {
 }
 
 export function getMouse(event) {
-  const { x, y } = getClick(event);
-  EVENT.mouse2d.x = x;
-  EVENT.mouse2d.y = y;
-  EVENT.mouse.x = (x / window.innerWidth) * 2 - 1;
-  EVENT.mouse.y = -(y / window.innerHeight) * 2 + 1;
+  EVENT.mouse2d.x = event.clientX;
+  EVENT.mouse2d.y = event.clientY;
+  EVENT.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  EVENT.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 export function getKeys(e) {

@@ -26,8 +26,8 @@ const compiler = webpack({
     ],
   },
 });
-const watching = compiler.watch({
-  // Example watchOptions
+// eslint-disable-next-line no-unused-vars
+const _ = compiler.watch({
   aggregateTimeout: 300,
   poll: undefined,
 }, (err, stats) => {

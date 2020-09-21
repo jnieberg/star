@@ -74,9 +74,9 @@ export default class Globe extends Body {
 
   get distance() {
     if (!this._distance) {
-      let factor = this.type === 'moon' && 1; // moon around planet
+      let factor = this.type === 'moon' && 0.5; // moon around planet
       factor = factor || (this.type === 'sub-star' && 3); // substar around star
-      factor = factor || (this.parent.type === 'sub-star' && 1); // planets around a substar
+      factor = factor || (this.parent.type === 'sub-star' && 2); // planets around a substar
       factor = factor || (this.star.hasSubStar && 3); // planets around star, in a substar system
       factor = factor || 2; // planets around star
       const size = this.parent.size * factor * 4;

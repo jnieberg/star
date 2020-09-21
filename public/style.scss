@@ -1,0 +1,262 @@
+@import 'variables';
+
+body {
+	font-family: $font-family;
+	background: black;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+	overflow: hidden;
+}
+
+#biomeCanvas {
+	display: none;
+}
+
+#debug {
+	font-family: $font-family;
+	font-size: 0.6vmax;
+	font-weight: 400;
+	color: $color-front;
+	position: absolute;
+  top: 0;
+  right: 0;
+	background-color: $color-back;
+	border: solid .1vmax $color-front;
+	margin: .4vmax;
+  padding: .4vmax;
+  pointer-events: none;
+
+  @media (max-width: $break-mobile) {
+		display: none;
+  }
+  
+  span {
+    float: right;
+    padding-left: .8vmax;
+  }
+}
+
+.crosshair {
+  font-size: 0.75vmax;
+  position: absolute;
+  display: block;
+  color: $color-cross;
+	text-shadow: 0 0 .1vmax $color-back;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: auto;
+  z-index: 999;
+}
+
+.label {
+	font-size: 1.2vmax;
+	font-weight: 400;
+	padding: .8vmax;
+	color: $color-front-label;
+	border: solid .1vmax $color-front-label;
+	border-radius: .4vmax;
+	position: absolute;
+  top: .4vmax !important;
+  left: .4vmax !important;
+	background-color: $color-back-label;
+	box-shadow: 0 0 .1vmax .1vmax $color-back-label;
+	opacity: 0;
+	white-space: nowrap;
+	z-index: 999;
+	pointer-events: none;
+	transition: opacity 0.2s;
+  transform: translate(-25%, -25%) scale(0.5);
+
+  @media (max-width: $break-mobile) {
+    top: .4vmax !important;
+    left: .4vmax !important;
+    transform: translate(-12.5%, -12.5%) scale(0.75);
+  }
+
+  span {
+    float: right;
+    padding-left: .8vmax;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+
+    .index {
+      padding-left: 0;
+      width: 2vmax;
+      display: block;
+      float: left;
+    }
+  }
+
+  li {
+    display: block;
+    &.star {
+      color: $color-star;
+    }
+    &.planet {
+      color: $color-planet;
+    }
+    &.moon {
+      color: $color-moon;
+    }
+  }
+
+  .label {
+    &--h1 {
+      font-size: 1.8vmax;
+    }
+
+    &--h2 {
+      font-size: 1.4vmax;
+      font-weight: 700;
+    }
+
+    &--h3 {
+      font-weight: 700;
+      margin-top: .8vmax;
+    }
+  }
+}
+
+.label-body {
+  position: absolute;
+  font-size: 0.7vmax;
+  top: 0;
+  left: 0;
+  color: $color-planet;
+  text-shadow: 0 0 .1vmax $color-back;
+  margin-top: -.5vmax;
+  margin-left: -.6vmax;
+  line-height: 1vmax;
+  pointer-events: none;
+
+  .index {
+    position: relative;
+    font-size: 0.5vmax;
+    display: inline-block;
+    text-align: center;
+    border: solid .05vmax $color-planet;
+    box-shadow: 0 0 .1vmax $color-back;
+    border-radius: 50%;
+    top: -.05vmax;
+    margin-right: .2vmax;
+    width: 1vmax;
+    height: 1vmax;
+    line-height: 1vmax;
+  }
+  
+  .children {
+    display: none;
+  }
+  
+  &.label-moon {
+    color: $color-moon;
+    .index {
+      border-color: $color-moon;
+    }
+  }
+  
+  &.label-star .index {
+    visibility: hidden;
+  }
+
+  &.label-star, &.label-sub-star {
+    color: $color-star;
+    .index {
+      border-color: $color-star;
+    }
+  }
+}
+
+.controls {
+  position: absolute;
+  height: 14.5vmax;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  display: none;
+
+  @media (max-width: $break-mobile) {
+    display: block;
+  }
+  
+  > * {
+    position: absolute;
+    font-size: 2vmax;
+  	color: $color-front;
+    background-color: $color-back;
+    border: solid .1vmax $color-front;
+    margin: .5vmax;
+    width: 6vmax;
+    height: 6vmax;
+    text-align: center;
+    line-height: 6vmax;
+    z-index: 999;
+    pointer-events: all;
+
+    &:active {
+      background-color: $color-back-active;
+    }
+
+    > i {
+      pointer-events: none;
+    }
+  }
+
+  #control-roll-left {
+    top: 0;
+    left: 0;
+  }
+
+  #control-forward {
+    top: 0;
+    left: 7vmax;
+  }
+
+  #control-roll-right {
+    top: 0;
+    left: 14vmax;
+  }
+
+  #control-left {
+    top: 7vmax;
+    left: 0;
+  }
+
+  #control-backward {
+    top: 7vmax;
+    left: 7vmax;
+  }
+
+  #control-right {
+    top: 7vmax;
+    left: 14vmax;
+  }
+
+  #control-rotate {
+    font-size: 7vmax;
+    line-height: 13vmax;
+    border-radius: 50%;
+    width: 13vmax;
+    height: 13vmax;
+    top: 0;
+    right: 0;
+    
+    span {
+      position: absolute;
+      display: block;
+      background: $color-front;
+      border-radius: 50%;
+      width: 3vmax;
+      height: 3vmax;
+      transform: translate(5vmax, 5vmax);
+      pointer-events: none;
+    }
+  }
+}
