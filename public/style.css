@@ -254,24 +254,37 @@ body {
 }
 
 .controls #control-rotate {
-  font-size: 7vmax;
-  line-height: 13vmax;
+  line-height: 19vmax;
   border-radius: 50%;
-  width: 13vmax;
-  height: 13vmax;
-  top: 0;
+  width: 19vmax;
+  height: 19vmax;
+  top: -6vmax;
   right: 0;
+}
+
+.controls #control-rotate::after {
+  content: '';
+  position: absolute;
+  display: block;
+  background: rgba(204, 238, 255, 0.25);
+  border-radius: 50%;
+  width: 5vmax;
+  height: 5vmax;
+  -webkit-transform: translate(7vmax, 7vmax);
+          transform: translate(7vmax, 7vmax);
+  pointer-events: none;
 }
 
 .controls #control-rotate span {
   position: absolute;
   display: block;
-  background: #cef;
+  background: #9bcd;
   border-radius: 50%;
-  width: 3vmax;
-  height: 3vmax;
-  -webkit-transform: translate(5vmax, 5vmax);
-          transform: translate(5vmax, 5vmax);
+  width: 5vmax;
+  height: 5vmax;
+  -webkit-transform: translate(7vmax, 7vmax);
+          transform: translate(7vmax, 7vmax);
   pointer-events: none;
+  z-index: 1;
 }
 /*# sourceMappingURL=style.css.map */

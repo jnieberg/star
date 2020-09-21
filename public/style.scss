@@ -240,23 +240,35 @@ body {
   }
 
   #control-rotate {
-    font-size: 7vmax;
-    line-height: 13vmax;
+    line-height: 19vmax;
     border-radius: 50%;
-    width: 13vmax;
-    height: 13vmax;
-    top: 0;
+    width: 19vmax;
+    height: 19vmax;
+    top: -6vmax;
     right: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      display: block;
+      background: $color-back-knob;
+      border-radius: 50%;
+      width: 5vmax;
+      height: 5vmax;
+      transform: translate(7vmax, 7vmax);
+      pointer-events: none;
+    }
     
     span {
       position: absolute;
       display: block;
-      background: $color-front;
+      background: $color-front-knob;
       border-radius: 50%;
-      width: 3vmax;
-      height: 3vmax;
-      transform: translate(5vmax, 5vmax);
+      width: 5vmax;
+      height: 5vmax;
+      transform: translate(7vmax, 7vmax);
       pointer-events: none;
+      z-index: 1;
     }
   }
 }

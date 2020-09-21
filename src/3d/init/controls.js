@@ -126,7 +126,7 @@ class FirstPersonControls {
       if (this.mouseX / window.innerWidth > 0.5) this.mouseX = window.innerWidth / 2;
       if (this.mouseY / window.innerHeight > 0.5) this.mouseY = window.innerHeight / 2;
       const knob = document.querySelector('#control-rotate > span');
-      knob.style.transform = `translate(${(this.mouseX / window.innerWidth) * 10 + 5}vmax, ${(this.mouseY / window.innerHeight) * 10 + 5}vmax)`;
+      knob.style.transform = `translate(${(this.mouseX / window.innerWidth) * 14 + 7}vmax, ${(this.mouseY / window.innerHeight) * 14 + 7}vmax)`;
     }
   }
 
@@ -180,6 +180,10 @@ class FirstPersonControls {
   }
 
   onMouseMove(event) {
+    if (event.cancelable) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     const events = (event.touches && [...event.touches]) || [event];
     for (let e = 0; e < events.length; e += 1) {
       const action = FirstPersonControls.getMouseActions(events[e]);
