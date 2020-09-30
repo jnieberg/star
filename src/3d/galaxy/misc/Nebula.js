@@ -3,9 +3,7 @@ import Random from '../../../misc/Random';
 import { TD, MISC } from '../../../variables';
 
 export default class Nebula {
-  constructor({
-    parent, index, x, y, z,
-  }) {
+  constructor({ parent, index, x, y, z }) {
     this.parent = parent;
     this.type = 'nebula';
     this.config = TD.entity[this.type];
@@ -13,7 +11,8 @@ export default class Nebula {
     this.index = index;
     this.id = {
       text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
-      toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
+      toString: () =>
+        `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
     };
     this.random = new Random(`nebula_${this.id}`);
     this.drawLow();
@@ -48,15 +47,22 @@ export default class Nebula {
       x: (this.position.x + this.coordinate.x * this.config.size) * TD.scale, // absolute
       y: (this.position.y + this.coordinate.y * this.config.size) * TD.scale,
       z: (this.position.z + this.coordinate.z * this.config.size) * TD.scale,
-      xr: ( // relative
-        this.position.x + (this.coordinate.x - (TD.camera.coordinate.x || 0)) * this.config.size
-      ) * TD.scale,
-      yr: (
-        this.position.y + (this.coordinate.y - (TD.camera.coordinate.y || 0)) * this.config.size
-      ) * TD.scale,
-      zr: (
-        this.position.z + (this.coordinate.z - (TD.camera.coordinate.z || 0)) * this.config.size
-      ) * TD.scale,
+      xr:
+        // relative
+        (this.position.x +
+          (this.coordinate.x - (TD.camera.coordinate.x || 0)) *
+            this.config.size) *
+        TD.scale,
+      yr:
+        (this.position.y +
+          (this.coordinate.y - (TD.camera.coordinate.y || 0)) *
+            this.config.size) *
+        TD.scale,
+      zr:
+        (this.position.z +
+          (this.coordinate.z - (TD.camera.coordinate.z || 0)) *
+            this.config.size) *
+        TD.scale,
     };
   }
 
@@ -91,15 +97,38 @@ export default class Nebula {
 
   drawLow() {
     const pos = this.universe;
-    setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
+    setColor(
+      1,
+      Number(this.color.hue),
+      1.0,
+      Number(this.color.lightness),
+      'hsl'
+    );
     const id = `${this.coordinate.x}_${this.coordinate.y}_${this.coordinate.z}`;
     this.parent.group[id].this.push(this);
-    this.parent.group[id].positions.push(pos.xr, pos.yr, pos.zr);
-    this.parent.group[id].rotations.push(this.rotation.x, this.rotation.y, this.rotation.z);
+    this.parent.group[id].positions.push(
+      pos.xr,
+      pos.yr,
+      pos.zr
+      // pos.xr + this.size.x * TD.scale, pos.yr, pos.zr,
+      // pos.xr, pos.yr + this.size.y * TD.scale, pos.zr,
+    );
+    this.parent.group[id].rotations.push(
+      this.rotation.x,
+      this.rotation.y,
+      this.rotation.z
+    );
     this.parent.group[id].colors.push(
-      MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b,
+      MISC.colorHelper.r,
+      MISC.colorHelper.g,
+      MISC.colorHelper.b
+      // MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b, this.opacity,
+      // MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b, this.opacity,
     );
     this.parent.group[id].opacity.push(this.opacity);
-    this.parent.group[id].sizes.push(this.size.x * TD.scale, this.size.y * TD.scale);
+    this.parent.group[id].sizes.push(
+      this.size.x * TD.scale,
+      this.size.y * TD.scale
+    );
   }
 }

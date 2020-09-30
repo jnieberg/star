@@ -5,9 +5,7 @@ import CloudMap from './CloudMap';
 import Random from '../../../../misc/Random';
 
 class Clouds {
-  constructor({
-    rnd, size, resolution, show, color,
-  }) {
+  constructor({ rnd, size, resolution, show, color }) {
     // this.view = new THREE.Object3D();
     this.seedString = rnd || 'lorem';
     this.initSeed();
@@ -85,22 +83,25 @@ class Clouds {
       max: 1,
     };
 
-    this.cloudMap.render({
-      timerBank: this.timerBank,
-      seed: this.seed,
-      resolution: this.resolution,
-      res1: Clouds.randRange(size.min, size.max),
-      res2: Clouds.randRange(size.min, size.max),
-      resMix: Clouds.randRange(size.min, size.max),
-      mixScale: Clouds.randRange(size.min, size.max),
-    }, () => {
-      this.updateMaterial();
-      this.sphere.visible = true;
-      console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
-      if (callback) {
-        callback();
+    this.cloudMap.render(
+      {
+        timerBank: this.timerBank,
+        seed: this.seed,
+        resolution: this.resolution,
+        res1: Clouds.randRange(size.min, size.max),
+        res2: Clouds.randRange(size.min, size.max),
+        resMix: Clouds.randRange(size.min, size.max),
+        mixScale: Clouds.randRange(size.min, size.max),
+      },
+      () => {
+        this.updateMaterial();
+        this.sphere.visible = true;
+        console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
+        if (callback) {
+          callback();
+        }
       }
-    });
+    );
   }
 
   initSeed() {
@@ -128,7 +129,7 @@ class Clouds {
     return new Color(
       Clouds.randRange(0.5, 1.0),
       Clouds.randRange(0.5, 1.0),
-      Clouds.randRange(0.5, 1.0),
+      Clouds.randRange(0.5, 1.0)
     );
   }
 

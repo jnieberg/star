@@ -4,7 +4,11 @@ import { TD } from '../../variables';
 export default function initScene() {
   // Scene
   TD.scene = new THREE.Scene();
-  TD.scene.fog = new THREE.Fog(0x000000, TD.camera.fade * TD.scale, TD.camera.far * TD.scale);
+  TD.scene.fog = new THREE.Fog(
+    0x000000,
+    TD.camera.fade * TD.scale,
+    TD.camera.far * TD.scale
+  );
 
   // WebGL Renderer
   TD.canvas = document.querySelector('#game');
@@ -12,9 +16,9 @@ export default function initScene() {
     canvas: TD.canvas,
     precision: 'highp',
     powerPreference: 'high-performance',
-    alpha: true,
+    // alpha: true,
     antialias: true,
-    stencil: false,
+    // stencil: false,
     physicallyCorrectLights: true,
   });
   TD.renderer.autoClear = true;

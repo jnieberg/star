@@ -18,6 +18,7 @@ export const TD = {
   camera: {
     object: undefined,
     near: 0.0000001,
+    system: 1,
     fade: 400,
     far: 700,
     orbit: undefined,
@@ -114,29 +115,5 @@ export const COLOR = {
     '': 0.7,
     Dark: 0.3,
     Black: 0.05,
-  },
-};
-
-export const SHADER = {
-  stars: {
-    fragment: `varying vec3 vColor;
-    varying vec2 vUv;
-    uniform sampler2D texture2;
-    ${THREE.ShaderChunk.common}
-    ${THREE.ShaderChunk.fog_pars_fragment}
-    void main() {
-      gl_FragColor = vec4( vColor, 1.0 );
-      ${THREE.ShaderChunk.fog_fragment}
-      #ifdef USE_FOG
-        #ifdef USE_LOGDEPTHBUF_EXT
-          float depth = 300.0 * gl_FragDepthEXT / gl_FragCoord.w;
-        #else
-          float depth = 300.0 * gl_FragCoord.z / gl_FragCoord.w;
-        #endif
-        fogFactor = smoothstep( fogFar, 0.0, depth ); // fogFar
-        gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
-      #endif
-      gl_FragColor = gl_FragColor * texture2D( texture2, gl_PointCoord );
-    }`,
   },
 };

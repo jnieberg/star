@@ -2,14 +2,6 @@ import * as THREE from 'three';
 import { TD } from '../../variables';
 import deleteThree from '../tools/delete';
 
-// MainStar  SubStar
-//    |  ____/ |
-//    | /      |
-//   Star    Globe
-//     \______/
-//         |
-//        Body
-
 export default class Body {
   constructor() {
     this.object = {
@@ -47,10 +39,12 @@ export default class Body {
       this.object.getWorldPosition(position);
       const p = new THREE.Vector3(position.x, position.y, position.z);
       const vector = p.project(TD.camera.object);
-      const width = parseInt(TD.renderer.domElement.style.width, 10)
-        || TD.renderer.domElement.width;
-      const height = parseInt(TD.renderer.domElement.style.height, 10)
-        || TD.renderer.domElement.height;
+      const width =
+        parseInt(TD.renderer.domElement.style.width, 10) ||
+        TD.renderer.domElement.width;
+      const height =
+        parseInt(TD.renderer.domElement.style.height, 10) ||
+        TD.renderer.domElement.height;
       vector.x = (vector.x + 1) * width * 0.5;
       vector.y = -(vector.y - 1) * height * 0.5;
       if (vector.z <= 1) {
@@ -69,7 +63,7 @@ export default class Body {
         1.0 - thickness / this.distance,
         1.0 + thickness / this.distance,
         128,
-        1,
+        1
       );
       const trajectoryMaterial = new THREE.MeshBasicMaterial({
         color: 0x0044ff,
@@ -79,17 +73,20 @@ export default class Body {
         opacity,
         depthTest: false,
       });
-      this.object.trajectory = new THREE.Mesh(trajectoryGeometry, trajectoryMaterial);
+      this.object.trajectory = new THREE.Mesh(
+        trajectoryGeometry,
+        trajectoryMaterial
+      );
       this.object.trajectory.name = `${this.type} trajectory`;
       this.object.trajectory.rotation.x = Math.PI * 0.5;
       this.object.trajectory.scale.set(
         this.distance * 0.0001 * TD.scale,
         this.distance * 0.0001 * TD.scale,
-        this.distance * 0.0001 * TD.scale,
+        this.distance * 0.0001 * TD.scale
       );
       this.object.trajectory.castShadow = false;
       this.object.trajectory.receiveShadow = false;
-      this.object.trajectory.renderOrder = -4;
+      this.object.trajectory.renderOrder = -99;
       this.parent.object.high.add(this.object.trajectory);
     }
   }

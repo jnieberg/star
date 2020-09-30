@@ -67,7 +67,11 @@ class FirstPersonControls {
     this._onKeyDown = this.onKeyDown.bind(this);
     this._onKeyUp = this.onKeyUp.bind(this);
 
-    document.addEventListener('contextmenu', FirstPersonControls.contextmenu, false);
+    document.addEventListener(
+      'contextmenu',
+      FirstPersonControls.contextmenu,
+      false
+    );
     document.addEventListener('mousemove', this._onMouseMove, false);
     document.addEventListener('mousedown', this._onMouseDown, false);
     document.addEventListener('mouseup', this._onMouseUp, false);
@@ -106,12 +110,12 @@ class FirstPersonControls {
           rollLeft: target.id === 'control-roll-left',
           rollRight: target.id === 'control-roll-right',
           rotate: target.id === 'control-rotate' && {
-            x: ((event.pageX - bound.left) / bound.width)
-              * window.innerWidth
-              - (window.innerWidth / 2),
-            y: ((event.pageY - bound.top) / bound.height)
-              * window.innerWidth
-              - (window.innerWidth / 2),
+            x:
+              ((event.pageX - bound.left) / bound.width) * window.innerWidth -
+              window.innerWidth / 2,
+            y:
+              ((event.pageY - bound.top) / bound.height) * window.innerWidth -
+              window.innerWidth / 2,
           },
         };
       }
@@ -121,12 +125,18 @@ class FirstPersonControls {
 
   setRotateKnob(event) {
     if (!event || event.target.id === 'control-rotate') {
-      if (this.mouseX / window.innerWidth < -0.5) this.mouseX = -window.innerWidth / 2;
-      if (this.mouseY / window.innerHeight < -0.5) this.mouseY = -window.innerHeight / 2;
-      if (this.mouseX / window.innerWidth > 0.5) this.mouseX = window.innerWidth / 2;
-      if (this.mouseY / window.innerHeight > 0.5) this.mouseY = window.innerHeight / 2;
+      if (this.mouseX / window.innerWidth < -0.5)
+        this.mouseX = -window.innerWidth / 2;
+      if (this.mouseY / window.innerHeight < -0.5)
+        this.mouseY = -window.innerHeight / 2;
+      if (this.mouseX / window.innerWidth > 0.5)
+        this.mouseX = window.innerWidth / 2;
+      if (this.mouseY / window.innerHeight > 0.5)
+        this.mouseY = window.innerHeight / 2;
       const knob = document.querySelector('#control-rotate > span');
-      knob.style.transform = `translate(${(this.mouseX / window.innerWidth) * 14 + 7}vmax, ${(this.mouseY / window.innerHeight) * 14 + 7}vmax)`;
+      knob.style.transform = `translate(${
+        (this.mouseX / window.innerWidth) * 14 + 7
+      }vmax, ${(this.mouseY / window.innerHeight) * 14 + 7}vmax)`;
     }
   }
 
@@ -199,47 +209,97 @@ class FirstPersonControls {
   onKeyDown(event) {
     switch (event.keyCode) {
       case 38: /* up */
-      case 87: /* W */ this.moveForward = true; this.rotate = true; break;
+      case 87:
+        /* W */ this.moveForward = true;
+        this.rotate = true;
+        break;
 
       case 37: /* left */
-      case 65: /* A */ this.moveLeft = true; this.rotate = true; break;
+      case 65:
+        /* A */ this.moveLeft = true;
+        this.rotate = true;
+        break;
 
       case 40: /* down */
-      case 83: /* S */ this.moveBackward = true; this.rotate = true; break;
+      case 83:
+        /* S */ this.moveBackward = true;
+        this.rotate = true;
+        break;
 
       case 39: /* right */
-      case 68: /* D */ this.moveRight = true; this.rotate = true; break;
+      case 68:
+        /* D */ this.moveRight = true;
+        this.rotate = true;
+        break;
 
-      case 82: /* R */ this.moveUp = true; this.rotate = true; break;
-      case 70: /* F */ this.moveDown = true; this.rotate = true; break;
+      case 82:
+        /* R */ this.moveUp = true;
+        this.rotate = true;
+        break;
+      case 70:
+        /* F */ this.moveDown = true;
+        this.rotate = true;
+        break;
 
-      case 81: /* Q */ this.rollLeft = true; this.rotate = true; break;
-      case 69: /* E */ this.rollRight = true; this.rotate = true; break;
+      case 81:
+        /* Q */ this.rollLeft = true;
+        this.rotate = true;
+        break;
+      case 69:
+        /* E */ this.rollRight = true;
+        this.rotate = true;
+        break;
 
-      default: break;
+      default:
+        break;
     }
   }
 
   onKeyUp(event) {
     switch (event.keyCode) {
       case 38: /* up */
-      case 87: /* W */ this.moveForward = false; this.rotate = false; break;
+      case 87:
+        /* W */ this.moveForward = false;
+        this.rotate = false;
+        break;
 
       case 37: /* left */
-      case 65: /* A */ this.moveLeft = false; this.rotate = false; break;
+      case 65:
+        /* A */ this.moveLeft = false;
+        this.rotate = false;
+        break;
 
       case 40: /* down */
-      case 83: /* S */ this.moveBackward = false; this.rotate = false; break;
+      case 83:
+        /* S */ this.moveBackward = false;
+        this.rotate = false;
+        break;
 
       case 39: /* right */
-      case 68: /* D */ this.moveRight = false; this.rotate = false; break;
+      case 68:
+        /* D */ this.moveRight = false;
+        this.rotate = false;
+        break;
 
-      case 82: /* R */ this.moveUp = false; this.rotate = false; break;
-      case 70: /* F */ this.moveDown = false; this.rotate = false; break;
+      case 82:
+        /* R */ this.moveUp = false;
+        this.rotate = false;
+        break;
+      case 70:
+        /* F */ this.moveDown = false;
+        this.rotate = false;
+        break;
 
-      case 81: /* Q */ this.rollLeft = false; this.rotate = false; break;
-      case 69: /* E */ this.rollRight = false; this.rotate = false; break;
-      default: break;
+      case 81:
+        /* Q */ this.rollLeft = false;
+        this.rotate = false;
+        break;
+      case 69:
+        /* E */ this.rollRight = false;
+        this.rotate = false;
+        break;
+      default:
+        break;
     }
   }
 
@@ -287,33 +347,53 @@ class FirstPersonControls {
         : -actualMoveSpeed + this.autoSpeedFactor;
     }
     if (this.moveBackward) {
-      this.accF = this.acceleration ? this.accF + actualMoveSpeed * 0.05 : actualMoveSpeed;
+      this.accF = this.acceleration
+        ? this.accF + actualMoveSpeed * 0.05
+        : actualMoveSpeed;
     }
 
     if (this.moveLeft) {
-      this.accL = this.acceleration ? this.accL - actualMoveSpeed * 0.05 : -actualMoveSpeed;
+      this.accL = this.acceleration
+        ? this.accL - actualMoveSpeed * 0.05
+        : -actualMoveSpeed;
     }
     if (this.moveRight) {
-      this.accL = this.acceleration ? this.accL + actualMoveSpeed * 0.05 : actualMoveSpeed;
+      this.accL = this.acceleration
+        ? this.accL + actualMoveSpeed * 0.05
+        : actualMoveSpeed;
     }
 
     if (this.moveUp) {
-      this.accU = this.acceleration ? this.accU + actualMoveSpeed * 0.05 : actualMoveSpeed;
+      this.accU = this.acceleration
+        ? this.accU + actualMoveSpeed * 0.05
+        : actualMoveSpeed;
     }
     if (this.moveDown) {
-      this.accU = this.acceleration ? this.accU - actualMoveSpeed * 0.05 : -actualMoveSpeed;
+      this.accU = this.acceleration
+        ? this.accU - actualMoveSpeed * 0.05
+        : -actualMoveSpeed;
     }
 
     if (this.rollLeft) {
-      this.accRoll = this.acceleration ? this.accRoll + 0.0005 : actualMoveSpeed;
+      this.accRoll = this.acceleration
+        ? this.accRoll + 0.0005
+        : actualMoveSpeed;
     }
     if (this.rollRight) {
-      this.accRoll = this.acceleration ? this.accRoll - 0.0005 : -actualMoveSpeed;
+      this.accRoll = this.acceleration
+        ? this.accRoll - 0.0005
+        : -actualMoveSpeed;
     }
 
-    this.object.translateZ(this.accF * this.speedFactorStar * this.speedFactorPlanet);
-    this.object.translateX(this.accL * this.speedFactorStar * this.speedFactorPlanet);
-    this.object.translateY(this.accU * this.speedFactorStar * this.speedFactorPlanet);
+    this.object.translateZ(
+      this.accF * this.speedFactorStar * this.speedFactorPlanet
+    );
+    this.object.translateX(
+      this.accL * this.speedFactorStar * this.speedFactorPlanet
+    );
+    this.object.translateY(
+      this.accU * this.speedFactorStar * this.speedFactorPlanet
+    );
     this.object.rotateZ(this.accRoll);
     this.accF *= brakeFactor;
     this.accL *= brakeFactor;
@@ -332,7 +412,9 @@ class FirstPersonControls {
       verticalLookRatio = Math.PI / (this.verticalMax - this.verticalMin);
     }
     if (this.lookVertical) {
-      this.object.rotateX(-this.mouseY * this.actualLookSpeed * verticalLookRatio * 0.02);
+      this.object.rotateX(
+        -this.mouseY * this.actualLookSpeed * verticalLookRatio * 0.02
+      );
     }
     this.object.rotateY(-this.mouseX * this.actualLookSpeed * 0.02);
 
@@ -344,7 +426,11 @@ class FirstPersonControls {
   }
 
   dispose() {
-    document.removeEventListener('contextmenu', FirstPersonControls.contextmenu, false);
+    document.removeEventListener(
+      'contextmenu',
+      FirstPersonControls.contextmenu,
+      false
+    );
     document.removeEventListener('mousemove', this._onMouseMove, false);
     document.removeEventListener('mousedown', this._onMouseDown, false);
     document.removeEventListener('mouseup', this._onMouseUp, false);
@@ -399,6 +485,7 @@ export function getKeys(e) {
       TD.label = undefined;
       resetCamera();
       break;
-    default: break;
+    default:
+      break;
   }
 }

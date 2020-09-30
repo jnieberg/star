@@ -95,15 +95,16 @@ body {
 
   li {
     display: block;
-    &.star {
-      color: $color-star;
-    }
-    &.planet {
-      color: $color-planet;
-    }
-    &.moon {
-      color: $color-moon;
-    }
+  }
+
+  .star {
+    color: $color-star;
+  }
+  .planet {
+    color: $color-planet;
+  }
+  .moon {
+    color: $color-moon;
   }
 
   .label {

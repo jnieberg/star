@@ -10,9 +10,7 @@ import setColor, { getColor } from '../../../misc/color';
 import getTime from '../../../misc/time';
 
 export default class System {
-  constructor({
-    parent, index, x, y, z,
-  }) {
+  constructor({ parent, index, x, y, z }) {
     this.parent = parent;
     this.type = 'system';
     this.config = TD.entity[this.type];
@@ -20,7 +18,8 @@ export default class System {
     this.index = index;
     this.id = {
       text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
-      toString: () => `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
+      toString: () =>
+        `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
     };
     this.random = new Random(`system_${this.id}`);
     this.object = {
@@ -58,21 +57,29 @@ export default class System {
       x: (this.position.x + this.coordinate.x * this.config.size) * TD.scale, // absolute
       y: (this.position.y + this.coordinate.y * this.config.size) * TD.scale,
       z: (this.position.z + this.coordinate.z * this.config.size) * TD.scale,
-      xr: ( // relative
-        this.position.x + (this.coordinate.x - (TD.camera.coordinate.x || 0)) * this.config.size
-      ) * TD.scale,
-      yr: (
-        this.position.y + (this.coordinate.y - (TD.camera.coordinate.y || 0)) * this.config.size
-      ) * TD.scale,
-      zr: (
-        this.position.z + (this.coordinate.z - (TD.camera.coordinate.z || 0)) * this.config.size
-      ) * TD.scale,
+      xr:
+        // relative
+        (this.position.x +
+          (this.coordinate.x - (TD.camera.coordinate.x || 0)) *
+            this.config.size) *
+        TD.scale,
+      yr:
+        (this.position.y +
+          (this.coordinate.y - (TD.camera.coordinate.y || 0)) *
+            this.config.size) *
+        TD.scale,
+      zr:
+        (this.position.z +
+          (this.coordinate.z - (TD.camera.coordinate.z || 0)) *
+            this.config.size) *
+        TD.scale,
     };
   }
 
   get special() {
     this.random.seed = 'special';
-    if (this.random.rndInt(1000) === 0) { // black hole
+    if (this.random.rndInt(1000) === 0) {
+      // black hole
       return 'black-hole';
     }
     return undefined;
@@ -81,9 +88,10 @@ export default class System {
   get size() {
     if (!this._size) {
       this.random.seed = 'size';
-      const size = this.special === 'black-hole'
-        ? this.random.rnd(15, 50)
-        : this.random.rnd(0.3, 15);
+      const size =
+        this.special === 'black-hole'
+          ? this.random.rnd(15, 50)
+          : this.random.rnd(0.3, 15);
       this._size = {
         valueOf: () => size,
         text: toSizeString(size),
@@ -102,10 +110,14 @@ export default class System {
     return this._color;
   }
 
-  get starDistance() {
-    if (this.children.length > 1) {
-      const size = this.children.map((child) => child.size).reduce((acc, cur) => acc + cur);
-      return size * this.random.rnd(2, 15);
+  // Radius amongst multinairy stars
+  get distance() {
+    this.random.seed = 'distance';
+    if (this.stars.length > 1) {
+      const size = this.stars
+        .map((child) => child.size)
+        .reduce((acc, cur) => acc + cur);
+      return size * this.random.rnd(1, 15);
     }
     return 0;
   }
@@ -114,18 +126,19 @@ export default class System {
     if (!this._children) {
       this.random.seed = 'stars';
       let childrenLength = 0;
-      do { // chance on multinary stars
+      do {
+        // chance on multinary stars
         childrenLength += 1;
       } while (this.random.rndInt(15) === 0);
       const children = [];
       for (let i = 0; i < childrenLength; i += 1) {
-        const Star = this.special === 'black-hole' ? BlackHole : MainStar;
-        children.push(
-          new Star({
-            system: this,
-            index: children.length,
-          }),
-        );
+        const StarClass = this.special === 'black-hole' ? BlackHole : MainStar;
+        const star = new StarClass({
+          system: this,
+          index: children.length,
+        });
+        // eslint-disable-next-line no-unused-vars
+        children.push(star);
       }
       this._children = children;
     }
@@ -145,28 +158,47 @@ export default class System {
   }
 
   get text() {
+    let system = this.stars.length > 1 && 'Multinary system';
+    system = system || (this.special === 'black-hole' && 'Black hole system');
+    system = system || 'System';
     return `
-    <div class="label--h1">${this.name}</div>
-    <div class="label--h2">${this.children.length > 1 ? 'Multinary system' : 'System'} #${this.id}</div>
-    <div class="label--h3">Stars<span>Bodies</span></div>
-    <ol>
-      ${this.children.map((star) => `<li>${star.textShort}</li>`).join('\n')}
-    </ol>`;
+    <div class="label--h1 star">${this.name}</div>
+    <div class="label--h2">${system} #${this.id}</div>
+    ${
+      this.stars.length
+        ? `<div class="label--h3">Stars<span>Bodies</span></div>
+          <ol>
+            ${this.stars.map((star) => `<li>${star.textShort}</li>`).join('\n')}
+          </ol>`
+        : ''
+    }
+    ${
+      this.planets.length
+        ? `<div class="label--h3">Planets<span>Bodies</span></div>
+          <ol>
+            ${this.planets
+              .map((planet) => `<li>${planet.textShort}</li>`)
+              .join('\n')}
+          </ol>`
+        : ''
+    }`;
   }
 
   // temperature + size?
   get rotationSpeedAroundAxis() {
     if (!this._rotationSpeedAroundAxis) {
-      if (this.children.length > 1) {
+      if (this.stars.length > 1) {
         let temperature = 0;
-        this.children.forEach((child) => {
+        this.stars.forEach((child) => {
           temperature += child.temperature.min;
         });
         this.random.seed = 'rotation_speed';
-        this._rotationSpeedAroundAxis = (this.random.rndInt(2) === 0 ? -1 : 1)
-        * this.random.rnd(temperature * 0.00002, temperature * 0.00004);
+        this._rotationSpeedAroundAxis =
+          (this.random.rndInt(2) === 0 ? -1 : 1) *
+          this.random.rnd(temperature * 0.000002, temperature * 0.000004);
+      } else {
+        this._rotationSpeedAroundAxis = 0;
       }
-      this._rotationSpeedAroundAxis = 0;
     }
     return this._rotationSpeedAroundAxis;
   }
@@ -183,10 +215,22 @@ export default class System {
     return this._rotation;
   }
 
+  get stars() {
+    return this.children.filter((child) => child.type === 'star');
+  }
+
+  get planets() {
+    return this.children.filter((child) => child.type === 'planet');
+  }
+
   update() {
     if (this.object && this.object.rotation) {
-      this.object.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
-      this.object.rotateY(getTime() * this.rotationSpeedAroundAxis * MISC.time);
+      this.object.rotation.set(
+        this.rotation.x,
+        this.rotation.y,
+        this.rotation.z
+      );
+      this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
     }
     this.children.forEach((child) => {
       child.update();
@@ -194,11 +238,11 @@ export default class System {
   }
 
   hideChildren() {
-    this.children.forEach((child) => child.hideChildren());
+    this.stars.forEach((child) => child.hideChildren());
   }
 
   updateShadows() {
-    this.children.forEach((child) => {
+    this.stars.forEach((child) => {
       if (child.light) {
         child.light.shadow.needsUpdate = true;
       }
@@ -208,25 +252,34 @@ export default class System {
   // Draw all stars and bodies here
   draw() {
     this.object = new THREE.Object3D();
+    this.object.high = this.object;
     this.object.position.set(
       this.position.x * TD.scale,
       this.position.y * TD.scale,
-      this.position.z * TD.scale,
+      this.position.z * TD.scale
     );
-    this.children.forEach((child) => child.drawHigh());
+    this.children.forEach((child) => child.drawLow());
     TD.scene.add(this.object);
   }
 
   drawLow() {
     const pos = this.universe;
-    setColor(1, Number(this.color.hue), 1.0, Number(this.color.lightness), 'hsl');
+    setColor(
+      1,
+      Number(this.color.hue),
+      1.0,
+      Number(this.color.lightness),
+      'hsl'
+    );
     const id = `${this.coordinate.x}_${this.coordinate.y}_${this.coordinate.z}`;
     this.parent.group[id].this.push(this);
     this.parent.group[id].positions.push(pos.xr, pos.yr, pos.zr);
     this.parent.group[id].colors.push(
-      MISC.colorHelper.r, MISC.colorHelper.g, MISC.colorHelper.b,
+      MISC.colorHelper.r,
+      MISC.colorHelper.g,
+      MISC.colorHelper.b
     );
-    this.parent.group[id].sizes.push(this.size * 0.2 * TD.scale);
+    this.parent.group[id].sizes.push(this.size * 0.1 * TD.scale);
   }
 
   remove() {

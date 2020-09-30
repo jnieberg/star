@@ -29,8 +29,8 @@ export function getColor({ hue, saturation, lightness }) {
   let hueString = 'Red';
   let saturationString = '';
   Object.keys(COLOR.lightness).forEach((col) => {
-  // for (const col in COLOR.lightness) {
-  //  if (COLOR.lightness.hasOwnProperty(col)) {
+    // for (const col in COLOR.lightness) {
+    //  if (COLOR.lightness.hasOwnProperty(col)) {
     const b = COLOR.lightness[col];
     if (lightness < b) {
       lightnessString = col;
@@ -38,8 +38,8 @@ export function getColor({ hue, saturation, lightness }) {
     // }
   });
   Object.keys(COLOR.hue).forEach((col) => {
-  // for (const col in COLOR.hue) {
-  //   if (COLOR.hue.hasOwnProperty(col)) {
+    // for (const col in COLOR.hue) {
+    //   if (COLOR.hue.hasOwnProperty(col)) {
     const h = COLOR.hue[col];
     if (hue < h) {
       hueString = col;
@@ -47,8 +47,8 @@ export function getColor({ hue, saturation, lightness }) {
     // }
   });
   Object.keys(COLOR.saturation).forEach((col) => {
-  // for (const col in COLOR.saturation) {
-  //   if (COLOR.saturation.hasOwnProperty(col)) {
+    // for (const col in COLOR.saturation) {
+    //   if (COLOR.saturation.hasOwnProperty(col)) {
     const h = COLOR.saturation[col];
     if (saturation < h) {
       saturationString = col;
@@ -68,6 +68,9 @@ export function getColor({ hue, saturation, lightness }) {
       valueOf: () => lightness,
       text: lightnessString,
     },
-    text: `${saturationString} ${lightnessString} ${hueString}`.replace(/^.*(Grey|White|Black).*$/g, '$1'),
+    text: `${saturationString} ${lightnessString} ${hueString}`.replace(
+      /^.*(Grey|White|Black).*$/g,
+      '$1'
+    ),
   };
 }

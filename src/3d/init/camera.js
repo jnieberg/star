@@ -25,7 +25,7 @@ export function resetCamera() {
   TD.camera.object.position.set(
     TD.entity.system.size * TD.scale * 0.5,
     TD.entity.system.size * TD.scale * 0.5,
-    TD.entity.system.size * TD.scale * 0.5,
+    TD.entity.system.size * TD.scale * 0.5
   );
   TD.camera.object.rotation.set(0, 0, 0);
 }
@@ -54,7 +54,7 @@ export function setCameraPosition() {
   TD.camera.object.position.set(
     (TD.camera.object.position.x + grid) % grid,
     (TD.camera.object.position.y + grid) % grid,
-    (TD.camera.object.position.z + grid) % grid,
+    (TD.camera.object.position.z + grid) % grid
   );
   const coord = getCameraCoordinate();
   return {
@@ -90,9 +90,9 @@ function getFixedToCamera(x, y, z) {
   const posC = getWorldCamera();
   const grid = TD.entity.system.size * TD.scale;
   const posOff = {
-    x: (x - posC.x),
-    y: (y - posC.y),
-    z: (z - posC.z),
+    x: x - posC.x,
+    y: y - posC.y,
+    z: z - posC.z,
   };
   let posSet = {
     x: posOff.x < -grid * 0.5 && x + grid,
@@ -115,15 +115,21 @@ function getFixedToCamera(x, y, z) {
 export function distanceToCamera(x, y, z) {
   const posC = getWorldCamera();
   const pos = getFixedToCamera(x, y, z);
-  return Math.sqrt(
-    (pos.x - posC.x) * (pos.x - posC.x)
-    + (pos.y - posC.y) * (pos.y - posC.y)
-    + (pos.z - posC.z) * (pos.z - posC.z),
-  ) / TD.scale;
+  return (
+    Math.sqrt(
+      (pos.x - posC.x) * (pos.x - posC.x) +
+        (pos.y - posC.y) * (pos.y - posC.y) +
+        (pos.z - posC.z) * (pos.z - posC.z)
+    ) / TD.scale
+  );
 }
 
 export function fixObjectToCamera(obj) {
-  const posSet = getFixedToCamera(obj.position.x, obj.position.y, obj.position.z);
+  const posSet = getFixedToCamera(
+    obj.position.x,
+    obj.position.y,
+    obj.position.z
+  );
   obj.position.set(posSet.x, posSet.y, posSet.z);
   return posSet;
 }
@@ -133,7 +139,7 @@ export function initCamera() {
     70,
     window.innerWidth / window.innerHeight,
     TD.camera.near * TD.scale,
-    TD.camera.far * TD.scale,
+    TD.camera.far * TD.scale
   );
   TD.scene.add(TD.camera.object);
 }

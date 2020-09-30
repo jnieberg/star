@@ -2,7 +2,14 @@ import * as THREE from 'three';
 
 export default class SphereGeometry {
   constructor(size = 1, segments = 64) {
-    const geometry = new THREE.BoxGeometry(1, 1, 1, segments, segments, segments);
+    const geometry = new THREE.BoxGeometry(
+      1,
+      1,
+      1,
+      segments,
+      segments,
+      segments
+    );
     for (let v = 0; v < geometry.vertices.length; v += 1) {
       const vertex = geometry.vertices[v];
       vertex.normalize().multiplyScalar(size);

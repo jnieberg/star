@@ -19,12 +19,25 @@ export function loop() {
 export function loadStorage() {
   let item = localStorage.getItem('camera');
   item = JSON.parse(item);
-  if (item && item.coordinate && item.position && item.rotation && typeof item.coordinate.x !== 'undefined') {
+  if (
+    item &&
+    item.coordinate &&
+    item.position &&
+    item.rotation &&
+    typeof item.coordinate.x !== 'undefined'
+  ) {
     const quaternion = new THREE.Quaternion(
-      item.rotation.x, item.rotation.y, item.rotation.z, item.rotation.w,
+      item.rotation.x,
+      item.rotation.y,
+      item.rotation.z,
+      item.rotation.w
     );
     TD.camera.coordinate = item.coordinate;
-    TD.camera.object.position.set(item.position.x, item.position.y, item.position.z);
+    TD.camera.object.position.set(
+      item.position.x,
+      item.position.y,
+      item.position.z
+    );
     TD.camera.object.rotation.setFromQuaternion(quaternion);
     MISC.reload = true;
   } else {

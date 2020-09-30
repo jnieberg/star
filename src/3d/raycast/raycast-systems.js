@@ -38,11 +38,10 @@ export default function raycastSystem() {
     const distanceCam = distanceToCamera(
       TD.system.object.position.x,
       TD.system.object.position.y,
-      TD.system.object.position.z,
+      TD.system.object.position.z
     );
-    EVENT.controls.speedFactorStar = (distanceCam / (distance * 2) < 1.0)
-      ? distanceCam / (distance * 2)
-      : 1.0;
+    EVENT.controls.speedFactorStar =
+      distanceCam / (distance * 2) < 1.0 ? distanceCam / (distance * 2) : 1.0;
     if (distanceCam >= distance) {
       TD.system.remove();
       TD.system = undefined;
@@ -54,7 +53,9 @@ export default function raycastSystem() {
       return false;
     }
   }
-  const obj = Object.values(TD.galaxy.star.group).map((sys) => sys.object).filter((sys) => sys);
+  const obj = Object.values(TD.galaxy.star.group)
+    .map((sys) => sys.object)
+    .filter((sys) => sys);
   const intersect = raycastFound(obj, distance, 0.5);
   if (intersect && intersect.object && intersect.object.name) {
     return raycastSystemEvents(intersect);

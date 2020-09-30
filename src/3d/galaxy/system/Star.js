@@ -66,30 +66,48 @@ export default class Star extends Body {
   }
 
   get textShort() {
-    return `<span class="index">${this.index + 1}</span>${this.name}${this.children && this.children.length ? `<span class="children">${this.children.length}</span>` : ''}`;
+    return `<span class="index">${this.index + 1}</span>${this.name}${
+      this.children && this.children.length
+        ? `<span class="children">${this.children.length}</span>`
+        : ''
+    }`;
   }
 
   get text() {
     const stars = this.children.filter((child) => child.type === 'sub-star');
     const children = this.children.filter((child) => child.type !== 'sub-star');
     return `
-      <div class="label--h1">${this.name}</div>
-      ${this.parent.children > 1 ? `<div class="label--h2">Star #${this.index + 1} of ${this.parent.name}</div>` : ''}
+      <div class="label--h1 ${this.type}">${this.name}</div>
+      ${
+        this.parent.children > 1
+          ? `<div class="label--h2">Star #${this.index + 1} of ${
+              this.parent.name
+            }</div>`
+          : ''
+      }
       <div>${this.color.text} ${this.size.text}</div>
       <div>Size:<span>${toSize(this.size)}</span></div>
       <div>Temperature:<span>${toCelcius(this.temperature.min)}</span></div>
-    ${stars && stars.length > 0
-    ? `<div class="label--h3">Stars<span>Planets</span></div>
+    ${
+      stars && stars.length > 0
+        ? `<div class="label--h3">Stars<span>Planets</span></div>
     <ol>
-      ${stars.map((body) => `<li class="star">${body.textShort}</li>`).join('\n')}
+      ${stars
+        .map((body) => `<li class="star">${body.textShort}</li>`)
+        .join('\n')}
     </ol>`
-    : ''}
-    ${children && children.length > 0
-    ? `<div class="label--h3">Planets<span>Moons</span></div>
+        : ''
+    }
+    ${
+      children && children.length > 0
+        ? `<div class="label--h3">Planets<span>Moons</span></div>
     <ol>
-      ${children.map((body) => `<li class="planet">${body.textShort}</li>`).join('\n')}
+      ${children
+        .map((body) => `<li class="planet">${body.textShort}</li>`)
+        .join('\n')}
     </ol>`
-    : ''}`;
+        : ''
+    }`;
   }
 
   // temperature + size?
@@ -97,7 +115,10 @@ export default class Star extends Body {
     if (!this._rotationSpeedAroundAxis) {
       const temperature = this.temperature.min;
       const direction = this.random.rndInt(2) === 0 ? -1 : 1;
-      const speed = this.random.rnd(temperature * 0.000003, temperature * 0.000004);
+      const speed = this.random.rnd(
+        temperature * 0.000003,
+        temperature * 0.000004
+      );
       this.random.seed = 'rotation_speed';
       this._rotationSpeedAroundAxis = direction * speed;
     }
@@ -154,8 +175,10 @@ export default class Star extends Body {
     }
 
     // Set star position
-    this.object.rotateY(((2 * Math.PI) / this.parent.children.length) * this.index);
-    this.object.translateX(this.parent.starDistance * 0.0001 * TD.scale);
+    this.object.rotateY(
+      ((2.0 * Math.PI) / this.system.stars.length) * this.index
+    );
+    this.object.translateX(this.system.distance * 0.0001 * TD.scale);
 
     // Add star to scene
     this.parent.object.add(this.object);
@@ -198,7 +221,7 @@ export default class Star extends Body {
     // Sub star flare
     const materialFlare = new THREE.SpriteMaterial({
       map: TD.texture.star.large,
-      color: MISC.colorHelper,
+      color: MISC.colorHelper2,
       transparent: true,
       blending: THREE.AdditiveBlending,
       alphaTest: 0,
@@ -215,12 +238,26 @@ export default class Star extends Body {
     // Star corona
     // eslint-disable-next-line no-unused-vars
     const _ = new Atmosphere(this.object.high, {
-      size: size * 1.005,
-      thickness: size * 1.5,
+      size,
+      thickness: size * 15,
+      color: MISC.colorHelper,
+      colorInner: MISC.colorHelper,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.5,
+      opacityInner: 0.3,
+      power: 5.0,
+    });
+
+    // eslint-disable-next-line no-unused-vars
+    const __ = new Atmosphere(this.object.high, {
+      size,
+      thickness: size * 0.5,
       color: MISC.colorHelper2,
       colorInner: MISC.colorHelper,
       blending: THREE.AdditiveBlending,
-      opacity: 0.75,
+      opacity: 0.5,
+      opacityInner: 0.0,
+      power: 5.0,
     });
 
     if (this.drawTrajectory) {
@@ -230,5 +267,9 @@ export default class Star extends Body {
     }
 
     this.drawPost();
+  }
+
+  drawLow() {
+    this.drawHigh();
   }
 }

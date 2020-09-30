@@ -19,20 +19,31 @@ const compiler = webpack({
   stats: 'errors-only',
   module: {
     rules: [
-      { test: /\.(glsl|frag|vert)$/, loader: 'raw-loader', exclude: /node_modules/ },
-      { test: /\.(glsl|frag|vert)$/, loader: 'glslify-loader', exclude: /node_modules/ },
+      {
+        test: /\.(glsl|frag|vert)$/,
+        loader: 'raw-loader',
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(glsl|frag|vert)$/,
+        loader: 'glslify-loader',
+        exclude: /node_modules/,
+      },
       { test: /node_modules/, loader: 'ify-loader' },
       { test: /\.json$/, loader: 'json-loader' },
     ],
   },
 });
 // eslint-disable-next-line no-unused-vars
-const _ = compiler.watch({
-  aggregateTimeout: 300,
-  poll: undefined,
-}, (err, stats) => {
-  console.log(stats);
-});
+const _ = compiler.watch(
+  {
+    aggregateTimeout: 300,
+    poll: undefined,
+  },
+  (err, stats) => {
+    console.log(stats);
+  }
+);
 
 const app = express();
 const mimetype = {
@@ -69,9 +80,11 @@ function open(resp, urlA) {
   });
 }
 
-app.use(bodyParser.urlencoded({
-  extended: true,
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 app.use(bodyParser.json());
 
 process.env.TZ = 'Europe/Amsterdam';

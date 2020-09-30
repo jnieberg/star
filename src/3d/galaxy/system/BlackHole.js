@@ -28,17 +28,25 @@ export default class BlackHole extends MainStar {
       const temperature = this.temperature.min;
       this.random.seed = 'children';
       // number of planets depends on star temperature and number of stars
-      const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.02)
-        / this.parent.children.length;
+      const childrenLength =
+        this.random.rndInt(Math.sqrt(temperature) * 0.02) /
+        this.parent.children.length;
       if (childrenLength > 0) {
         this.hasSubStar = false;
         this.random.seed = 'sub-star';
         for (let index = 0; index < childrenLength; index += 1) {
-          let child;
-          if (this.system.special === 'black-hole') {
-            child = new SubStar({ system: this.system, index, parent: this });
-          }
-          if (this.system.starDistance === 0 || child.distance < this.system.starDistance) {
+          // let child;
+          // if (this.system.special === 'black-hole') {
+          const child = new SubStar({
+            system: this.system,
+            index,
+            parent: this,
+          });
+          // }
+          if (
+            this.system.distance === 0 ||
+            child.distance < this.system.distance
+          ) {
             children.push(child);
           }
         }
@@ -61,7 +69,7 @@ export default class BlackHole extends MainStar {
     this.camera = new THREE.CubeCamera(
       TD.camera.near * TD.scale,
       TD.camera.far * TD.scale,
-      cubeRenderTarget,
+      cubeRenderTarget
     );
     this.camera.children.forEach((cam) => {
       cam.fov = 120;
@@ -156,21 +164,21 @@ export default class BlackHole extends MainStar {
     // Star double corona
     // eslint-disable-next-line no-unused-vars
     const _ = new Atmosphere(this.object.high, {
-      size: size * 1.1,
+      size,
       thickness: size * 1.5,
       color: MISC.colorHelper,
       colorInner: MISC.colorHelper,
       blending: THREE.AdditiveBlending,
-      opacity: 1,
+      opacity: 0.25,
     });
     // eslint-disable-next-line no-unused-vars
     const __ = new Atmosphere(this.object.high, {
-      size: size * 1.05,
+      size,
       thickness: size * 1.2,
       color: MISC.colorHelper2,
       colorInner: MISC.colorHelper2,
       blending: THREE.AdditiveBlending,
-      opacity: 1,
+      opacity: 0.25,
     });
 
     const material5 = new THREE.SpriteMaterial({

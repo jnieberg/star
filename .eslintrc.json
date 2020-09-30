@@ -3,15 +3,43 @@
     "browser": true,
     "es2020": true
   },
+  "plugins": [
+    "prettier"
+  ],
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "eslint:recommended",
+    "plugin:prettier/recommended"
   ],
   "parserOptions": {
     "ecmaVersion": 11,
+    "modules": true,
     "sourceType": "module"
   },
   "rules": {
+    "prettier/prettier": [
+      "error"
+    ],
     "no-underscore-dangle": 0,
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "no-var": [
+      "error"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "keyword-spacing": [
+      "error",
+      {
+        "after": true,
+        "before": true
+      }
+    ],
+    "space-before-blocks": "error",
+    "object-curly-spacing": [
+      "error",
+      "always"
+    ]
   }
 }

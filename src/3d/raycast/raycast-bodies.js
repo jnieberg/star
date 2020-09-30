@@ -40,7 +40,7 @@ function raycastBodyEvents(intersect) {
 }
 
 function checkOrbitBody(body, inOrbit) {
-  if (body) {
+  if (body && body.object) {
     if (inOrbit) {
       TD.camera.orbit = body;
       setCameraParent(body.object);
@@ -59,7 +59,7 @@ export default function raycastBody() {
     const bodies = TD.system.getAllChildren();
     const distanceMax = 0.1;
     const { distance, body } = getNearestBody(bodies);
-    const bodyRadius = body ? (body.size * 0.0001) * 0.5 : 0;
+    const bodyRadius = body ? body.size * 0.0001 * 0.5 : 0;
     const distanceOrbitStar = 0.01 + bodyRadius;
     const distanceOrbitPlanet = 0.0005 + bodyRadius;
     const distanceOrbitMoon = 0.00005 + bodyRadius;
@@ -71,12 +71,12 @@ export default function raycastBody() {
       }
       EVENT.controls.speedFactorPlanet = 1.0;
       return false;
-    } if (distance > 0 && distance < distanceOrbitStar) {
+    }
+    if (distance > 0 && distance < distanceOrbitStar) {
       const obj = bodies.map((bd) => bd.object.low).filter((bd) => bd);
       const intersect = raycastFound(obj, 0.1, 2);
-      EVENT.controls.speedFactorPlanet = (distance * 100.0 < 1.0)
-        ? distance * 100.0
-        : 1.0;
+      EVENT.controls.speedFactorPlanet =
+        distance * 100.0 < 1.0 ? distance * 100.0 : 1.0;
       let moon;
       if (distance < distanceOrbitMoon) {
         moon = body.type === 'moon' && body;
@@ -108,9 +108,10 @@ export default function raycastBody() {
       }
       let star;
       if (distance < distanceOrbitStar) {
-        star = body.type === 'moon' && body.parent.parent;
-        star = star || (body.type === 'planet' && body.parent);
-        star = star || (body.type === 'star' && body);
+        // star = body.type === 'moon' && body.parent.parent;
+        // star = star || (body.type === 'planet' && body.parent);
+        // star = star || (body.type === 'star' && body);
+        star = body.star;
         if (star && TD.star !== star) {
           TD.star = star;
         }
@@ -130,6 +131,7 @@ export default function raycastBody() {
       return raycastBodyEvents(intersect);
     }
     if (TD.star) {
+      console.log(TD.star);
       TD.star.parent.hideChildren();
       TD.star = undefined;
       TD.camera.orbit = undefined;

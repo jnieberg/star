@@ -17,8 +17,10 @@ export default class Debug {
     if (this.framesList.length > 1000 / MISC.interval) {
       this.framesList.shift();
     }
-    return this.framesList.reduce((a, b) => a + b, 0)
-      * ((1000 / MISC.interval) - this.framesList.length + 1);
+    return (
+      this.framesList.reduce((a, b) => a + b, 0) *
+      (1000 / MISC.interval - this.framesList.length + 1)
+    );
   }
 
   update() {
@@ -27,8 +29,12 @@ export default class Debug {
       this.view.innerHTML = `
         <div>FPS:<span>${this.fps}</span></div>
         <div>Objects:<span>${Debug.meshes}</span></div>
-        <div>Coordinate:<span>${TD.camera.coordinate.x || 0}, ${TD.camera.coordinate.y || 0}, ${TD.camera.coordinate.z || 0}</span></div>
-        <div>Position:<span>${Math.floor(pos.x / TD.scale)}, ${Math.floor(pos.y / TD.scale)}, ${Math.floor(pos.z / TD.scale)}</span></div>
+        <div>Coordinate:<span>${TD.camera.coordinate.x || 0}, ${
+        TD.camera.coordinate.y || 0
+      }, ${TD.camera.coordinate.z || 0}</span></div>
+        <div>Position:<span>${Math.floor(pos.x / TD.scale)}, ${Math.floor(
+        pos.y / TD.scale
+      )}, ${Math.floor(pos.z / TD.scale)}</span></div>
     `;
     });
   }

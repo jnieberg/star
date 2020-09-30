@@ -105,15 +105,15 @@ body {
   display: block;
 }
 
-.label li.star {
+.label .star {
   color: #fff;
 }
 
-.label li.planet {
+.label .planet {
   color: #fe8;
 }
 
-.label li.moon {
+.label .moon {
   color: #8ae;
 }
 

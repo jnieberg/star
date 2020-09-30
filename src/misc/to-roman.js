@@ -17,13 +17,10 @@ export default function toRoman(number) {
   };
   let roman = '';
   Object.keys(lookup).forEach((i) => {
-  // for (const i = 0; i < lookup.length) {
-  //   if (lookup[i]) {
     while (num >= lookup[i]) {
       roman += i;
       num -= lookup[i];
     }
-    // }
   });
   return roman;
 }

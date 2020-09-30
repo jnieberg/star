@@ -5,18 +5,33 @@ import fragShader from '../../../shaders/atmosphere.frag';
 import Thing from '../../../object/Thing';
 
 export default class Atmosphere {
-  constructor(mesh, {
-    size, blending = THREE.NormalBlending, thickness = 0.1, color: colorS = 'rgba(255, 255, 255, 1.0)', colorInner: colorInnerS = colorS, power = 3, opacity = 0.5,
-  } = {}) {
+  constructor(
+    mesh,
+    {
+      size,
+      blending = THREE.NormalBlending,
+      thickness = 0.1,
+      color: colorS = 'rgba(255, 255, 255, 1.0)',
+      colorInner: colorInnerS = colorS,
+      opacity = 0.5,
+      opacityInner = opacity * 0.5,
+      power = 1.0,
+    } = {}
+  ) {
     this.color = new THREE.Color(colorS);
     this.colorInner = new THREE.Color(colorInnerS);
+    this.power = power;
     this.atmosphereIn = new Thing('glowInside')
       .geometry(new THREE.SphereBufferGeometry(size, 64, 64))
       .material(Atmosphere.atmosphereMaterial(blending), {
-        'uniforms.b.value': opacity * 0.35 + 0.75 - size * 0.001,
-        'uniforms.p.value': power,
-        'uniforms.glowColor.value': this.colorInner,
-        side: THREE.FrontSide,
+        'uniforms.reverse.value': 1.0,
+        'uniforms.size.value': size * 0.8,
+        'uniforms.thickness.value': size * 0.2,
+        'uniforms.opacity.value': opacityInner,
+        'uniforms.power.value': this.power,
+        'uniforms.color.value': this.colorInner,
+        side: THREE.BackSide,
+        depthTest: false,
       })
       .mesh({
         name: 'Atmosphere inside',
@@ -28,16 +43,18 @@ export default class Atmosphere {
     this.atmosphereOut = new Thing('glowOutside')
       .geometry(new THREE.SphereBufferGeometry(size + thickness, 64, 64))
       .material(Atmosphere.atmosphereMaterial(blending), {
-        'uniforms.b.value': -0.085,
-        'uniforms.p.value': (thickness / size) * (1.1 - opacity * 0.5) * 20,
-        'uniforms.glowColor.value': this.color,
+        'uniforms.size.value': size,
+        'uniforms.thickness.value': thickness,
+        'uniforms.opacity.value': opacity,
+        'uniforms.power.value': this.power,
+        'uniforms.color.value': this.color,
         side: THREE.BackSide,
+        depthTest: false,
       })
       .mesh({
         name: 'Atmosphere outside',
         castShadow: false,
         receiveShadow: false,
-        renderOrder: 0,
       })
       .add(mesh);
   }
@@ -47,11 +64,14 @@ export default class Atmosphere {
       uniforms: THREE.UniformsUtils.merge([
         THREE.UniformsLib.lights,
         {
-          s: { type: 'f', value: -1.0 },
-          b: { type: 'f', value: 1.0 },
-          p: { type: 'f', value: 2.0 },
-          glowColor: { type: 'c', value: new THREE.Color(0xffff00) },
-        }]),
+          size: { type: 'f', value: 1.0 },
+          thickness: { type: 'f', value: 1.0 },
+          opacity: { type: 'f', value: 1.0 },
+          reverse: { type: 'f', value: 0.0 },
+          power: { type: 'f', value: 1.0 },
+          color: { type: 'c', value: new THREE.Color(0xffff00) },
+        },
+      ]),
       vertexShader: vertShader,
       fragmentShader: fragShader,
       blending,

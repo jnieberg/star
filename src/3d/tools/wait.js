@@ -1,6 +1,10 @@
 import { MISC } from '../../variables';
 
-export default function wait(timerBank, callback = () => {}, interrupt = false) {
+export default function wait(
+  timerBank,
+  callback = () => {},
+  interrupt = false
+) {
   if (interrupt && MISC.timers[timerBank]) {
     console.log('TIMEOUT INTERRUPT');
     for (let i = 0; i < MISC.timers[timerBank].length; i += 1) {
