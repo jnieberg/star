@@ -138,7 +138,7 @@ export default class Star extends Body {
     deleteThree(this.object); // WIP. Maybe we can hide it?
     const hue2 = this.color.hue - 0.08 > 0 ? this.color.hue - 0.08 : 0;
     setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
-    setColor(2, hue2, 1.0, this.color.lightness + 0.15, 'hsl');
+    setColor(2, hue2, 1.0, this.color.lightness, 'hsl');
     setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
 
     // Star pivot
@@ -221,7 +221,7 @@ export default class Star extends Body {
     // Sub star flare
     const materialFlare = new THREE.SpriteMaterial({
       map: TD.texture.star.large,
-      color: MISC.colorHelper2,
+      color: MISC.colorHelper,
       transparent: true,
       blending: THREE.AdditiveBlending,
       alphaTest: 0,
@@ -238,24 +238,25 @@ export default class Star extends Body {
     // Star corona
     // eslint-disable-next-line no-unused-vars
     const _ = new Atmosphere(this.object.high, {
-      size,
-      thickness: size * 15,
+      size: size * 1.01,
+      thickness: size * 1.01 * 15.0,
       color: MISC.colorHelper,
-      colorInner: MISC.colorHelper,
+      color2: MISC.colorHelper2,
       blending: THREE.AdditiveBlending,
-      opacity: 0.5,
-      opacityInner: 0.3,
+      opacity: 0.75,
+      opacityInner: 1.0,
       power: 5.0,
+      depth: false,
     });
 
     // eslint-disable-next-line no-unused-vars
     const __ = new Atmosphere(this.object.high, {
-      size,
-      thickness: size * 0.5,
-      color: MISC.colorHelper2,
-      colorInner: MISC.colorHelper,
+      size: size * 1.01,
+      thickness: size * 1.01 * 0.5,
+      color: MISC.colorHelper,
+      color2: MISC.colorHelper2,
       blending: THREE.AdditiveBlending,
-      opacity: 0.5,
+      opacity: 0.75,
       opacityInner: 0.0,
       power: 5.0,
     });

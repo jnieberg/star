@@ -20,7 +20,7 @@ export function getWorldCamera() {
 }
 
 export function resetCamera() {
-  TD.camera.coordinate = { x: undefined, y: undefined, z: undefined };
+  TD.camera.coordinate = { x: 0, y: 0, z: 0 };
   setCameraParent(TD.scene);
   TD.camera.object.position.set(
     TD.entity.system.size * TD.scale * 0.5,

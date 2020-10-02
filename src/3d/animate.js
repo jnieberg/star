@@ -7,25 +7,18 @@ import { resetCamera } from './init/camera';
 
 export function render() {
   TD.renderer.render(TD.scene, TD.camera.object);
+  TD.galaxy.update();
   MISC.debug.frames += 1;
 }
 
 export function loop() {
   EVENT.controls.update(TD.clock.getDelta());
-  TD.galaxy.update();
-  eventLabel();
 }
 
 export function loadStorage() {
   let item = localStorage.getItem('camera');
   item = JSON.parse(item);
-  if (
-    item &&
-    item.coordinate &&
-    item.position &&
-    item.rotation &&
-    typeof item.coordinate.x !== 'undefined'
-  ) {
+  if (item && item.coordinate && item.position && item.rotation) {
     const quaternion = new THREE.Quaternion(
       item.rotation.x,
       item.rotation.y,
@@ -49,6 +42,7 @@ export function loadStorage() {
 export function interval() {
   setInterval(() => {
     TD.galaxy.draw();
+    eventLabel();
     let keepLabel = raycastSystem();
     keepLabel = raycastBody() || keepLabel;
     if (!keepLabel && TD.label && TD.label.visible) {

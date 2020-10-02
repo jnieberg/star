@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MISC, TD } from '../../../variables';
+import { BODY, MISC, TD } from '../../../variables';
 import setColor, { getColorMix, getColor } from '../../../misc/color';
 import toCelcius from '../../../misc/temperature';
 import deleteThree from '../../tools/delete';
@@ -115,7 +115,7 @@ export default class Globe extends Body {
     if (!this._temperature) {
       const starTemp = this.star.temperature.min;
       const distanceToStar = this.distanceStar * 0.5;
-      const gas = this.gas.thickness * 0.6 + 0.4;
+      const gas = this.gas.density * 0.6 + 0.4;
       this.random.seed = 'temperature';
       let temp = [
         Math.floor(
@@ -140,7 +140,8 @@ export default class Globe extends Body {
     if (!this._atmosphere) {
       this._atmosphere = {
         size: 0,
-        thickness: 0,
+        density: 0,
+        blend: BODY.gas.Dust,
         color: {
           hue: 0,
           saturation: 0,
@@ -148,15 +149,20 @@ export default class Globe extends Body {
         },
       };
       this.random.seed = 'gas';
+      const blend = this.random.rndInt(2);
       if (this.random.rndInt(5) > 0) {
         const hsl = {
           hue: this.random.rnd(),
           saturation: this.random.rnd(),
-          lightness: this.random.rnd(),
+          lightness:
+            blend === BODY.gas.Dust
+              ? this.random.rnd(0.0, 1.0)
+              : this.random.rnd(0.5, 1.0),
         };
         this._atmosphere = {
           size: this.random.rnd(this.size * 0.1),
-          thickness: this.random.rnd(0.1, 1.0),
+          density: this.random.rnd(0.1, 1.0),
+          blend,
           color: {
             ...hsl,
             text: getColor(hsl).text,
@@ -171,11 +177,11 @@ export default class Globe extends Body {
     this.random.seed = 'clouds';
     if (
       this.type === 'planet' &&
-      this.gas.thickness > 0 &&
+      this.gas.density > 0 &&
       this.random.rndInt(2) === 0
     ) {
       return {
-        hue: this.gas.color.hue + this.random.rnd(0.2),
+        hue: this.gas.color.hue,
         saturation: this.gas.color.saturation,
         lightness: this.gas.color.lightness + this.random.rnd(0.25),
       };
@@ -295,8 +301,10 @@ export default class Globe extends Body {
           : ''
       }
       ${
-        this.gas.thickness > 0
-          ? `<div>Gas: ${toPercent(this.gas.thickness)}<span>${
+        this.gas.density > 0
+          ? `<div>${
+              this.gas.blend === BODY.gas.Dust ? 'Dust' : 'Moist'
+            }: ${toPercent(this.gas.density)}<span>${
               this.gas.color.text
             }</span></div>`
           : ''
@@ -530,7 +538,7 @@ export default class Globe extends Body {
       });
       const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
       ringMesh.name = 'Planet rings';
-      ringMesh.renderOrder = 1;
+      ringMesh.renderOrder = 2;
       ringMesh.rotateX(Math.PI * 0.5);
       ringMesh.castShadow = true;
       ringMesh.receiveShadow = true;
@@ -560,7 +568,9 @@ export default class Globe extends Body {
         this.drawSurface();
 
         // Planet gas
-        if (this.gas.thickness) {
+        if (this.gas.density) {
+          const hue2 =
+            this.gas.color.hue + 0.1 < 1 ? this.gas.color.hue + 0.1 : 0;
           setColor(
             1,
             this.gas.color.hue,
@@ -568,14 +578,25 @@ export default class Globe extends Body {
             this.gas.color.lightness,
             'hsl'
           );
+          setColor(
+            2,
+            hue2,
+            this.gas.color.saturation,
+            this.gas.color.lightness,
+            'hsl'
+          );
           // eslint-disable-next-line no-unused-vars
           const _ = new Atmosphere(this.object.high, {
-            size: this.size * 0.0001 * TD.scale,
-            thickness: this.gas.size * 0.0001 * TD.scale,
+            size: this.size * 0.000101 * TD.scale,
+            thickness: this.gas.size * 0.000101 * TD.scale,
             color: MISC.colorHelper,
-            // blending: THREE.AdditiveBlending,
+            color2: MISC.colorHelper2,
+            blending:
+              this.gas.blend === BODY.gas.Dust
+                ? THREE.NormalBlending
+                : THREE.AdditiveBlending,
             transparent: true,
-            opacity: this.gas.thickness,
+            opacity: this.gas.density,
           });
         }
 

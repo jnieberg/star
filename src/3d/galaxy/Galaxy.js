@@ -52,6 +52,7 @@ export default class Galaxy {
         );
       }
     }
+    this.update();
   }
 
   remove() {
@@ -61,11 +62,6 @@ export default class Galaxy {
 
   static newEntitiesCanBeRendered(config) {
     const offset = getCoordinateOffset(config);
-    return (
-      typeof TD.camera.coordinate.x === 'undefined' ||
-      offset.x !== 0 ||
-      offset.y !== 0 ||
-      offset.z !== 0
-    );
+    return offset.x !== 0 || offset.y !== 0 || offset.z !== 0;
   }
 }

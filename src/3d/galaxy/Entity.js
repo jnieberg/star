@@ -171,7 +171,7 @@ export default class Entity {
   }
 
   draw({ coordx, coordy, coordz }, callback) {
-    // let count = (this.config.radius * 2 + 1) ** 3;
+    // const count = (this.config.radius * 2 + 1) ** 3;
     const content = this.config.size * this.config.size * this.config.size;
     for (
       let z = coordz - this.config.radius;
@@ -189,7 +189,7 @@ export default class Entity {
           x += 1
         ) {
           // ((count2) => {
-          // setTimeout(() => {
+          //   setTimeout(() => {
           const coordString = `${x}_${y}_${z}`;
           if (!this.group[coordString]) {
             this.group[coordString] = {
@@ -235,11 +235,11 @@ export default class Entity {
               }
             }
           }
-          // if (count <= 1) {
+          // if (count2 <= 1) {
           //   this.removeOutsideRange({ coordx, coordy, coordz });
           //   callback();
           // }
-          // });
+          //   });
           // })(count);
           // count -= 1;
         }

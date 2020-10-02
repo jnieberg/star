@@ -19,13 +19,13 @@ export const TD = {
     object: undefined,
     near: 0.0000001,
     system: 1,
-    fade: 400,
+    fade: 350,
     far: 700,
     orbit: undefined,
     coordinate: {
-      x: undefined,
-      y: undefined,
-      z: undefined,
+      x: 0,
+      y: 0,
+      z: 0,
     },
   },
   clock: undefined,
@@ -92,6 +92,13 @@ export const STAR = {
     Green: { min: 7500, max: 10000 },
     Blue: { min: 10000, max: 30000 },
     Purple: { min: 30000, max: 40000 },
+  },
+};
+
+export const BODY = {
+  gas: {
+    Dust: 0,
+    Moist: 1,
   },
 };
 

@@ -49,7 +49,7 @@ class Clouds {
     this.cloudMaps = this.cloudMap.maps;
 
     for (let i = 0; i < 6; i += 1) {
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshPhongMaterial({
         color: this.color,
         emissive: this.color,
         emissiveIntensity: 0.02,
@@ -59,7 +59,7 @@ class Clouds {
       this.materials[i] = material;
     }
 
-    const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);
+    const geo = new THREE.BoxGeometry(1, 1, 1, 64, 64, 64);
     const radius = this.size;
     for (let v = 0; v < geo.vertices.length; v += 1) {
       const vertex = geo.vertices[v];

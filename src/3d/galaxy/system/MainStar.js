@@ -12,15 +12,16 @@ export default class MainStar extends Star {
     this.type = 'star';
     this.random = new Random(`${this.type}_${system.id}_${index}`);
     this.index = index;
-    this.letter = toLetter(this.index);
     this.system = system;
     this.parent = parent;
   }
 
+  get letter() {
+    return this.system.stars.length > 1 ? toLetter(this.index) : '';
+  }
+
   get name() {
-    return `${this.parent.name}${
-      this.parent.children.length > 1 ? ` ${this.letter}` : ''
-    }`;
+    return `${this.parent.name} ${this.letter}`;
   }
 
   get color() {

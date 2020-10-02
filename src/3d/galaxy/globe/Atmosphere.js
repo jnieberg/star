@@ -10,28 +10,32 @@ export default class Atmosphere {
     {
       size,
       blending = THREE.NormalBlending,
-      thickness = 0.1,
-      color: colorS = 'rgba(255, 255, 255, 1.0)',
-      colorInner: colorInnerS = colorS,
+      thickness = size * 0.1,
+      color = 'rgba(255, 255, 255, 1.0)',
+      color2 = color,
+      colorInner = color,
       opacity = 0.5,
-      opacityInner = opacity * 0.5,
-      power = 1.0,
+      opacityInner = opacity,
+      power = 2.0,
+      depth = true,
     } = {}
   ) {
-    this.color = new THREE.Color(colorS);
-    this.colorInner = new THREE.Color(colorInnerS);
+    this.color = new THREE.Color(color);
+    this.color2 = new THREE.Color(color2);
+    this.colorInner = new THREE.Color(colorInner);
     this.power = power;
+    this.depth = depth;
     this.atmosphereIn = new Thing('glowInside')
       .geometry(new THREE.SphereBufferGeometry(size, 64, 64))
       .material(Atmosphere.atmosphereMaterial(blending), {
-        'uniforms.reverse.value': 1.0,
+        'uniforms.direction.value': -1.0,
         'uniforms.size.value': size * 0.8,
         'uniforms.thickness.value': size * 0.2,
         'uniforms.opacity.value': opacityInner,
         'uniforms.power.value': this.power,
         'uniforms.color.value': this.colorInner,
-        side: THREE.BackSide,
-        depthTest: false,
+        'uniforms.color2.value': this.color2,
+        side: THREE.FrontSide,
       })
       .mesh({
         name: 'Atmosphere inside',
@@ -48,13 +52,15 @@ export default class Atmosphere {
         'uniforms.opacity.value': opacity,
         'uniforms.power.value': this.power,
         'uniforms.color.value': this.color,
+        'uniforms.color2.value': this.color2,
         side: THREE.BackSide,
-        depthTest: false,
+        depthTest: depth,
       })
       .mesh({
         name: 'Atmosphere outside',
         castShadow: false,
         receiveShadow: false,
+        renderOrder: 1,
       })
       .add(mesh);
   }
@@ -67,9 +73,10 @@ export default class Atmosphere {
           size: { type: 'f', value: 1.0 },
           thickness: { type: 'f', value: 1.0 },
           opacity: { type: 'f', value: 1.0 },
-          reverse: { type: 'f', value: 0.0 },
-          power: { type: 'f', value: 1.0 },
-          color: { type: 'c', value: new THREE.Color(0xffff00) },
+          direction: { type: 'f', value: 1.0 },
+          power: { type: 'f', value: 2.0 },
+          color: { type: 'c', value: new THREE.Color(0xffffff) },
+          color2: { type: 'c', value: new THREE.Color(0xffffff) },
         },
       ]),
       vertexShader: vertShader,

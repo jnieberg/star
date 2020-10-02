@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TD, EVENT } from '../../variables';
+import { TD, EVENT, MISC } from '../../variables';
 import { resetCamera } from './camera';
 import { labelHide } from '../label/label';
 import Galaxy from '../galaxy/Galaxy';
@@ -8,7 +8,7 @@ function isMobile() {
   return window.innerWidth <= 1024;
 }
 
-class FirstPersonControls {
+class Controls {
   constructor(object) {
     this.object = object;
 
@@ -67,11 +67,7 @@ class FirstPersonControls {
     this._onKeyDown = this.onKeyDown.bind(this);
     this._onKeyUp = this.onKeyUp.bind(this);
 
-    document.addEventListener(
-      'contextmenu',
-      FirstPersonControls.contextmenu,
-      false
-    );
+    document.addEventListener('contextmenu', Controls.contextmenu, false);
     document.addEventListener('mousemove', this._onMouseMove, false);
     document.addEventListener('mousedown', this._onMouseDown, false);
     document.addEventListener('mouseup', this._onMouseUp, false);
@@ -150,7 +146,7 @@ class FirstPersonControls {
     }
     const events = (event.touches && [...event.touches]) || [event];
     for (let e = 0; e < events.length; e += 1) {
-      const action = FirstPersonControls.getMouseActions(events[e]);
+      const action = Controls.getMouseActions(events[e]);
       if (action.forward) {
         this.moveForward = true;
         this.rotate = true;
@@ -196,7 +192,7 @@ class FirstPersonControls {
     }
     const events = (event.touches && [...event.touches]) || [event];
     for (let e = 0; e < events.length; e += 1) {
-      const action = FirstPersonControls.getMouseActions(events[e]);
+      const action = Controls.getMouseActions(events[e]);
       if (action.rotate) {
         this.mouseX = action.rotate.x;
         this.mouseY = action.rotate.y;
@@ -424,28 +420,11 @@ class FirstPersonControls {
       this.setRotateKnob();
     }
   }
-
-  dispose() {
-    document.removeEventListener(
-      'contextmenu',
-      FirstPersonControls.contextmenu,
-      false
-    );
-    document.removeEventListener('mousemove', this._onMouseMove, false);
-    document.removeEventListener('mousedown', this._onMouseDown, false);
-    document.removeEventListener('mouseup', this._onMouseUp, false);
-    document.removeEventListener('touchstart', this._onMouseDown, false);
-    document.removeEventListener('touchend', this._onMouseUp, false);
-    document.removeEventListener('touchmove', this._onMouseMove, false);
-
-    window.removeEventListener('keydown', this._onKeyDown, false);
-    window.removeEventListener('keyup', this._onKeyUp, false);
-  }
 }
 
 export default function initControls() {
   TD.clock = new THREE.Clock();
-  EVENT.controls = new FirstPersonControls(TD.camera.object);
+  EVENT.controls = new Controls(TD.camera.object);
   EVENT.controls.acceleration = true;
   EVENT.controls.movementSpeed = 10 * TD.scale;
   EVENT.controls.lookSpeed = 0.1;
@@ -484,6 +463,7 @@ export function getKeys(e) {
       TD.moon = undefined;
       TD.label = undefined;
       resetCamera();
+      MISC.reload = true;
       break;
     default:
       break;
