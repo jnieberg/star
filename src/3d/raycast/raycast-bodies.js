@@ -108,10 +108,10 @@ export default function raycastBody() {
       }
       let star;
       if (distance < distanceOrbitStar) {
-        // star = body.type === 'moon' && body.parent.parent;
-        // star = star || (body.type === 'planet' && body.parent);
-        // star = star || (body.type === 'star' && body);
-        star = body.star;
+        star = body.type === 'moon' && body.parent.parent;
+        star = star || (body.type === 'planet' && body.parent);
+        star = star || (body.type === 'star' && body);
+        // star = body.star;
         if (star && TD.star !== star) {
           TD.star = star;
         }
@@ -131,7 +131,6 @@ export default function raycastBody() {
       return raycastBodyEvents(intersect);
     }
     if (TD.star) {
-      console.log(TD.star);
       TD.star.parent.hideChildren();
       TD.star = undefined;
       TD.camera.orbit = undefined;

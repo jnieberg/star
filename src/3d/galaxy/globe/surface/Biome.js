@@ -24,7 +24,9 @@ class Biome {
     // const s = Biome.randRange(0.0, 0.7);
     // const l = Biome.randRange(0.0, 0.6);
     this.baseColor = new THREE.Color().setHSL(
-      this.metal.hue, this.metal.saturation, this.metal.lightness,
+      this.metal.hue,
+      this.metal.saturation,
+      this.metal.lightness
     );
     this.colorAngle = Biome.randRange(0.2, 0.4);
     this.satRange = Biome.randRange(0.3, 0.5);
@@ -90,7 +92,9 @@ class Biome {
       };
       const opacity = 0.9;
       // this.ctx.strokeStyle = 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', 0.5)';
-      this.ctx.strokeStyle = `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(c.lightness)}%, ${opacity})`;
+      this.ctx.strokeStyle = `hsla(${Math.round(c.hue)}, ${Math.round(
+        c.saturation
+      )}%, ${Math.round(c.lightness)}%, ${opacity})`;
 
       let x = Biome.randRange(0, this.width);
       let y = Biome.randRange(0, this.height);
@@ -136,9 +140,15 @@ class Biome {
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
     const c = this.randomColor();
-    gradient.addColorStop(Biome.randRange(0, 0.5), `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`);
+    gradient.addColorStop(
+      Biome.randRange(0, 0.5),
+      `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`
+    );
     gradient.addColorStop(0.5, `rgba(${c.r}, ${c.g}, ${c.b}, 0.8)`);
-    gradient.addColorStop(Biome.randRange(0.5, 1.0), `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`);
+    gradient.addColorStop(
+      Biome.randRange(0.5, 1.0),
+      `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`
+    );
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(x, y, width, height);
@@ -167,7 +177,7 @@ class Biome {
 
   drawWater() {
     const x1 = 0;
-    const y1 = this.height - (this.height * this.waterLevel);
+    const y1 = this.height - this.height * this.waterLevel;
     const x2 = 0;
     const y2 = this.height;
 
@@ -185,10 +195,30 @@ class Biome {
     const falloff3 = 0.8;
     const falloff4 = 0.7;
     const opacity = 1;
-    gradient.addColorStop(0.0, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(c.lightness * falloff)}%, ${opacity})`);
-    gradient.addColorStop(0.2, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(c.lightness * falloff2)}%, ${opacity})`);
-    gradient.addColorStop(0.4, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(c.lightness * falloff3)}%, ${opacity})`);
-    gradient.addColorStop(0.6, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(c.lightness * falloff4)}%, ${opacity})`);
+    gradient.addColorStop(
+      0.0,
+      `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(
+        c.lightness * falloff
+      )}%, ${opacity})`
+    );
+    gradient.addColorStop(
+      0.2,
+      `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(
+        c.lightness * falloff2
+      )}%, ${opacity})`
+    );
+    gradient.addColorStop(
+      0.4,
+      `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(
+        c.lightness * falloff3
+      )}%, ${opacity})`
+    );
+    gradient.addColorStop(
+      0.6,
+      `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation)}%, ${Math.round(
+        c.lightness * falloff4
+      )}%, ${opacity})`
+    );
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(x1, y1, this.width, this.height);
@@ -198,9 +228,11 @@ class Biome {
     this.beachSize = Biome.randRange(0, 16);
 
     const x1 = 0;
-    const y1 = this.height - (this.height * this.waterLevel) - this.beachSize * 0.5;
+    const y1 =
+      this.height - this.height * this.waterLevel - this.beachSize * 0.5;
     const x2 = 0;
-    const y2 = this.height - (this.height * this.waterLevel) + this.beachSize * 0.5;
+    const y2 =
+      this.height - this.height * this.waterLevel + this.beachSize * 0.5;
 
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
@@ -210,36 +242,70 @@ class Biome {
       saturation: Math.floor(this.fluid.saturation * 100),
       lightness: Math.floor(this.fluid.lightness * 100),
     };
-    gradient.addColorStop(0.0, `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 1.0)`);
-    gradient.addColorStop(0.4, `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 1.0)`);
-    gradient.addColorStop(0.6, `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 0.5)`);
-    gradient.addColorStop(1.0, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation)}%, ${Math.round(c2.lightness)}%, 0.0)`);
+    gradient.addColorStop(
+      0.0,
+      `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 1.0)`
+    );
+    gradient.addColorStop(
+      0.4,
+      `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 1.0)`
+    );
+    gradient.addColorStop(
+      0.6,
+      `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, 0.5)`
+    );
+    gradient.addColorStop(
+      1.0,
+      `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation)}%, ${Math.round(
+        c2.lightness
+      )}%, 0.0)`
+    );
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(x1, y1, this.width, this.beachSize * 3);
   }
 
   drawInland() {
-    this.inlandSize = this.height - (this.height * this.waterLevel);
+    this.inlandSize = this.height - this.height * this.waterLevel;
 
     const x1 = 0;
-    const y1 = 0;// this.height - (this.height * this.waterLevel) - this.inlandSize;
+    const y1 = 0; // this.height - (this.height * this.waterLevel) - this.inlandSize;
     const x2 = 0;
-    const y2 = this.height - (this.height * this.waterLevel);
+    const y2 = this.height - this.height * this.waterLevel;
 
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
     const c = this.randomColor(-0.2);
     const c2 = this.randomColor(0);
     const c3 = this.randomColor(0.2);
-    const falloff = 0.25;
-    const falloff1 = 0.5;
-    const falloff2 = 0.75;
-    const falloff3 = 1.0;
-    gradient.addColorStop(0.0, `hsla(${Math.round(c.hue)}, ${Math.round(c.saturation * falloff)}%, ${Math.round(c.lightness * falloff1)}%, 1.0)`);
-    gradient.addColorStop(0.3, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation * falloff1)}%, ${Math.round(c2.lightness * falloff2)}%, 1.0)`);
-    gradient.addColorStop(0.7, `hsla(${Math.round(c2.hue)}, ${Math.round(c2.saturation * falloff2)}%, ${Math.round(c2.lightness * falloff3)}%, 1.0)`);
-    gradient.addColorStop(1.0, `hsla(${Math.round(c3.hue)}, ${Math.round(c3.saturation * falloff3)}%, ${Math.round(c3.lightness * falloff3)}%, 1.0)`);
+    const falloff = 0.5;
+    const falloff1 = 0.75;
+    const falloff2 = 1.0;
+    const falloff3 = 1.2;
+    gradient.addColorStop(
+      0.0,
+      `hsla(${Math.round(c.hue)}, ${Math.round(
+        c.saturation * falloff
+      )}%, ${Math.round(c.lightness * falloff1)}%, 1.0)`
+    );
+    gradient.addColorStop(
+      0.3,
+      `hsla(${Math.round(c2.hue)}, ${Math.round(
+        c2.saturation * falloff1
+      )}%, ${Math.round(c2.lightness * falloff2)}%, 1.0)`
+    );
+    gradient.addColorStop(
+      0.7,
+      `hsla(${Math.round(c2.hue)}, ${Math.round(
+        c2.saturation * falloff2
+      )}%, ${Math.round(c2.lightness * falloff3)}%, 1.0)`
+    );
+    gradient.addColorStop(
+      1.0,
+      `hsla(${Math.round(c3.hue)}, ${Math.round(
+        c3.saturation * falloff3
+      )}%, ${Math.round(c3.lightness * falloff3)}%, 1.0)`
+    );
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(x1, y1, this.width, this.inlandSize);
@@ -297,7 +363,9 @@ class Biome {
   }
 
   static toCanvasColor(c) {
-    return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, 1.0)`;
+    return `rgba(${Math.round(c.r * 255)}, ${Math.round(
+      c.g * 255
+    )}, ${Math.round(c.b * 255)}, 1.0)`;
   }
 
   static randRange(low, high) {

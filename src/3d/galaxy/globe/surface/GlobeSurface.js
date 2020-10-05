@@ -11,10 +11,22 @@ import Random from '../../../../misc/Random';
 import wait from '../../../tools/wait';
 
 class GlobeSurface {
-  constructor({
-    rnd, size, resolution, obj, biome, detail, hasClouds = false, cloudColor, metal, fluid,
-  }, callback) {
-    MISC.interrupt = false;// true
+  constructor(
+    {
+      rnd,
+      size,
+      resolution,
+      obj,
+      biome,
+      detail,
+      hasClouds = false,
+      cloudColor,
+      metal,
+      fluid,
+    },
+    callback
+  ) {
+    MISC.interrupt = false; // true
     this.seedString = rnd || 'lorem';
     this.initSeed();
     this.timerBank = this.seedString;
@@ -39,16 +51,19 @@ class GlobeSurface {
     this.resolution = resolution || 256;
     this.segments = resolution / 32 > 16 ? resolution / 32 : 16;
     this.cloudColor = cloudColor;
+    this.cloudDensity = hasClouds.density;
     this.clouds = undefined;
     if (this.hasClouds) {
       this.clouds = this.createClouds();
     }
     wait(this.timerBank, () => {
       this.initSeed();
-      this.biome = biome || new Biome({
-        metal: this.metal,
-        fluid: this.fluid,
-      });
+      this.biome =
+        biome ||
+        new Biome({
+          metal: this.metal,
+          fluid: this.fluid,
+        });
       wait(this.timerBank, () => {
         this.createScene();
         this.render(resolution, callback);
@@ -131,72 +146,90 @@ class GlobeSurface {
 
     MISC.interrupt = false;
     this.initSeed();
-    this.heightMap.render({
-      timerBank: this.timerBank,
-      seed: this.seed,
-      resolution: this.resolution,
-      res1: GlobeSurface.randRange(resMin, resMax),
-      res2: GlobeSurface.randRange(resMin, resMax),
-      resMix: GlobeSurface.randRange(resMin, resMax),
-      mixScale: GlobeSurface.randRange(0.5, 1.0),
-      doesRidged: Math.floor(GlobeSurface.randRange(0, 4)),
-      // doesRidged: 1
-    }, () => {
-      this.initSeed();
-      // this.updateMaterial();
-      const resMod = GlobeSurface.randRange(3, 10);
-      resMax *= resMod;
-      resMin *= resMod;
-
-      this.moistureMap.render({
+    this.heightMap.render(
+      {
         timerBank: this.timerBank,
-        seed: this.seed + 392.253,
+        seed: this.seed,
         resolution: this.resolution,
         res1: GlobeSurface.randRange(resMin, resMax),
         res2: GlobeSurface.randRange(resMin, resMax),
         resMix: GlobeSurface.randRange(resMin, resMax),
         mixScale: GlobeSurface.randRange(0.5, 1.0),
         doesRidged: Math.floor(GlobeSurface.randRange(0, 4)),
-        // doesRidged: 0
-      }, () => {
+        // doesRidged: 1
+      },
+      () => {
+        this.initSeed();
         // this.updateMaterial();
-        this.textureMap.render({
-          timerBank: this.timerBank,
-          resolution: this.resolution,
-          heightMaps: this.heightMaps,
-          moistureMaps: this.moistureMaps,
-          biomeMap: this.biome.texture,
-        }, () => {
-          // this.updateMaterial();
-          this.normalMap.render({
+        const resMod = GlobeSurface.randRange(3, 10);
+        resMax *= resMod;
+        resMin *= resMod;
+
+        this.moistureMap.render(
+          {
             timerBank: this.timerBank,
+            seed: this.seed + 392.253,
             resolution: this.resolution,
-            waterLevel: this.fluid.level,
-            heightMaps: this.heightMaps,
-            textureMaps: this.textureMaps,
-          }, () => {
+            res1: GlobeSurface.randRange(resMin, resMax),
+            res2: GlobeSurface.randRange(resMin, resMax),
+            resMix: GlobeSurface.randRange(resMin, resMax),
+            mixScale: GlobeSurface.randRange(0.5, 1.0),
+            doesRidged: Math.floor(GlobeSurface.randRange(0, 4)),
+            // doesRidged: 0
+          },
+          () => {
             // this.updateMaterial();
-            this.roughnessMap.render({
-              timerBank: this.timerBank,
-              resolution: this.resolution,
-              heightMaps: this.heightMaps,
-              waterLevel: this.fluid.level,
-            }, () => {
-              if (this.hasClouds) {
-                this.clouds.render({
-                  timerBank: this.timerBank,
-                  waterLevel: this.fluid.level,
-                }, () => {
-                  this.renderCallback('CALLBACK', callback);
-                });
-              } else {
-                this.renderCallback('CALLBACK', callback);
+            this.textureMap.render(
+              {
+                timerBank: this.timerBank,
+                resolution: this.resolution,
+                heightMaps: this.heightMaps,
+                moistureMaps: this.moistureMaps,
+                biomeMap: this.biome.texture,
+              },
+              () => {
+                // this.updateMaterial();
+                this.normalMap.render(
+                  {
+                    timerBank: this.timerBank,
+                    resolution: this.resolution,
+                    waterLevel: this.fluid.level,
+                    heightMaps: this.heightMaps,
+                    textureMaps: this.textureMaps,
+                  },
+                  () => {
+                    // this.updateMaterial();
+                    this.roughnessMap.render(
+                      {
+                        timerBank: this.timerBank,
+                        resolution: this.resolution,
+                        heightMaps: this.heightMaps,
+                        waterLevel: this.fluid.level,
+                      },
+                      () => {
+                        if (this.hasClouds) {
+                          this.clouds.render(
+                            {
+                              timerBank: this.timerBank,
+                              waterLevel: this.fluid.level,
+                            },
+                            () => {
+                              this.renderCallback('CALLBACK', callback);
+                            }
+                          );
+                        } else {
+                          this.renderCallback('CALLBACK', callback);
+                        }
+                      }
+                    );
+                  }
+                );
               }
-            });
-          });
-        });
-      });
-    });
+            );
+          }
+        );
+      }
+    );
   }
 
   updateMaterial() {
@@ -207,7 +240,10 @@ class GlobeSurface {
 
       material.map = this.textureMaps[i];
       material.normalMap = this.normalMaps[i];
-      material.normalScale = new THREE.Vector2(this.normalScale, this.normalScale);
+      material.normalScale = new THREE.Vector2(
+        this.normalScale,
+        this.normalScale
+      );
       material.roughnessMap = this.roughnessMaps[i];
       material.metalnessMap = this.roughnessMaps[i];
       // material.opacity = 1;
@@ -228,19 +264,34 @@ class GlobeSurface {
       resolution: 512,
       show: true,
       color: this.cloudColor,
+      opacity: this.cloudDensity,
     });
     // this.ground.add(this.clouds.view);
   }
 
   updateNormalScaleForRes(value) {
     switch (value) {
-      case 32: this.normalScale = 0.03; break;
-      case 64: this.normalScale = 0.05; break;
-      case 128: this.normalScale = 0.10; break;
-      case 256: this.normalScale = 0.15; break;
-      case 512: this.normalScale = 0.25; break;
-      case 1024: this.normalScale = 0.5; break;
-      default: this.normalScale = 0; break;
+      case 32:
+        this.normalScale = 0.03;
+        break;
+      case 64:
+        this.normalScale = 0.05;
+        break;
+      case 128:
+        this.normalScale = 0.1;
+        break;
+      case 256:
+        this.normalScale = 0.15;
+        break;
+      case 512:
+        this.normalScale = 0.25;
+        break;
+      case 1024:
+        this.normalScale = 0.5;
+        break;
+      default:
+        this.normalScale = 0;
+        break;
     }
   }
 

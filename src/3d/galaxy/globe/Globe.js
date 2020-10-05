@@ -151,14 +151,15 @@ export default class Globe extends Body {
       this.random.seed = 'gas';
       const blend = this.random.rndInt(2);
       if (this.random.rndInt(5) > 0) {
-        const hsl = {
-          hue: this.random.rnd(),
-          saturation: this.random.rnd(),
-          lightness:
-            blend === BODY.gas.Dust
-              ? this.random.rnd(0.0, 1.0)
-              : this.random.rnd(0.5, 1.0),
-        };
+        // const hsl = {
+        //   hue: this.random.rnd(),
+        //   saturation: this.random.rnd(),
+        //   lightness:
+        //     blend === BODY.gas.Dust
+        //       ? this.random.rnd(0.0, 1.0)
+        //       : this.random.rnd(0.5, 1.0),
+        // };
+        const hsl = blend === BODY.gas.Dust ? this.metal : this.fluid;
         this._atmosphere = {
           size: this.random.rnd(this.size * 0.1),
           density: this.random.rnd(0.1, 1.0),
@@ -184,6 +185,7 @@ export default class Globe extends Body {
         hue: this.gas.color.hue,
         saturation: this.gas.color.saturation,
         lightness: this.gas.color.lightness + this.random.rnd(0.25),
+        density: this.gas.density,
       };
     }
     return false;
@@ -526,23 +528,23 @@ export default class Globe extends Body {
         this.rings.size * (this.rings.thickness * 0.00004 + 0.00006) * TD.scale,
         64
       );
-      const ringMaterial = new THREE.MeshPhongMaterial({
+      const ringMaterial = new THREE.MeshStandardMaterial({
         map: TD.texture.planet.rings,
         color: MISC.colorHelper,
         emissive: MISC.colorHelper,
         emissiveIntensity: 0.01,
         opacity: this.rings.color.a,
+        blending: THREE.NormalBlending,
         side: THREE.DoubleSide,
         alphaTest: 0,
         transparent: true,
       });
       const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
       ringMesh.name = 'Planet rings';
-      ringMesh.renderOrder = 2;
+      ringMesh.renderOrder = 0;
       ringMesh.rotateX(Math.PI * 0.5);
       ringMesh.castShadow = true;
       ringMesh.receiveShadow = true;
-      ringMesh.material.needsUpdate = true;
       this.object.low.add(ringMesh);
     }
 
@@ -582,7 +584,7 @@ export default class Globe extends Body {
             2,
             hue2,
             this.gas.color.saturation,
-            this.gas.color.lightness,
+            this.gas.color.lightness - 0.25,
             'hsl'
           );
           // eslint-disable-next-line no-unused-vars

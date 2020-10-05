@@ -42,12 +42,12 @@ export function loadStorage() {
 export function interval() {
   setInterval(() => {
     TD.galaxy.draw();
-    eventLabel();
     let keepLabel = raycastSystem();
     keepLabel = raycastBody() || keepLabel;
     if (!keepLabel && TD.label && TD.label.visible) {
       labelHide();
     }
+    eventLabel();
     MISC.debug.update();
     if (!MISC.started) {
       loadStorage();

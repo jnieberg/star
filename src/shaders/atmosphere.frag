@@ -22,10 +22,10 @@ void main() {
   float r_in;
   float r_out;
   if(direction >= 0.0) {
-    r_in = size / (size + thickness * 8.0);
-    r_out = 1.0 / power;
+    r_in = (size / (size + thickness)) - (power * 0.2);
+    r_out = 1.0;
   } else {
-    r_in = 0.9;
+    r_in = 1.0 / power;
     r_out = 2.0;
   }
   float radius = length( pos-1.0 );
@@ -33,5 +33,5 @@ void main() {
   mask = max(mask, 0.0);
   mask = min(mask, 1.0);
   vec3 color3 = mix(color, color2, mask);
-  gl_FragColor = vec4( color3, a );
+  gl_FragColor = vec4( color3, a);
 }

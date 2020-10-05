@@ -17,18 +17,22 @@ class Map {
     this.geos = [];
     if (this.enabled) {
       for (let i = 0; i < 6; i += 1) {
-        this.textures[i] = new THREE.WebGLRenderTarget(this.resolution, this.resolution, {
-          precision: 'highp',
-          powerPreference: 'high-performance',
-          minFilter: THREE.LinearFilter,
-        });
+        this.textures[i] = new THREE.WebGLRenderTarget(
+          this.resolution,
+          this.resolution,
+          {
+            precision: 'highp',
+            powerPreference: 'high-performance',
+            minFilter: THREE.LinearFilter,
+          }
+        );
         this.textureCameras[i] = new THREE.OrthographicCamera(
           -this.resolution / 2,
           this.resolution / 2,
           this.resolution / 2,
           -this.resolution / 2,
           -100,
-          100,
+          100
         );
         this.textureCameras[i].position.z = 10;
 
@@ -63,14 +67,24 @@ class Map {
         this.textureCameras[i].top = resolution / 2;
         this.textureCameras[i].bottom = -resolution / 2;
         this.textureCameras[i].updateProjectionMatrix();
-        this.geos[i] = new THREE.PlaneBufferGeometry(resolution, resolution, 1, 1);
+        this.geos[i] = new THREE.PlaneBufferGeometry(
+          resolution,
+          resolution,
+          1,
+          1
+        );
         this.planes[i].geometry = this.geos[i];
         this.geos[i].dispose();
         // TD.renderer.autoClear = false;
         if (y < fragments) {
           if (x < fragments) {
             Map.renderPart(
-              x, y, resolution, this.textures[i], this.textureScenes[i], this.textureCameras[i],
+              x,
+              y,
+              resolution,
+              this.textures[i],
+              this.textureScenes[i],
+              this.textureCameras[i]
             );
             this.renderFragment(resolution, i, x + 1, y, callback);
           } else {
@@ -105,7 +119,7 @@ class Map {
       Math.floor((x * resolution) / fragments),
       Math.floor((y * resolution) / fragments),
       Math.floor(resolution / fragments),
-      Math.floor(resolution / fragments),
+      Math.floor(resolution / fragments)
     );
     TD.renderer.render(scene, camera);
     TD.renderer.antialias = true;

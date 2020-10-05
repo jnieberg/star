@@ -5,7 +5,7 @@ import CloudMap from './CloudMap';
 import Random from '../../../../misc/Random';
 
 class Clouds {
-  constructor({ rnd, size, resolution, show, color }) {
+  constructor({ rnd, size, resolution, show, color, opacity = 0.9 }) {
     // this.view = new THREE.Object3D();
     this.seedString = rnd || 'lorem';
     this.initSeed();
@@ -16,7 +16,7 @@ class Clouds {
     this.roughness = 0.9;
     this.metalness = 0.5;
     this.normalScale = 5.0;
-    this.opacity = 0.9;
+    this.opacity = opacity;
     this.sphere = new THREE.Mesh();
 
     this.resolution = resolution;

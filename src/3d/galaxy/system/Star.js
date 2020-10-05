@@ -244,7 +244,7 @@ export default class Star extends Body {
       color2: MISC.colorHelper2,
       blending: THREE.AdditiveBlending,
       opacity: 0.75,
-      opacityInner: 1.0,
+      opacityInner: 0.5,
       power: 5.0,
       depth: false,
     });

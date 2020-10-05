@@ -11,10 +11,13 @@ const compiler = webpack({
   mode: 'development',
   devtool: 'inline-source-map',
   watch: true,
-  entry: './src/index.js',
+  entry: {
+    index: './src/index.js',
+    test: './src/test.js',
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].js',
   },
   stats: 'errors-only',
   module: {
@@ -88,6 +91,10 @@ app.use(
 app.use(bodyParser.json());
 
 process.env.TZ = 'Europe/Amsterdam';
+
+app.get('/test', (req, resp) => {
+  open(resp, 'public/test.html');
+});
 
 app.get('/', (req, resp) => {
   open(resp, 'public/index.html');

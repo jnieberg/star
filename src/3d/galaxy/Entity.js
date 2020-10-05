@@ -107,7 +107,7 @@ export default class Entity {
                 opacity,
                 flatShading: true,
                 depthTest: false,
-                depthWrite: false,
+                // depthWrite: false,
               });
               const object = new THREE.Mesh(this.group[i].geometry, material);
               object.renderOrder = this.order;

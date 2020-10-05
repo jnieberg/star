@@ -77,8 +77,6 @@ export default class BlackHole extends MainStar {
     });
     this.camera.fov = 120;
     this.camera.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
-    this.object.add(this.camera);
-
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
     const material = new THREE.MeshBasicMaterial({
       envMap: cubeRenderTarget.texture,
@@ -89,25 +87,26 @@ export default class BlackHole extends MainStar {
       alphaTest: 0,
     });
     this.object.low = new THREE.Mesh(geometry, material);
-    this.object.low.name = 'Star low';
+    this.object.low.name = 'Black hole low';
     this.object.low.castShadow = false;
     this.object.low.receiveShadow = false;
-    this.object.low.scale.set(2, 2, 2);
+    this.object.low.scale.set(1.5, 1.5, 1.5);
     this.object.low.renderOrder = -3;
     this.object.add(this.object.low);
     this.camera.update(TD.renderer, TD.scene);
 
-    // Black hole inner
+    // Black hole core
     const material2 = new THREE.MeshBasicMaterial({
       color: 0x000000,
       blending: THREE.MultiplyBlending,
       alphaTest: 0,
     });
     this.object.high = new THREE.Mesh(geometry, material2);
-    this.object.high.name = 'Star high';
+    this.object.high.name = 'Black hole high';
     this.object.high.scale.set(1, 1, 1);
     this.object.high.castShadow = false;
     this.object.high.receiveShadow = false;
+    this.object.high.renderOrder = 0;
     this.object.add(this.object.high);
 
     // Black hole ring
@@ -123,10 +122,11 @@ export default class BlackHole extends MainStar {
       alphaTest: 0,
     });
     this.object.ring = new THREE.Mesh(geometry3, material3);
-    this.object.ring.name = 'Star ring';
+    this.object.ring.name = 'Black hole ring';
     this.object.ring.castShadow = false;
     this.object.ring.receiveShadow = false;
-    this.object.ring.rotateX(Math.PI * 0.5); // Math.sign(this.rotationSpeedAroundAxis) *
+    this.object.ring.rotateX(Math.PI * 0.5);
+    this.object.ring.renderOrder = 0;
     this.object.add(this.object.ring);
 
     // Black hole ring inner
@@ -140,47 +140,58 @@ export default class BlackHole extends MainStar {
       alphaTest: 0,
     });
     this.object.ring2 = new THREE.Mesh(geometry4, material4);
-    this.object.ring2.name = 'Star ring inner';
+    this.object.ring2.name = 'Black hole ring inner';
     this.object.ring2.castShadow = false;
     this.object.ring2.receiveShadow = false;
+    this.object.ring2.renderOrder = 0;
     this.object.ring.add(this.object.ring2);
 
     // Sub star flare
-    const materialFlare = new THREE.SpriteMaterial({
-      map: TD.texture.star.large,
-      color: MISC.colorHelper,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      alphaTest: 0,
-      rotation: Math.PI * 0.25,
-    });
-    const objectFlare = new THREE.Sprite(materialFlare);
-    objectFlare.name = 'Star flare';
-    objectFlare.scale.set(size * 8, size * 8, size * 8);
-    objectFlare.castShadow = false;
-    objectFlare.receiveShadow = false;
-    this.object.add(objectFlare);
+    // const materialFlare = new THREE.SpriteMaterial({
+    //   map: TD.texture.star.large,
+    //   color: MISC.colorHelper,
+    //   transparent: true,
+    //   blending: THREE.AdditiveBlending,
+    //   alphaTest: 0,
+    //   rotation: Math.PI * 0.25,
+    // });
+    // const objectFlare = new THREE.Sprite(materialFlare);
+    // objectFlare.name = 'Black hole flare';
+    // objectFlare.scale.set(size * 8, size * 8, size * 8);
+    // objectFlare.castShadow = false;
+    // objectFlare.receiveShadow = false;
+    // objectFlare.renderOrder = 3;
+    // this.object.add(objectFlare);
 
     // Star double corona
     // eslint-disable-next-line no-unused-vars
-    const _ = new Atmosphere(this.object.high, {
-      size,
-      thickness: size * 1.5,
-      color: MISC.colorHelper,
-      colorInner: MISC.colorHelper,
-      blending: THREE.AdditiveBlending,
-      opacity: 0.25,
-    });
+    // const _ = new Atmosphere(this.object.high, {
+    //   size: size * 1.01,
+    //   thickness: size * 1.01 * 15,
+    //   color: MISC.colorHelper,
+    //   color2: MISC.colorHelper2,
+    //   colorInner: MISC.colorHelper,
+    //   blending: THREE.AdditiveBlending,
+    //   opacity: 0.75,
+    //   opacityInner: 1.0,
+    //   power: 5.0,
+    //   depth: false,
+    // });
+
     // eslint-disable-next-line no-unused-vars
     const __ = new Atmosphere(this.object.high, {
-      size,
-      thickness: size * 1.2,
-      color: MISC.colorHelper2,
-      colorInner: MISC.colorHelper2,
+      size: size * 1.01,
+      thickness: size * 1.01 * 1.1,
+      color: MISC.colorHelper,
+      color2: MISC.colorHelper2,
+      colorInner: MISC.colorHelper,
       blending: THREE.AdditiveBlending,
-      opacity: 0.25,
+      opacity: 1.0,
+      opacityInner: 1.0,
+      power: 2.0,
     });
 
+    // Black hole aura
     const material5 = new THREE.SpriteMaterial({
       map: TD.texture.star.aura,
       color: MISC.colorHelper,
@@ -189,7 +200,9 @@ export default class BlackHole extends MainStar {
       alphaTest: 0,
     });
     this.object.aura = new THREE.Sprite(material5);
+    this.object.aura.name = 'Black hole aura';
     this.object.aura.scale.set(size * 3, size * 3, size * 3);
+    this.object.aura.renderOrder = 0;
     this.object.add(this.object.aura);
 
     this.drawPost();

@@ -52,7 +52,7 @@ export default class Galaxy {
         );
       }
     }
-    this.update();
+    // this.update();
   }
 
   remove() {

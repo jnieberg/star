@@ -14,7 +14,7 @@ export const TD = {
       density: 512,
     },
   },
-  scale: 100000,
+  scale: 1000,
   camera: {
     object: undefined,
     near: 0.0000001,
