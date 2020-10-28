@@ -1,9 +1,13 @@
 import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { TD } from '../../variables';
 import deleteThree from '../tools/delete';
 
 export default class Body {
-  constructor() {
+  constructor({ index, system, parent = system } = {}) {
+    if (typeof index !== 'undefined') this.index = index;
+    if (typeof system !== 'undefined') this.system = system;
+    if (typeof parent !== 'undefined') this.parent = parent;
     this.object = {
       low: undefined,
       high: undefined,
@@ -11,16 +15,43 @@ export default class Body {
     };
   }
 
-  setLabel() {
-    if (this.visible) {
+  get id() {
+    const id = typeof this.parent.id !== 'undefined' ? this.parent.id : [];
+    id.push(this.index);
+    return id;
+  }
+
+  get distanceToCamera() {
+    if (this.object) {
+      const position = new THREE.Vector3();
+      this.object.getWorldPosition(position);
+      return TD.camera.distanceTo(position);
+    }
+    return 99999999;
+  }
+
+  setLabel(distance = 0.2) {
+    if (this.visible && this.distanceToCamera < distance) {
+      const opacity = (distance - this.distanceToCamera) * (1.0 / distance);
       if (!this.label) {
-        this.label = document.createElement('div');
-        this.label.id = 'label-body';
-        this.label.classList.add('label-body', `label-${this.type}`);
-        this.label.innerHTML = this.textShort;
-        document.body.appendChild(this.label);
+        this.labelContainer = document.createElement('div');
+        this.labelContainer.classList.add(
+          'label-container',
+          `label-${this.type}`
+        );
+
+        this.labelElement = document.createElement('div');
+        this.labelElement.classList.add('label-body', `label-${this.type}`);
+        this.labelElement.innerHTML = this.textShort;
+
+        this.labelContainer.appendChild(this.labelElement);
+
+        this.label = new CSS2DObject(this.labelContainer);
+        this.label.position.set(0, 0, 0);
+        this.object.add(this.label);
+      } else {
+        this.labelElement.style.opacity = opacity;
       }
-      this.label.style.transform = `translate(${this.screenPosition.x}px, ${this.screenPosition.y}px)`;
     } else {
       this.removeLabel();
     }
@@ -28,33 +59,13 @@ export default class Body {
 
   removeLabel() {
     if (this.label) {
+      this.labelElement.remove();
+      this.labelElement = undefined;
+      this.labelContainer.remove();
+      this.labelContainer = undefined;
       this.label.remove();
       this.label = undefined;
     }
-  }
-
-  get screenPosition() {
-    if (this.object) {
-      const position = new THREE.Vector3();
-      this.object.getWorldPosition(position);
-      const p = new THREE.Vector3(position.x, position.y, position.z);
-      const vector = p.project(TD.camera.object);
-      const width =
-        parseInt(TD.renderer.domElement.style.width, 10) ||
-        TD.renderer.domElement.width;
-      const height =
-        parseInt(TD.renderer.domElement.style.height, 10) ||
-        TD.renderer.domElement.height;
-      vector.x = (vector.x + 1) * width * 0.5;
-      vector.y = -(vector.y - 1) * height * 0.5;
-      if (vector.z <= 1) {
-        return vector;
-      }
-    }
-    return {
-      x: -9999,
-      y: -9999,
-    };
   }
 
   drawTrajectory({ thickness = 0.5, opacity = 0.25 } = {}) {
@@ -87,7 +98,7 @@ export default class Body {
       this.object.trajectory.castShadow = false;
       this.object.trajectory.receiveShadow = false;
       this.object.trajectory.renderOrder = -99;
-      this.parent.object.high.add(this.object.trajectory);
+      this.parent.object.add(this.object.trajectory);
     }
   }
 
@@ -97,6 +108,7 @@ export default class Body {
       child.remove();
     });
     deleteThree(this.object);
+    deleteThree(this.camera); // !!!
     delete this;
   }
 }

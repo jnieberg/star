@@ -1,6 +1,6 @@
-import { EVENT, TD } from '../../variables';
+import { EVENT, LAYER, MISC, TD } from '../../variables';
+import Store from '../init/Store';
 import setLabel, { labelShow } from '../label/label';
-import { distanceToCamera, fixObjectToCamera } from '../init/camera';
 import raycastFound from './raycast-found';
 
 function raycastSystemEvents(intersect) {
@@ -14,7 +14,7 @@ function raycastSystemEvents(intersect) {
   }
   if (system) {
     if (intersect.distance / TD.scale < distanceFar) {
-      if (!TD.system || TD.system.id !== system.id) {
+      if (!TD.system || TD.system.key !== system.key) {
         if (TD.system) TD.system.remove();
         TD.system = system;
         TD.system.draw();
@@ -28,18 +28,15 @@ function raycastSystemEvents(intersect) {
       return true;
     }
   }
+  Store.loadSystem();
   return false;
 }
 
 export default function raycastSystem() {
   const distance = 10;
   if (TD.system && TD.system.object) {
-    fixObjectToCamera(TD.system.object);
-    const distanceCam = distanceToCamera(
-      TD.system.object.position.x,
-      TD.system.object.position.y,
-      TD.system.object.position.z
-    );
+    // fixObjectToCamera(TD.system.object);
+    const distanceCam = TD.camera.distanceTo(TD.system.object.position);
     EVENT.controls.speedFactorStar =
       distanceCam / (distance * 2) < 1.0 ? distanceCam / (distance * 2) : 1.0;
     if (distanceCam >= distance) {
@@ -52,13 +49,15 @@ export default function raycastSystem() {
       EVENT.controls.speedFactorPlanet = 1.0;
       return false;
     }
-  }
-  const obj = Object.values(TD.galaxy.star.group)
-    .map((sys) => sys.object)
-    .filter((sys) => sys);
-  const intersect = raycastFound(obj, distance, 0.5);
-  if (intersect && intersect.object && intersect.object.name) {
-    return raycastSystemEvents(intersect);
+  } else {
+    TD.raycaster.layers.enable(LAYER.ENTITY);
+    const obj = Object.values(TD.galaxy.star.group)
+      .map((sys) => sys.object)
+      .filter((sys) => sys);
+    const intersect = raycastFound(obj, distance, 0.5);
+    if (intersect && intersect.object && intersect.object.name) {
+      return raycastSystemEvents(intersect);
+    }
   }
   return false;
 }

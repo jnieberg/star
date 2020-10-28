@@ -3,14 +3,14 @@ import * as THREE from 'three';
 import setColor from '../../../misc/color';
 import { toSize, toSizeString } from '../../../misc/size';
 import toCelcius from '../../../misc/temperature';
-import { MISC, STAR, TD } from '../../../variables';
+import { LOD, MISC, STAR, TD } from '../../../variables';
 import deleteThree from '../../tools/delete';
 import Body from '../Body';
 import Atmosphere from '../globe/Atmosphere';
 
 export default class Star extends Body {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.visible = true;
   }
 
@@ -137,21 +137,22 @@ export default class Star extends Body {
   drawPre() {
     deleteThree(this.object); // WIP. Maybe we can hide it?
     const hue2 = this.color.hue - 0.08 > 0 ? this.color.hue - 0.08 : 0;
-    setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl');
-    setColor(2, hue2, 1.0, this.color.lightness, 'hsl');
-    setColor(3, this.color.hue, 0.5, this.color.lightness + 0.25, 'hsl');
+    setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl'); // Inner
+    setColor(2, hue2, 1.0, this.color.lightness - 0.15, 'hsl'); // Outer
+    setColor(3, this.color.hue, 0.25, this.color.lightness + 0.15, 'hsl'); // Light
 
     // Star pivot
     this.object = new THREE.Object3D();
+    this.object.name = 'Star pivot';
   }
 
   drawPost() {
     // Star point light
-    const near = TD.camera.near * 100 * TD.scale;
-    const far = TD.camera.far * 0.001 * TD.scale;
+    const near = MISC.camera.near * 100 * TD.scale;
+    const far = MISC.camera.far * 0.001 * TD.scale;
     this.light = new THREE.PointLight(MISC.colorHelper3);
     this.light.name = 'Star light';
-    this.light.power = 30;
+    this.light.power = MISC.lod === LOD.LOW ? 30 : 10;
     this.light.decay = 2;
     this.light.distance = far;
     this.light.castShadow = true;
@@ -182,6 +183,7 @@ export default class Star extends Body {
 
     // Add star to scene
     this.parent.object.add(this.object);
+    this.object.this = this;
     this.object.low.this = this;
   }
 
@@ -218,49 +220,39 @@ export default class Star extends Body {
 
     this.object.add(this.object.high);
 
-    // Sub star flare
-    const materialFlare = new THREE.SpriteMaterial({
-      map: TD.texture.star.large,
-      color: MISC.colorHelper,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      alphaTest: 0,
-      depthTest: false,
-      rotation: Math.PI * 0.25,
-    });
-    const objectFlare = new THREE.Sprite(materialFlare);
-    objectFlare.name = 'Star flare';
-    objectFlare.scale.set(size * 8, size * 8, size * 8);
-    objectFlare.castShadow = false;
-    objectFlare.receiveShadow = false;
-    this.object.add(objectFlare);
+    if (MISC.lod === LOD.LOW) {
+      // Sub star flare
+      const materialFlare = new THREE.SpriteMaterial({
+        map: TD.texture.star.large,
+        color: MISC.colorHelper,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        alphaTest: 0,
+        depthTest: false,
+        rotation: Math.PI * 0.25,
+      });
+      const objectFlare = new THREE.Sprite(materialFlare);
+      objectFlare.name = 'Star flare';
+      objectFlare.scale.set(size * 8, size * 8, size * 8);
+      objectFlare.castShadow = false;
+      objectFlare.receiveShadow = false;
+      this.object.add(objectFlare);
 
-    // Star corona
-    // eslint-disable-next-line no-unused-vars
-    const _ = new Atmosphere(this.object.high, {
-      size: size * 1.01,
-      thickness: size * 1.01 * 15.0,
-      color: MISC.colorHelper,
-      color2: MISC.colorHelper2,
-      blending: THREE.AdditiveBlending,
-      opacity: 0.75,
-      opacityInner: 0.5,
-      power: 5.0,
-      depth: false,
-    });
+      // Star corona
+      const atmosphere = new Atmosphere({
+        size: size * 1.01,
+        thickness: 15.0,
+        color: MISC.colorHelper,
+        color2: MISC.colorHelper2,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.75,
+        power: 5.0,
+        depth: false,
+      });
+      atmosphere.add(this.object.high);
+    }
 
-    // eslint-disable-next-line no-unused-vars
-    const __ = new Atmosphere(this.object.high, {
-      size: size * 1.01,
-      thickness: size * 1.01 * 0.5,
-      color: MISC.colorHelper,
-      color2: MISC.colorHelper2,
-      blending: THREE.AdditiveBlending,
-      opacity: 0.75,
-      opacityInner: 0.0,
-      power: 5.0,
-    });
-
+    // Star trajectory
     if (this.drawTrajectory) {
       this.drawTrajectory({
         thickness: 2,

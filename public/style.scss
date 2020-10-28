@@ -16,7 +16,8 @@ body {
 #debug {
 	font-family: $font-family;
 	font-size: 0.6vmax;
-	font-weight: 400;
+  font-weight: 400;
+  min-width: 12vmax;
 	color: $color-front;
 	position: absolute;
   top: 0;
@@ -124,52 +125,57 @@ body {
   }
 }
 
-.label-body {
+.label-container {
   position: absolute;
-  font-size: 0.7vmax;
+  white-space: nowrap;
   top: 0;
   left: 0;
-  color: $color-planet;
-  text-shadow: 0 0 .1vmax $color-back;
-  margin-top: -.5vmax;
-  margin-left: -.6vmax;
-  line-height: 1vmax;
-  pointer-events: none;
 
-  .index {
-    position: relative;
-    font-size: 0.5vmax;
-    display: inline-block;
-    text-align: center;
-    border: solid .05vmax $color-planet;
-    box-shadow: 0 0 .1vmax $color-back;
-    border-radius: 50%;
-    top: -.05vmax;
-    margin-right: .2vmax;
-    width: 1vmax;
-    height: 1vmax;
+  .label-body {
+    position: absolute;
+    font-size: 0.7vmax;
+    top: -0.5vmax;
+    left: -0.5vmax;
+    color: $color-planet;
+    text-shadow: 0 0 .1vmax $color-back;
     line-height: 1vmax;
-  }
+    pointer-events: none;
   
-  .children {
-    display: none;
-  }
-  
-  &.label-moon {
-    color: $color-moon;
     .index {
-      border-color: $color-moon;
+      position: relative;
+      font-size: 0.5vmax;
+      display: inline-block;
+      text-align: center;
+      border: solid .05vmax $color-planet;
+      box-shadow: 0 0 .1vmax $color-back;
+      border-radius: 50%;
+      top: -.05vmax;
+      margin-right: .2vmax;
+      width: 1vmax;
+      height: 1vmax;
+      line-height: 1vmax;
     }
-  }
+    
+    .children {
+      display: none;
+    }
+    
+    &.label-moon {
+      color: $color-moon;
+      .index {
+        border-color: $color-moon;
+      }
+    }
+    
+    &.label-star .index {
+      visibility: hidden;
+    }
   
-  &.label-star .index {
-    visibility: hidden;
-  }
-
-  &.label-star, &.label-sub-star {
-    color: $color-star;
-    .index {
-      border-color: $color-star;
+    &.label-star, &.label-sub-star {
+      color: $color-star;
+      .index {
+        border-color: $color-star;
+      }
     }
   }
 }

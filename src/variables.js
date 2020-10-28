@@ -15,23 +15,14 @@ export const TD = {
     },
   },
   scale: 1000,
-  camera: {
-    object: undefined,
-    near: 0.0000001,
-    system: 1,
-    fade: 350,
-    far: 700,
-    orbit: undefined,
-    coordinate: {
-      x: 0,
-      y: 0,
-      z: 0,
-    },
-  },
+  camera: undefined,
   clock: undefined,
   scene: undefined,
   canvas: undefined,
   renderer: undefined,
+  labelRenderer: undefined,
+  bloomComposer: undefined,
+  finalComposer: undefined,
   raycaster: undefined,
   texture: {
     manager: undefined,
@@ -67,12 +58,18 @@ export const EVENT = {
   mouse2d: new THREE.Vector2(),
 };
 
+export const LOD = {
+  LOW: 0,
+  HIGH: 1,
+};
+
 export const MISC = {
   interrupt: false,
+  lod: LOD.LOW,
   timers: {},
   timeStart: Date.now(),
   time: 0.0001,
-  started: false,
+  loaded: 0,
   things: new ThingList(),
   colorHelper: new THREE.Color(),
   colorHelper2: new THREE.Color(),
@@ -81,6 +78,16 @@ export const MISC = {
   debug: undefined,
   interval: 200,
   intervalShadow: 200,
+  camera: {
+    near: 0.0000001,
+    fade: 350,
+    far: 700,
+  },
+};
+
+export const LAYER = {
+  ENTITY: 0,
+  SYSTEM: 1,
 };
 
 export const STAR = {

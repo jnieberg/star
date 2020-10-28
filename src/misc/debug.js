@@ -1,6 +1,5 @@
 import { TD, MISC } from '../variables';
 import wait from '../3d/tools/wait';
-import { getWorldCamera } from '../3d/init/camera';
 
 export default class Debug {
   constructor() {
@@ -24,7 +23,19 @@ export default class Debug {
   }
 
   update() {
-    const pos = getWorldCamera();
+    const pos = TD.camera.universe;
+    const bodyType = TD.camera.orbit ? TD.camera.orbit.type : '';
+    let bodyScale = bodyType === 'star' && 1000;
+    bodyScale = bodyScale || (bodyType === 'planet' && 100000);
+    bodyScale = bodyScale || (bodyType === 'moon' && 100000);
+    bodyScale = bodyScale || 1.0;
+    const toSystemCoord = (coor) =>
+      Math.floor((coor / TD.scale) * bodyScale * 100) / 100;
+    const system = {
+      x: toSystemCoord(TD.camera.object.position.x),
+      y: toSystemCoord(TD.camera.object.position.y),
+      z: toSystemCoord(TD.camera.object.position.z),
+    };
     wait('debug', () => {
       this.view.innerHTML = `
         <div>FPS:<span>${this.fps}</span></div>
@@ -32,9 +43,13 @@ export default class Debug {
         <div>Coordinate:<span>${TD.camera.coordinate.x || 0}, ${
         TD.camera.coordinate.y || 0
       }, ${TD.camera.coordinate.z || 0}</span></div>
-        <div>Position:<span>${Math.floor(pos.x / TD.scale)}, ${Math.floor(
-        pos.y / TD.scale
-      )}, ${Math.floor(pos.z / TD.scale)}</span></div>
+        <div>Position:<span>${Math.floor((pos.x / TD.scale) * 100) / 100}, ${
+        Math.floor((pos.y / TD.scale) * 100) / 100
+      }, ${Math.floor((pos.z / TD.scale) * 100) / 100}</span></div>
+      ${
+        bodyType &&
+        `<div>Position ${bodyType}:<span>${system.x}, ${system.y}, ${system.z}</span></div>`
+      }
     `;
     });
   }

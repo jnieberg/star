@@ -59,7 +59,7 @@ class Clouds {
       this.materials[i] = material;
     }
 
-    const geo = new THREE.BoxGeometry(1, 1, 1, 64, 64, 64);
+    const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);
     const radius = this.size;
     for (let v = 0; v < geo.vertices.length; v += 1) {
       const vertex = geo.vertices[v];
@@ -96,7 +96,7 @@ class Clouds {
       () => {
         this.updateMaterial();
         this.sphere.visible = true;
-        console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
+        // console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
         if (callback) {
           callback();
         }

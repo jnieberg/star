@@ -17,15 +17,17 @@ function loadTexture(filename, detail = true) {
   return texture;
 }
 
-export default function initTextures(callback = () => {}) {
+export default async function initTextures() {
   TD.texture.manager = new THREE.LoadingManager();
   TD.texture.manager.onProgress = (item, loaded, total) => {
-    console.log('TEXTURE LOADED:', item, loaded, total);
+    // console.log('TEXTURE LOADED:', item, loaded, total);
     // this gets called after any item has been loaded
   };
 
   TD.texture.manager.onLoad = () => {
-    callback();
+    return new Promise((resolve) => {
+      resolve();
+    });
   };
 
   TD.texture.star.small = loadTexture('/public/star/star2.jpg', false);

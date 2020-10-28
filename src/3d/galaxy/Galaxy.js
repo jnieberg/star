@@ -1,9 +1,4 @@
 import { TD, MISC } from '../../variables';
-import {
-  getCoordinateOffset,
-  setCameraPosition,
-  updateCameraCoordinatesByOffset,
-} from '../init/camera';
 import Entity from './Entity';
 
 export default class Galaxy {
@@ -33,7 +28,7 @@ export default class Galaxy {
   draw() {
     if (MISC.reload || Galaxy.newEntitiesCanBeRendered()) {
       MISC.reload = false;
-      updateCameraCoordinatesByOffset();
+      TD.camera.warp();
       const coord = TD.camera.coordinate;
       if (this.star) {
         this.star.draw(
@@ -43,7 +38,7 @@ export default class Galaxy {
               this.nebula.draw(
                 { coordx: coord.x, coordy: coord.y, coordz: coord.z },
                 () => {
-                  const off = setCameraPosition();
+                  const off = TD.camera.snap();
                   this.update(off);
                 }
               );
@@ -60,8 +55,8 @@ export default class Galaxy {
     if (this.nebula) this.nebula.remove();
   }
 
-  static newEntitiesCanBeRendered(config) {
-    const offset = getCoordinateOffset(config);
+  static newEntitiesCanBeRendered() {
+    const { offset } = TD.camera;
     return offset.x !== 0 || offset.y !== 0 || offset.z !== 0;
   }
 }

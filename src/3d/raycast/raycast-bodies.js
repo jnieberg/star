@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { EVENT, TD } from '../../variables';
+import { EVENT, LAYER, MISC, TD } from '../../variables';
+import Store from '../init/Store';
 import setLabel, { labelShow } from '../label/label';
-import { distanceToCamera, setCameraParent } from '../init/camera';
 import raycastFound from './raycast-found';
 
 function getNearestBody(bodies) {
@@ -12,7 +12,7 @@ function getNearestBody(bodies) {
     if (body.object && body.object.matrixWorld) {
       const position = new THREE.Vector3();
       body.object.getWorldPosition(position);
-      const distanceThis = distanceToCamera(position.x, position.y, position.z);
+      const distanceThis = TD.camera.distanceTo(position);
       if (distanceBody === 0 || distanceBody > distanceThis) {
         closestBody = body;
         distanceBody = distanceThis;
@@ -42,13 +42,13 @@ function raycastBodyEvents(intersect) {
 function checkOrbitBody(body, inOrbit) {
   if (body && body.object) {
     if (inOrbit) {
-      TD.camera.orbit = body;
-      setCameraParent(body.object);
+      // TD.camera.orbit = body;
+      TD.camera.parent = body.object;
       return true;
     }
-    if (TD.camera.orbit === body) {
-      TD.camera.orbit = undefined;
-      setCameraParent(TD.scene);
+    if (TD.camera.parent === body) {
+      // TD.camera.orbit = undefined;
+      TD.camera.parent = TD.scene;
     }
   }
   return false;
@@ -73,6 +73,7 @@ export default function raycastBody() {
       return false;
     }
     if (distance > 0 && distance < distanceOrbitStar) {
+      TD.raycaster.layers.enable(LAYER.SYSTEM);
       const obj = bodies.map((bd) => bd.object.low).filter((bd) => bd);
       const intersect = raycastFound(obj, 0.1, 2);
       EVENT.controls.speedFactorPlanet =
@@ -96,15 +97,11 @@ export default function raycastBody() {
           TD.planet = planet;
           TD.planet.parent.hideChildren();
           TD.planet.drawHigh();
-          // TD.camera.object.near = TD.camera.near * TD.scale * 0.01;
-          // TD.camera.object.far = TD.camera.far * TD.scale * 0.01;
-          // TD.camera.object.updateProjectionMatrix();
         }
+        TD.camera.farFactor = distance * 1000 > 0.001 ? distance * 1000 : 0.001;
       } else if (TD.planet) {
         TD.planet = undefined;
-        // TD.camera.object.near = TD.camera.near * TD.scale;
-        // TD.camera.object.far = TD.camera.far * TD.scale;
-        // TD.camera.object.updateProjectionMatrix();
+        TD.camera.farFactor = 1.0;
       }
       let star;
       if (distance < distanceOrbitStar) {
@@ -131,10 +128,10 @@ export default function raycastBody() {
       return raycastBodyEvents(intersect);
     }
     if (TD.star) {
-      TD.star.parent.hideChildren();
+      // TD.star.parent.hideChildren();
       TD.star = undefined;
-      TD.camera.orbit = undefined;
-      setCameraParent(TD.scene);
+      // TD.camera.orbit = undefined;
+      TD.camera.parent = TD.scene;
       return false;
     }
   }

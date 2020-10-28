@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { TD, EVENT, MISC } from '../../variables';
-import { resetCamera } from './camera';
 import { labelHide } from '../label/label';
 import Galaxy from '../galaxy/Galaxy';
 
@@ -431,9 +430,9 @@ export default function initControls() {
 }
 
 export function to3DCoordinate(x, y) {
-  const width = 2.5 * TD.camera.near * x * TD.scale;
-  const height = 1.4 * TD.camera.near * y * TD.scale;
-  return new THREE.Vector3(width, height, -2.0 * TD.camera.near * TD.scale);
+  const width = 2.5 * MISC.camera.near * x * TD.scale;
+  const height = 1.4 * MISC.camera.near * y * TD.scale;
+  return new THREE.Vector3(width, height, -2.0 * MISC.camera.near * TD.scale);
 }
 
 export function getMouse(event) {
@@ -445,7 +444,7 @@ export function getMouse(event) {
 
 export function getKeys(e) {
   switch (e.which) {
-    case 49: // 1
+    case 49: // 1. Reset camera
       labelHide();
       EVENT.controls.speedFactorStar = 1.0;
       EVENT.controls.speedFactorPlanet = 1.0;
@@ -462,7 +461,7 @@ export function getKeys(e) {
       TD.planet = undefined;
       TD.moon = undefined;
       TD.label = undefined;
-      resetCamera();
+      TD.camera.reset();
       MISC.reload = true;
       break;
     default:

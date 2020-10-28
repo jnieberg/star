@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BODY, MISC, TD } from '../../../variables';
+import { BODY, LAYER, MISC, TD } from '../../../variables';
 import setColor, { getColorMix, getColor } from '../../../misc/color';
 import toCelcius from '../../../misc/temperature';
 import deleteThree from '../../tools/delete';
@@ -14,13 +14,10 @@ import Body from '../Body';
 
 export default class Globe extends Body {
   constructor({ system, index, parent, type, distance = 0.0 }) {
-    super();
-    this.index = index;
-    this.system = system;
-    this.parent = parent;
+    super({ index, system, parent });
     this.type = type || (this.parent.type === 'planet' ? 'moon' : 'planet');
     this.random = new Random(
-      `${this.type}_${system.id}_${this.grandParentId}_${this.parentId}_${index}`
+      `${this.type}_${system.key}_${this.grandParentId}_${this.parentId}_${index}`
     );
     this.visible = false;
     this.distanceMin = distance;
@@ -149,7 +146,9 @@ export default class Globe extends Body {
         },
       };
       this.random.seed = 'gas';
-      const blend = this.random.rndInt(2);
+      let blend = this.random.rndInt(2);
+      blend = this.metal.level === 1.0 ? 0 : blend;
+      blend = this.fluid.level === 1.0 ? 1 : blend;
       if (this.random.rndInt(5) > 0) {
         // const hsl = {
         //   hue: this.random.rnd(),
@@ -215,12 +214,8 @@ export default class Globe extends Body {
       saturation: this.random.rnd(),
       lightness: this.random.rnd(),
     };
-    let level;
-    const levelChance = this.random.rndInt(4);
-    if (levelChance <= 1) level = levelChance;
-    else level = this.random.rnd(0.1, 0.9);
     return {
-      level,
+      level: 1.0 - this.fluid.level,
       ...getColor(hsl),
     };
   }
@@ -262,7 +257,7 @@ export default class Globe extends Body {
   }
 
   get letter() {
-    return this.parent.letter.toLowerCase() || '';
+    return (this.parent.letter && this.parent.letter.toLowerCase()) || '';
   }
 
   get textShort() {
@@ -289,8 +284,8 @@ export default class Globe extends Body {
       ${this.clouds ? '<div>Cloudy</div>' : ''}
       <div>&nbsp;</div>
       ${
-        this.fluid.level < 1
-          ? `<div>Metal: ${toPercent(1.0 - this.fluid.level)}<span>${
+        this.metal.level > 0
+          ? `<div>Metal: ${toPercent(this.metal.level)}<span>${
               this.metal.text
             }</span></div>`
           : ''
@@ -367,7 +362,18 @@ export default class Globe extends Body {
           child.update();
         }
       }
-      this.setLabel();
+      if (this.type === 'moon') this.setLabel(0.02);
+      else this.setLabel();
+    }
+  }
+
+  setLayer(sub) {
+    const obj = (this.object && this.object[sub]) || this.object;
+    if (obj) {
+      obj.layers.set(LAYER.SYSTEM);
+      obj.traverse((child) => {
+        child.layers.set(LAYER.SYSTEM);
+      });
     }
   }
 
@@ -402,7 +408,7 @@ export default class Globe extends Body {
           this.drawSurface();
         },
         () => {
-          console.log('INTERRUPT SUCCESS!!!');
+          // console.log('INTERRUPT SUCCESS!!!');
         }
       );
       globeSurface.ground.name = `${this.type} high ${resolution}`;
@@ -412,6 +418,7 @@ export default class Globe extends Body {
         globeSurface.clouds.sphere.name = `${this.type} clouds`;
         this.object.high.add(globeSurface.clouds.sphere);
       }
+      // this.setLayer('high');
     } else {
       this.setSurfaceRender();
     }
@@ -495,7 +502,7 @@ export default class Globe extends Body {
     // Planet pivot
     this.object = new THREE.Object3D();
     this.object.name = `${this.type} pivot`;
-    this.parent.object.high.add(this.object);
+    this.parent.object.add(this.object); // .high
     this.object.rotation.y = this.random.rnd(2 * Math.PI) || 0;
     this.object.translateX(this.distance * 0.0001 * TD.scale || 0);
 
@@ -552,7 +559,16 @@ export default class Globe extends Body {
       thickness: this.type === 'moon' ? 0.1 : 0.5,
       opacity: this.type === 'moon' ? 0.15 : 0.25,
     });
+    this.object.this = this;
     this.object.low.this = this;
+
+    // Draw moons of planet
+    if (this.children && this.children.length) {
+      for (let c = 0; c < this.children.length; c += 1) {
+        const child = this.children[c];
+        child.drawLow();
+      }
+    }
     return this.object.low;
   }
 
@@ -587,27 +603,18 @@ export default class Globe extends Body {
             this.gas.color.lightness - 0.25,
             'hsl'
           );
-          // eslint-disable-next-line no-unused-vars
-          const _ = new Atmosphere(this.object.high, {
-            size: this.size * 0.000101 * TD.scale,
-            thickness: this.gas.size * 0.000101 * TD.scale,
+          const atmosphere = new Atmosphere({
+            size: this.size * 0.000102 * TD.scale,
+            thickness: this.gas.size * 0.000102 * TD.scale,
             color: MISC.colorHelper,
             color2: MISC.colorHelper2,
             blending:
               this.gas.blend === BODY.gas.Dust
                 ? THREE.NormalBlending
                 : THREE.AdditiveBlending,
-            transparent: true,
             opacity: this.gas.density,
           });
-        }
-
-        // Draw moons of planet
-        if (this.children && this.children.length) {
-          for (let c = 0; c < this.children.length; c += 1) {
-            const child = this.children[c];
-            child.drawLow();
-          }
+          atmosphere.add(this.object.high);
         }
       }
     }

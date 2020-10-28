@@ -6,7 +6,7 @@ export default function wait(
   interrupt = false
 ) {
   if (interrupt && MISC.timers[timerBank]) {
-    console.log('TIMEOUT INTERRUPT');
+    // console.log('TIMEOUT INTERRUPT');
     for (let i = 0; i < MISC.timers[timerBank].length; i += 1) {
       clearTimeout(MISC.timers[timerBank][i]);
     }

@@ -52,7 +52,7 @@ class Map {
 
   renderFragment(resolution, iA, xA, yA, callback) {
     if (MISC.interrupt) {
-      console.log(`[${this.timerBank}] INTERRUPT MAP: ${this.resolution}`);
+      // console.log(`[${this.timerBank}] INTERRUPT MAP: ${this.resolution}`);
       return;
     }
     wait(this.timerBank, () => {
@@ -94,7 +94,7 @@ class Map {
           this.renderFragment(resolution, i + 1, 0, 0, callback);
         }
       } else if (callback) {
-        console.log(`[${this.timerBank}] CALLBACK MAP: ${this.resolution}`);
+        // console.log(`[${this.timerBank}] CALLBACK MAP: ${this.resolution}`);
         callback();
       }
     });
@@ -105,7 +105,7 @@ class Map {
     if (this.enabled) {
       this.renderFragment(this.resolution, 0, 0, 0, callback);
     } else if (callback) {
-      console.log(`[${this.timerBank}] CALLBACK MAP DONE: ${this.resolution}`);
+      // console.log(`[${this.timerBank}] CALLBACK MAP DONE: ${this.resolution}`);
       callback();
     }
   }

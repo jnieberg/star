@@ -1,42 +1,27 @@
-import * as THREE from 'three';
-import { TD, EVENT, MISC } from '../variables';
+import { TD, EVENT, MISC, LOD } from '../variables';
 import { eventLabel, labelHide } from './label/label';
 import raycastSystem from './raycast/raycast-systems';
 import raycastBody from './raycast/raycast-bodies';
-import { resetCamera } from './init/camera';
+import Store from './init/Store';
 
 export function render() {
-  TD.renderer.render(TD.scene, TD.camera.object);
+  if (MISC.lod === LOD.HIGH) {
+    // TD.renderer.render(TD.scene, TD.camera.object);
+    // TD.renderer.clear();
+    // TD.camera.object.layers.set(LAYER.SYSTEM);
+    TD.bloomComposer.render();
+  }
+  TD.finalComposer.render();
+  // TD.camera.object.layers.set();
+  // TD.renderer.render(TD.scene, TD.camera.object);
+  TD.labelRenderer.render(TD.scene, TD.camera.object);
   TD.galaxy.update();
+
   MISC.debug.frames += 1;
 }
 
 export function loop() {
   EVENT.controls.update(TD.clock.getDelta());
-}
-
-export function loadStorage() {
-  let item = localStorage.getItem('camera');
-  item = JSON.parse(item);
-  if (item && item.coordinate && item.position && item.rotation) {
-    const quaternion = new THREE.Quaternion(
-      item.rotation.x,
-      item.rotation.y,
-      item.rotation.z,
-      item.rotation.w
-    );
-    TD.camera.coordinate = item.coordinate;
-    TD.camera.object.position.set(
-      item.position.x,
-      item.position.y,
-      item.position.z
-    );
-    TD.camera.object.rotation.setFromQuaternion(quaternion);
-    MISC.reload = true;
-  } else {
-    resetCamera();
-  }
-  MISC.timeStart = Date.now() - Number(localStorage.getItem('time'));
 }
 
 export function interval() {
@@ -49,11 +34,10 @@ export function interval() {
     }
     eventLabel();
     MISC.debug.update();
-    if (!MISC.started) {
-      loadStorage();
-      MISC.started = true;
-    }
   }, MISC.interval);
+  // setTimeout(() => {
+  //   Store.loadPosition();
+  // }, MISC.interval + 100);
 }
 
 export function intervalShadow() {
@@ -66,6 +50,8 @@ export function intervalShadow() {
 
 export default function animate() {
   MISC.animation = requestAnimationFrame(animate);
-  loop();
-  render();
+  if (MISC.loaded === 2) {
+    loop();
+    render();
+  }
 }

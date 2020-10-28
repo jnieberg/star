@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { TD, MISC } from '../../../variables';
+import { TD, MISC, LOD } from '../../../variables';
 import Atmosphere from '../globe/Atmosphere';
 import MainStar from './MainStar';
 import SubStar from './SubStar';
@@ -67,22 +67,26 @@ export default class BlackHole extends MainStar {
       minFilter: THREE.LinearMipmapLinearFilter,
     });
     this.camera = new THREE.CubeCamera(
-      TD.camera.near * TD.scale,
-      TD.camera.far * TD.scale,
+      MISC.camera.near * TD.scale,
+      MISC.camera.far * TD.scale,
       cubeRenderTarget
     );
-    this.camera.children.forEach((cam) => {
-      cam.fov = 120;
-      cam.aspect = window.innerWidth / window.innerHeight;
-    });
-    this.camera.fov = 120;
+    // this.camera.children.forEach((cam) => {
+    // cam.fov = 90;
+    // cam.aspect = window.innerWidth / window.innerHeight;
+    // const helper = new THREE.CameraHelper(cam);
+    // TD.scene.add(helper);
+    // });
+    // this.camera.fov = 90;
+    // this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
     const material = new THREE.MeshBasicMaterial({
       envMap: cubeRenderTarget.texture,
       color: 0xffffff,
       refractionRatio: 0.9,
-      reflectivity: 1,
+      reflectivity: 1.0,
       depthWrite: false,
       alphaTest: 0,
     });
@@ -93,6 +97,13 @@ export default class BlackHole extends MainStar {
     this.object.low.scale.set(1.5, 1.5, 1.5);
     this.object.low.renderOrder = -3;
     this.object.add(this.object.low);
+
+    this.camera.position.set(
+      this.system.position.x * TD.scale,
+      this.system.position.y * TD.scale,
+      this.system.position.z * TD.scale
+    );
+    TD.scene.add(this.camera);
     this.camera.update(TD.renderer, TD.scene);
 
     // Black hole core
@@ -146,50 +157,49 @@ export default class BlackHole extends MainStar {
     this.object.ring2.renderOrder = 0;
     this.object.ring.add(this.object.ring2);
 
-    // Sub star flare
-    // const materialFlare = new THREE.SpriteMaterial({
-    //   map: TD.texture.star.large,
-    //   color: MISC.colorHelper,
-    //   transparent: true,
-    //   blending: THREE.AdditiveBlending,
-    //   alphaTest: 0,
-    //   rotation: Math.PI * 0.25,
-    // });
-    // const objectFlare = new THREE.Sprite(materialFlare);
-    // objectFlare.name = 'Black hole flare';
-    // objectFlare.scale.set(size * 8, size * 8, size * 8);
-    // objectFlare.castShadow = false;
-    // objectFlare.receiveShadow = false;
-    // objectFlare.renderOrder = 3;
-    // this.object.add(objectFlare);
+    if (MISC.lod === LOD.LOW) {
+      // Sub star flare
+      const materialFlare = new THREE.SpriteMaterial({
+        map: TD.texture.star.large,
+        color: MISC.colorHelper,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        alphaTest: 0,
+        rotation: Math.PI * 0.25,
+      });
+      const objectFlare = new THREE.Sprite(materialFlare);
+      objectFlare.name = 'Black hole flare';
+      objectFlare.scale.set(size * 8, size * 8, size * 8);
+      objectFlare.castShadow = false;
+      objectFlare.receiveShadow = false;
+      objectFlare.renderOrder = 3;
+      this.object.add(objectFlare);
 
-    // Star double corona
-    // eslint-disable-next-line no-unused-vars
-    // const _ = new Atmosphere(this.object.high, {
-    //   size: size * 1.01,
-    //   thickness: size * 1.01 * 15,
-    //   color: MISC.colorHelper,
-    //   color2: MISC.colorHelper2,
-    //   colorInner: MISC.colorHelper,
-    //   blending: THREE.AdditiveBlending,
-    //   opacity: 0.75,
-    //   opacityInner: 1.0,
-    //   power: 5.0,
-    //   depth: false,
-    // });
+      // Star double corona
+      // eslint-disable-next-line no-unused-vars
+      const _ = new Atmosphere(this.object.high, {
+        size: size * 1.01,
+        thickness: size * 1.01 * 15,
+        color: MISC.colorHelper,
+        color2: MISC.colorHelper2,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.75,
+        opacityInner: 1.0,
+        power: 5.0,
+        depth: false,
+      });
 
-    // eslint-disable-next-line no-unused-vars
-    const __ = new Atmosphere(this.object.high, {
-      size: size * 1.01,
-      thickness: size * 1.01 * 1.1,
-      color: MISC.colorHelper,
-      color2: MISC.colorHelper2,
-      colorInner: MISC.colorHelper,
-      blending: THREE.AdditiveBlending,
-      opacity: 1.0,
-      opacityInner: 1.0,
-      power: 2.0,
-    });
+      const atmosphere = new Atmosphere({
+        size: size * 1.01,
+        thickness: size * 1.01 * 1.1,
+        color: MISC.colorHelper,
+        color2: MISC.colorHelper2,
+        blending: THREE.AdditiveBlending,
+        opacity: 1.0,
+        power: 2.0,
+      });
+      atmosphere.add(this.object.high);
+    }
 
     // Black hole aura
     const material5 = new THREE.SpriteMaterial({

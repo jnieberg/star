@@ -5,15 +5,13 @@ import getTime from '../../../misc/time';
 import SubStar from './SubStar';
 import Star from './Star';
 import toLetter from '../../../misc/to-letter';
+import { TD } from '../../../variables';
 
 export default class MainStar extends Star {
-  constructor({ index, system, parent = system }) {
-    super();
+  constructor(props) {
+    super(props);
     this.type = 'star';
-    this.random = new Random(`${this.type}_${system.id}_${index}`);
-    this.index = index;
-    this.system = system;
-    this.parent = parent;
+    this.random = new Random(`${this.type}_${props.system.key}_${props.index}`);
   }
 
   get letter() {
@@ -21,7 +19,10 @@ export default class MainStar extends Star {
   }
 
   get name() {
-    return `${this.parent.name} ${this.letter}`;
+    if (!this._name) {
+      this._name = `${this.parent.name} ${this.letter}`;
+    }
+    return this._name;
   }
 
   get color() {
@@ -110,7 +111,10 @@ export default class MainStar extends Star {
           child.update();
         }
       }
-      this.setLabel();
+      if (this.camera) {
+        this.camera.update(TD.renderer, TD.scene);
+      }
+      this.setLabel(2.0);
     }
   }
 }

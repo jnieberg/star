@@ -1,6 +1,6 @@
 import setColor, { getColor } from '../../../misc/color';
 import Random from '../../../misc/Random';
-import { TD, MISC } from '../../../variables';
+import { TD, MISC, LOD } from '../../../variables';
 
 export default class Nebula {
   constructor({ parent, index, x, y, z }) {
@@ -90,7 +90,10 @@ export default class Nebula {
   get opacity() {
     if (!this._opacity) {
       this.random.seed = 'opacity';
-      this._opacity = this.random.rnd(0.1, 1.0);
+      this._opacity =
+        MISC.lod === LOD.LOW
+          ? this.random.rnd(0.1, 1.0)
+          : this.random.rnd(0.05, 0.5);
     }
     return this._opacity;
   }

@@ -21,16 +21,16 @@ recalculate temperatures
 
 ## Class hierarchy
 ```
-BlackHole
-    |
-    |
- MainStar  SubStar
-    |  _____/ |
-    | /       |
-   Star     Globe
-     \_______/
-         |
-        Body
+[BlackHole]
+     |
+     |
+ [MainStar] [SubStar]
+     |  ______/ |
+     | /        |
+   [Star]    [Globe]
+      \________/
+           |
+         [Body]
 ```
 
 ## Children hierarchy

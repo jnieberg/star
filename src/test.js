@@ -12,8 +12,6 @@ init(dat);
 // const stats = new Stats();
 // document.body.appendChild(stats.dom);
 
-const lastTime = new Date().getTime();
-
 const Test = {
   renderer: null,
   camera: null,
@@ -47,44 +45,46 @@ const Test = {
     this.controls.maxPolarAngle = Math.PI * 0.495;
 
     this.data = {
-      radius: 3,
+      size: 3,
       thickness: 0.1,
       opacity: 1.0,
       power: 2.0,
+      inner: true,
     };
     this.generateGeometry();
 
     const gui = new dat.GUI();
-    gui
-      .add(this.data, 'radius', 0.1, 10)
-      .onChange(() => this.generateGeometry());
+    gui.add(this.data, 'size', 0.1, 10).onChange(() => this.generateGeometry());
     gui
       .add(this.data, 'thickness', 0, 1)
       .onChange(() => this.generateGeometry());
     gui.add(this.data, 'opacity', 0, 1).onChange(() => this.generateGeometry());
-    gui.add(this.data, 'power', 1, 10).onChange(() => this.generateGeometry());
+    gui
+      .add(this.data, 'power', 0.1, 10)
+      .onChange(() => this.generateGeometry());
+    gui.add(this.data, 'inner', true).onChange(() => this.generateGeometry());
   },
 
   generateGeometry() {
     deleteThree(this.sphere);
-    const geometry = new THREE.SphereGeometry(this.data.radius, 32, 32);
+    const geometry = new THREE.SphereGeometry(this.data.size, 32, 32);
     const material = new THREE.MeshBasicMaterial({
-      color: 0x808080,
-      blending: THREE.MultiplyBlending,
+      color: 0x404040,
     });
     this.sphere = new THREE.Mesh(geometry, material);
     this.sphere.position.set(0, 0, 0);
     this.scene.add(this.sphere);
 
     this.atmosphere = new Atmosphere(this.sphere, {
-      size: this.data.radius * 1.0001,
-      thickness: this.data.radius * 1.0001 * this.data.thickness,
-      color: 0xff0000,
-      color2: 0x0000ff,
+      size: this.data.size * 1.0001,
+      thickness: this.data.thickness,
+      color: 0x0000ff,
+      color2: 0x00ffff,
       blending: THREE.AdditiveBlending,
       opacity: this.data.opacity,
       opacityInner: 0.0,
       power: this.data.power,
+      inner: this.data.inner,
     });
   },
 

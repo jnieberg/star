@@ -6,14 +6,14 @@ import aggregation from '../../../misc/aggregation';
 import Star from './Star';
 
 export default class SubStar extends aggregation(Globe, Star) {
-  constructor({ index, system, parent }) {
+  constructor(props) {
     super({
-      index,
-      system,
-      parent,
+      ...props,
       type: 'sub-star',
     });
-    this.random = new Random(`substar_${system.id}_${parent.id}_${index}`);
+    this.random = new Random(
+      `substar_${props.system.key}_${props.parent.id}_${props.index}`
+    );
   }
 
   get color() {
@@ -25,8 +25,8 @@ export default class SubStar extends aggregation(Globe, Star) {
           : this.random.rnd(COLOR.hue.Orange);
       const lightness =
         this.system.special === 'black-hole'
-          ? this.random.rnd(COLOR.lightness.Black, 1.0)
-          : this.random.rnd(COLOR.lightness.Black, COLOR.lightness.Dark);
+          ? this.random.rnd(0.1, 1.0)
+          : this.random.rnd(0.1, COLOR.lightness['']);
       this._color = getColor({ hue, lightness });
     }
     return this._color;

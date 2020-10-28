@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Word from '../../../misc/Word';
-import { TD, MISC } from '../../../variables';
+import { TD, MISC, LAYER } from '../../../variables';
 import deleteThree from '../../tools/delete';
 import Random from '../../../misc/Random';
 import MainStar from './MainStar';
@@ -16,12 +16,8 @@ export default class System {
     this.config = TD.entity[this.type];
     this.coordinate = { x, y, z };
     this.index = index;
-    this.id = {
-      text: `X:${this.coordinate.x}, Y:${this.coordinate.y}, Z:${this.coordinate.z}, I:${this.index}`,
-      toString: () =>
-        `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`,
-    };
-    this.random = new Random(`system_${this.id}`);
+    this.key = `${this.coordinate.x}.${this.coordinate.y}.${this.coordinate.z}:${this.index}`;
+    this.random = new Random(`system_${this.key}`);
     this.object = {
       low: undefined,
       high: undefined,
@@ -137,7 +133,6 @@ export default class System {
           system: this,
           index: children.length,
         });
-        // eslint-disable-next-line no-unused-vars
         children.push(star);
       }
       this._children = children;
@@ -163,7 +158,7 @@ export default class System {
     system = system || 'System';
     return `
     <div class="label--h1 star">${this.name}</div>
-    <div class="label--h2">${system} #${this.id}</div>
+    <div class="label--h2">${system} #${this.key}</div>
     ${
       this.stars.length
         ? `<div class="label--h3">Stars<span>Bodies</span></div>
@@ -182,6 +177,15 @@ export default class System {
           </ol>`
         : ''
     }`;
+  }
+
+  getBodyByIds(ids, children = this.children) {
+    const index = ids.shift();
+    const found = children.find((child) => child.index === index);
+    if (ids.length > 0) {
+      return this.getBodyByIds(ids, found.children);
+    }
+    return found;
   }
 
   // temperature + size?
@@ -249,6 +253,15 @@ export default class System {
     });
   }
 
+  setLayer() {
+    if (this.object) {
+      this.object.layers.set(LAYER.SYSTEM);
+      this.object.traverse((child) => {
+        child.layers.set(LAYER.SYSTEM);
+      });
+    }
+  }
+
   // Draw all stars and bodies here
   draw() {
     this.object = new THREE.Object3D();
@@ -259,6 +272,7 @@ export default class System {
       this.position.z * TD.scale
     );
     this.children.forEach((child) => child.drawLow());
+    // this.setLayer();
     TD.scene.add(this.object);
   }
 

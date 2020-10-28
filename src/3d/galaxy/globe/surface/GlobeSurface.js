@@ -73,7 +73,7 @@ class GlobeSurface {
 
   render(detail, callback) {
     this.resolution = detail || 256;
-    console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
+    // console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
     // wait(() => {
     this.renderScene(callback);
     // });
@@ -128,7 +128,7 @@ class GlobeSurface {
   renderCallback(message, callback) {
     this.updateMaterial();
     this.ground.visible = true;
-    console.log(`[${this.timerBank}] ${message} PLANET: ${this.resolution}`);
+    // console.log(`[${this.timerBank}] ${message} PLANET: ${this.resolution}`);
     if (callback) {
       callback();
     }

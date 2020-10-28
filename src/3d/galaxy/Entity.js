@@ -4,7 +4,7 @@ import Random from '../../misc/Random';
 
 import vertShader from '../../shaders/stars.vert';
 import fragShader from '../../shaders/stars.frag';
-import { TD } from '../../variables';
+import { LAYER, LOD, MISC, TD } from '../../variables';
 import deleteThree from '../tools/delete';
 import Nebula from './misc/Nebula';
 import System from './system/System';
@@ -23,8 +23,9 @@ export default class Entity {
       const uniforms = {
         texture2: { type: 't', value: this.texture },
         fogColor: { type: 'c', value: TD.scene.fog && TD.scene.fog.color },
-        fogNear: { type: 'f', value: TD.camera.near * TD.scale },
-        fogFar: { type: 'f', value: TD.camera.far * TD.scale },
+        fogNear: { type: 'f', value: MISC.camera.near * TD.scale },
+        fogFar: { type: 'f', value: MISC.camera.far * TD.scale },
+        brightness: { type: 'f', value: MISC.lod === LOD.LOW ? 1.0 : 0.0 },
       };
       this.material = new THREE.ShaderMaterial({
         uniforms,
@@ -37,6 +38,15 @@ export default class Entity {
       });
     }
     this.group = {};
+  }
+
+  setLayer(i) {
+    if (this.group[i] && this.group[i].object) {
+      this.group[i].object.layers.set(LAYER.ENTITY);
+      this.group[i].object.traverse((child) => {
+        child.layers.set(LAYER.ENTITY);
+      });
+    }
   }
 
   update(off) {
@@ -140,6 +150,7 @@ export default class Entity {
           this.group[i].object.castShadow = false;
           this.group[i].object.receiveShadow = false;
           this.group[i].object.matrixAutoUpdate = true;
+          // this.setLayer(i);
           TD.scene.add(this.group[i].object);
         }
       } else {

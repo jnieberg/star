@@ -15,6 +15,7 @@ body {
   font-family: "Montserrat Alternates", sans-serif;
   font-size: 0.6vmax;
   font-weight: 400;
+  min-width: 12vmax;
   color: #cef;
   position: absolute;
   top: 0;
@@ -131,20 +132,25 @@ body {
   margin-top: .8vmax;
 }
 
-.label-body {
+.label-container {
   position: absolute;
-  font-size: 0.7vmax;
+  white-space: nowrap;
   top: 0;
   left: 0;
+}
+
+.label-container .label-body {
+  position: absolute;
+  font-size: 0.7vmax;
+  top: -0.5vmax;
+  left: -0.5vmax;
   color: #fe8;
   text-shadow: 0 0 0.1vmax rgba(0, 34, 68, 0.75);
-  margin-top: -.5vmax;
-  margin-left: -.6vmax;
   line-height: 1vmax;
   pointer-events: none;
 }
 
-.label-body .index {
+.label-container .label-body .index {
   position: relative;
   font-size: 0.5vmax;
   display: inline-block;
@@ -160,27 +166,27 @@ body {
   line-height: 1vmax;
 }
 
-.label-body .children {
+.label-container .label-body .children {
   display: none;
 }
 
-.label-body.label-moon {
+.label-container .label-body.label-moon {
   color: #8ae;
 }
 
-.label-body.label-moon .index {
+.label-container .label-body.label-moon .index {
   border-color: #8ae;
 }
 
-.label-body.label-star .index {
+.label-container .label-body.label-star .index {
   visibility: hidden;
 }
 
-.label-body.label-star, .label-body.label-sub-star {
+.label-container .label-body.label-star, .label-container .label-body.label-sub-star {
   color: #fff;
 }
 
-.label-body.label-star .index, .label-body.label-sub-star .index {
+.label-container .label-body.label-star .index, .label-container .label-body.label-sub-star .index {
   border-color: #fff;
 }
 

@@ -1,5 +1,5 @@
 import { MISC } from '../variables';
 
 export default function getTime() {
-  return Date.now() * MISC.time;
+  return Date.now() * MISC.time; // - MISC.timeStart
 }
