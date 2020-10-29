@@ -56,7 +56,7 @@ class Map {
       return;
     }
     wait(this.timerBank, () => {
-      const fragments = Math.ceil(resolution / 64);
+      const fragments = Math.ceil(resolution / 128);
       const i = iA || 0;
       const x = xA || 0;
       const y = yA || 0;
@@ -111,7 +111,7 @@ class Map {
   }
 
   static renderPart(x, y, resolution, texture, scene, camera) {
-    const fragments = Math.ceil(resolution / 64);
+    const fragments = Math.ceil(resolution / 128);
     TD.renderer.setRenderTarget(texture);
     TD.renderer.antialias = false;
     TD.renderer.setScissorTest(true);

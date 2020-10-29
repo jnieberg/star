@@ -189,7 +189,8 @@ export default class BlackHole extends MainStar {
         depth: false,
       });
 
-      const atmosphere = new Atmosphere({
+      // eslint-disable-next-line no-unused-vars
+      const __ = new Atmosphere(this.object.high, {
         size: size * 1.01,
         thickness: size * 1.01 * 1.1,
         color: MISC.colorHelper,
@@ -198,7 +199,6 @@ export default class BlackHole extends MainStar {
         opacity: 1.0,
         power: 2.0,
       });
-      atmosphere.add(this.object.high);
     }
 
     // Black hole aura

@@ -39,15 +39,16 @@ class CloudMap extends Map {
     // props.res2
     // props.resMix
     // props.mixScale
-
-    for (let i = 0; i < 6; i += 1) {
-      this.mats[i].uniforms.seed.value = props.seed;
-      this.mats[i].uniforms.resolution.value = props.resolution;
-      this.mats[i].uniforms.res1.value = props.res1;
-      this.mats[i].uniforms.res2.value = props.res2;
-      this.mats[i].uniforms.resMix.value = props.resMix;
-      this.mats[i].uniforms.mixScale.value = props.mixScale;
-      this.mats[i].needsUpdate = true;
+    if (this.enabled) {
+      for (let i = 0; i < 6; i += 1) {
+        this.mats[i].uniforms.seed.value = props.seed;
+        this.mats[i].uniforms.resolution.value = props.resolution;
+        this.mats[i].uniforms.res1.value = props.res1;
+        this.mats[i].uniforms.res2.value = props.res2;
+        this.mats[i].uniforms.resMix.value = props.resMix;
+        this.mats[i].uniforms.mixScale.value = props.mixScale;
+        this.mats[i].needsUpdate = true;
+      }
     }
 
     super.render(props, callback);

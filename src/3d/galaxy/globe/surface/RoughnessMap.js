@@ -7,6 +7,7 @@ import Map from './Map';
 class RoughnessMap extends Map {
   constructor(resolution, enabled) {
     super(resolution, enabled);
+    this.enabled = enabled;
     this.setup();
     super.setup();
   }
@@ -33,12 +34,13 @@ class RoughnessMap extends Map {
     // props.resolution
     // props.heightMaps[]
     // props.waterLevel
-
-    for (let i = 0; i < 6; i += 1) {
-      this.mats[i].uniforms.resolution.value = props.resolution;
-      this.mats[i].uniforms.waterLevel.value = props.waterLevel;
-      this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
-      this.mats[i].needsUpdate = true;
+    if (this.enabled) {
+      for (let i = 0; i < 6; i += 1) {
+        this.mats[i].uniforms.resolution.value = props.resolution;
+        this.mats[i].uniforms.waterLevel.value = props.waterLevel;
+        this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
+        this.mats[i].needsUpdate = true;
+      }
     }
     super.render(props, callback);
   }

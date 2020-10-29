@@ -20,6 +20,8 @@ class GlobeSurface {
       biome,
       detail,
       hasClouds = false,
+      hasGlow = false,
+      glow = false,
       cloudColor,
       metal,
       fluid,
@@ -32,6 +34,7 @@ class GlobeSurface {
     this.timerBank = this.seedString;
     this.ground = new THREE.Mesh();
     this.obj = obj;
+    this.callback = callback || (() => {});
 
     this.materials = [];
     this.detail = detail;
@@ -39,7 +42,9 @@ class GlobeSurface {
     this.metalness = 0.5;
     this.normalScale = 3.0;
     this.size = size || 1;
-    this.hasClouds = hasClouds && this.detail === 0;
+    this.hasClouds = hasClouds && this.detail === 1;
+    this.hasGlow = hasGlow;
+    this.glow = glow;
     this.metal = metal;
     this.fluid = fluid;
 
@@ -56,6 +61,10 @@ class GlobeSurface {
     if (this.hasClouds) {
       this.clouds = this.createClouds();
     }
+    this.render({ biome });
+  }
+
+  render({ biome }) {
     wait(this.timerBank, () => {
       this.initSeed();
       this.biome =
@@ -63,20 +72,14 @@ class GlobeSurface {
         new Biome({
           metal: this.metal,
           fluid: this.fluid,
+          glow: this.glow,
         });
       wait(this.timerBank, () => {
         this.createScene();
-        this.render(resolution, callback);
+        this.renderScene();
+        // console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
       });
     });
-  }
-
-  render(detail, callback) {
-    this.resolution = detail || 256;
-    // console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
-    // wait(() => {
-    this.renderScene(callback);
-    // });
   }
 
   initSeed() {
@@ -84,28 +87,37 @@ class GlobeSurface {
   }
 
   createScene() {
-    this.heightMap = new NoiseMap(this.resolution);
+    this.heightMap = new NoiseMap(this.resolution, this.detail > -1); // metal
     this.heightMaps = this.heightMap.maps;
 
-    this.moistureMap = new NoiseMap(this.resolution);
-    this.moistureMaps = this.moistureMap.maps;
-
-    this.textureMap = new TextureMap(this.resolution);
+    this.textureMap = new TextureMap(this.resolution, this.detail > -1); // liquid
     this.textureMaps = this.textureMap.maps;
 
-    this.normalMap = new NormalMap(this.resolution);
+    this.moistureMap = new NoiseMap(this.resolution, this.detail > 0); // metal aftertouch
+    this.moistureMaps = this.moistureMap.maps;
+
+    this.normalMap = new NormalMap(this.resolution, this.detail > 0); // height map
     this.normalMaps = this.normalMap.maps;
 
-    this.roughnessMap = new RoughnessMap(this.resolution);
+    this.roughnessMap = new RoughnessMap(this.resolution, this.detail > 0); // liquid light reflection
     this.roughnessMaps = this.roughnessMap.maps;
-
     for (let i = 0; i < 6; i += 1) {
-      const material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0xffffff),
-        transparent: true,
-        // opacity: 0,
-        alphaTest: 0,
-      });
+      let material;
+      if (this.glow) {
+        material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(0xffffff),
+          emissive: new THREE.Color(0xffffff),
+          emissiveIntensity: 1.0,
+          transparent: true,
+          alphaTest: 0,
+        });
+      } else {
+        material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(0xffffff),
+          transparent: true,
+          alphaTest: 0,
+        });
+      }
       this.materials[i] = material;
     }
     const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);
@@ -122,19 +134,24 @@ class GlobeSurface {
     this.ground.castShadow = true;
     this.ground.receiveShadow = true;
     this.ground.visible = false;
-    // this.view.add(this.ground);
+    // this.view.add(ground);
+    return this.ground;
   }
 
-  renderCallback(message, callback) {
+  renderCallback() {
     this.updateMaterial();
     this.ground.visible = true;
-    // console.log(`[${this.timerBank}] ${message} PLANET: ${this.resolution}`);
-    if (callback) {
-      callback();
+    // console.log(`[${this.timerBank}] CALLBACK PLANET: ${this.resolution}`);
+    if (this.hasGlow) {
+      this.createGlow(() => {
+        this.callback();
+      });
+    } else {
+      this.callback();
     }
   }
 
-  renderScene(callback) {
+  renderScene() {
     this.initSeed();
     this.seed = GlobeSurface.randRange(0, 1) * 100000.0;
     this.updateNormalScaleForRes(this.resolution);
@@ -214,11 +231,11 @@ class GlobeSurface {
                               waterLevel: this.fluid.level,
                             },
                             () => {
-                              this.renderCallback('CALLBACK', callback);
+                              this.renderCallback();
                             }
                           );
                         } else {
-                          this.renderCallback('CALLBACK', callback);
+                          this.renderCallback();
                         }
                       }
                     );
@@ -239,6 +256,7 @@ class GlobeSurface {
       material.metalness = this.metalness;
 
       material.map = this.textureMaps[i];
+      material.emissiveMap = this.textureMaps[i];
       material.normalMap = this.normalMaps[i];
       material.normalScale = new THREE.Vector2(
         this.normalScale,
@@ -246,7 +264,6 @@ class GlobeSurface {
       );
       material.roughnessMap = this.roughnessMaps[i];
       material.metalnessMap = this.roughnessMaps[i];
-      // material.opacity = 1;
       material.needsUpdate = true;
     }
   }
@@ -267,6 +284,28 @@ class GlobeSurface {
       opacity: this.cloudDensity,
     });
     // this.ground.add(this.clouds.view);
+  }
+
+  createGlow(callback) {
+    const glowSurface = new GlobeSurface(
+      {
+        rnd: this.seedString,
+        size: this.size,
+        resolution: this.resolution,
+        detail: 0,
+        glow: true,
+        fluid: this.fluid,
+        metal: this.metal,
+      },
+      () => {
+        callback();
+      }
+    );
+    this.groundGlow = glowSurface.ground;
+    this.groundGlow.name = this.type === 'planet' ? 'Planet low' : 'Moon low';
+    this.groundGlow.castShadow = true;
+    this.groundGlow.receiveShadow = false;
+    this.ground.add(this.groundGlow);
   }
 
   updateNormalScaleForRes(value) {

@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { EVENT, LAYER, MISC, TD } from '../../variables';
-import Store from '../init/Store';
+import { EVENT, LAYER, TD } from '../../variables';
 import setLabel, { labelShow } from '../label/label';
 import raycastFound from './raycast-found';
 
@@ -42,12 +41,10 @@ function raycastBodyEvents(intersect) {
 function checkOrbitBody(body, inOrbit) {
   if (body && body.object) {
     if (inOrbit) {
-      // TD.camera.orbit = body;
       TD.camera.parent = body.object;
       return true;
     }
     if (TD.camera.parent === body) {
-      // TD.camera.orbit = undefined;
       TD.camera.parent = TD.scene;
     }
   }
@@ -73,11 +70,17 @@ export default function raycastBody() {
       return false;
     }
     if (distance > 0 && distance < distanceOrbitStar) {
+      const speedMin =
+        TD.camera.orbit && TD.camera.orbit.type !== 'star' ? 0.0 : 0.01;
       TD.raycaster.layers.enable(LAYER.SYSTEM);
       const obj = bodies.map((bd) => bd.object.low).filter((bd) => bd);
       const intersect = raycastFound(obj, 0.1, 2);
       EVENT.controls.speedFactorPlanet =
-        distance * 100.0 < 1.0 ? distance * 100.0 : 1.0;
+        distance * 10.0 < 1.0 ? distance * 10.0 : 1.0;
+      EVENT.controls.speedFactorPlanet =
+        EVENT.controls.speedFactorPlanet > speedMin
+          ? EVENT.controls.speedFactorPlanet
+          : speedMin;
       let moon;
       if (distance < distanceOrbitMoon) {
         moon = body.type === 'moon' && body;
@@ -105,10 +108,10 @@ export default function raycastBody() {
       }
       let star;
       if (distance < distanceOrbitStar) {
-        star = body.type === 'moon' && body.parent.parent;
-        star = star || (body.type === 'planet' && body.parent);
-        star = star || (body.type === 'star' && body);
-        // star = body.star;
+        // star = body.type === 'moon' && body.parent.parent;
+        // star = star || (body.type === 'planet' && body.parent);
+        // star = star || (body.type === 'star' && body);
+        star = body.subStar || body.star;
         if (star && TD.star !== star) {
           TD.star = star;
         }

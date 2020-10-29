@@ -1,4 +1,4 @@
-import { EVENT, LAYER, MISC, TD } from '../../variables';
+import { EVENT, LAYER, TD } from '../../variables';
 import Store from '../init/Store';
 import setLabel, { labelShow } from '../label/label';
 import raycastFound from './raycast-found';
@@ -20,7 +20,7 @@ function raycastSystemEvents(intersect) {
         TD.system.draw();
         const starInfo = TD.system.text;
         setLabel(starInfo);
-        // console.log(TD.system);
+        console.log(TD.system);
       }
     }
     if (intersect.distance > distanceNear * TD.scale) {
@@ -39,6 +39,10 @@ export default function raycastSystem() {
     const distanceCam = TD.camera.distanceTo(TD.system.object.position);
     EVENT.controls.speedFactorStar =
       distanceCam / (distance * 2) < 1.0 ? distanceCam / (distance * 2) : 1.0;
+    EVENT.controls.speedFactorStar =
+      EVENT.controls.speedFactorStar > 0.001
+        ? EVENT.controls.speedFactorStar
+        : 0.001;
     if (distanceCam >= distance) {
       TD.system.remove();
       TD.system = undefined;

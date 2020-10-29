@@ -52,9 +52,10 @@ class Clouds {
       const material = new THREE.MeshPhongMaterial({
         color: this.color,
         emissive: this.color,
-        emissiveIntensity: 0.02,
+        emissiveIntensity: 0.1,
         alphaTest: 0,
         transparent: true,
+        side: THREE.DoubleSide,
       });
       this.materials[i] = material;
     }
@@ -115,6 +116,7 @@ class Clouds {
         material.roughness = this.roughness;
         material.metalness = this.metalness;
         material.map = this.cloudMaps[i];
+        material.emissiveMap = this.cloudMaps[i];
         material.color = this.color;
         // material.alphaMap = this.cloudMaps[i],
         // material.bumpMap = this.cloudMaps[i],

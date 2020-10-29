@@ -6,6 +6,7 @@ import Map from './Map';
 class NormalMap extends Map {
   constructor(resolution, enabled) {
     super(resolution, enabled);
+    this.enabled = enabled;
     this.setup();
     super.setup();
   }
@@ -30,12 +31,14 @@ class NormalMap extends Map {
   }
 
   render(props, callback) {
-    for (let i = 0; i < 6; i += 1) {
-      this.mats[i].uniforms.resolution.value = props.resolution;
-      this.mats[i].uniforms.waterLevel.value = props.waterLevel;
-      this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
-      this.mats[i].uniforms.textureMap.value = props.textureMaps[i];
-      this.mats[i].needsUpdate = true;
+    if (this.enabled) {
+      for (let i = 0; i < 6; i += 1) {
+        this.mats[i].uniforms.resolution.value = props.resolution;
+        this.mats[i].uniforms.waterLevel.value = props.waterLevel;
+        this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
+        this.mats[i].uniforms.textureMap.value = props.textureMaps[i];
+        this.mats[i].needsUpdate = true;
+      }
     }
 
     super.render(props, callback);

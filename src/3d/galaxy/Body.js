@@ -30,6 +30,36 @@ export default class Body {
     return 99999999;
   }
 
+  get star() {
+    return this.ancestor('star');
+  }
+
+  get subStar() {
+    return this.ancestor('sub-star');
+  }
+
+  ancestor(type) {
+    let ancestor = this.parent.type === type && this.parent; // get parent
+    ancestor = // get grandparent
+      ancestor ||
+      (this.parent.parent &&
+        this.parent.parent.type === type &&
+        this.parent.parent);
+    ancestor = // get great grandparent
+      ancestor ||
+      (this.parent.parent.parent &&
+        this.parent.parent.parent.type === type &&
+        this.parent.parent.parent);
+    ancestor = // get sibling
+      ancestor ||
+      (this.parent.children &&
+        this.parent.children.length > 0 &&
+        this.parent.children[0].type === type &&
+        this.parent.children[0]);
+    ancestor = ancestor || (this.parent.ancestor && this.parent.ancestor(type)); // get uncle
+    return ancestor || null;
+  }
+
   setLabel(distance = 0.2) {
     if (this.visible && this.distanceToCamera < distance) {
       const opacity = (distance - this.distanceToCamera) * (1.0 / distance);

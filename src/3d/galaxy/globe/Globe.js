@@ -22,7 +22,7 @@ export default class Globe extends Body {
     this.visible = false;
     this.distanceMin = distance;
     this.surfaceRenders = {
-      resolutions: [128, 512], // 1024
+      resolutions: [512], // 1024
       last: undefined,
     };
     if (this.type !== 'moon') {
@@ -60,28 +60,6 @@ export default class Globe extends Body {
       : -1;
   }
 
-  get star() {
-    let star = this.parent.type === 'star' && this.parent; // get parent star
-    star = // get grandparent star
-      star ||
-      (this.parent.parent &&
-        this.parent.parent.type === 'star' &&
-        this.parent.parent);
-    star = // get great grandparent star
-      star ||
-      (this.parent.parent.parent &&
-        this.parent.parent.parent.type === 'star' &&
-        this.parent.parent.parent);
-    star = // get sibling star
-      star ||
-      (this.parent.children &&
-        this.parent.children.length > 0 &&
-        this.parent.children[0].type === 'star' &&
-        this.parent.children[0]);
-    star = star || this.parent.star; // get uncle star
-    return star || null;
-  }
-
   get distanceStar() {
     let distance = this.type === 'planet' && this.distance;
     distance =
@@ -117,11 +95,11 @@ export default class Globe extends Body {
       let temp = [
         Math.floor(
           (gas * starTemp) /
-            this.random.rnd(distanceToStar, distanceToStar * 1.5)
+            this.random.rnd(distanceToStar, distanceToStar * 1.3)
         ),
         Math.floor(
           starTemp /
-            (1.0 + gas * this.random.rnd(distanceToStar, distanceToStar * 1.5))
+            (1.0 + gas * this.random.rnd(distanceToStar, distanceToStar * 1.3))
         ),
       ];
       temp = temp.sort((a, b) => (a > b ? 1 : -1));
@@ -200,7 +178,7 @@ export default class Globe extends Body {
     let level;
     const levelChance = this.random.rndInt(4);
     if (levelChance <= 1) level = levelChance;
-    else level = this.random.rnd(0.1, 0.9);
+    else level = this.random.rnd(0.05, 0.95);
     return {
       level,
       ...getColor(hsl),
@@ -218,6 +196,21 @@ export default class Globe extends Body {
       level: 1.0 - this.fluid.level,
       ...getColor(hsl),
     };
+  }
+
+  get glow() {
+    this.random.seed = 'glow';
+    let glow =
+      this.temperature.min > 400 &&
+      (this.fluid.text.indexOf('Red') > -1 ||
+        this.fluid.text.indexOf('Orange') > -1) &&
+      this.fluid.level > 0.0 &&
+      this.fluid.level < 0.75;
+    glow = glow || (this.fluid.level > 0.0 && this.fluid.level < 0.25);
+    if (glow) {
+      return this.random.rnd(0, 1) === 0;
+    }
+    return false;
   }
 
   get rings() {
@@ -392,9 +385,10 @@ export default class Globe extends Body {
           rnd: this.random.seed,
           size: this.size * 0.0001 * TD.scale,
           resolution,
-          detail: 2 - this.surfaceRenders.resolutions.length,
+          detail: 1, // 2 - this.surfaceRenders.resolutions.length,
           biome: this.surfaceRenders.last && this.surfaceRenders.last.biome,
           hasClouds: this.clouds,
+          hasGlow: this.glow,
           cloudColor: MISC.colorHelper,
           metal: this.metal,
           fluid: this.fluid,
@@ -406,6 +400,7 @@ export default class Globe extends Body {
           this.surfaceRenders.resolutions.shift();
           this.surfaceRenders.last = globeSurface;
           this.drawSurface();
+          this.object.low.visible = false;
         },
         () => {
           // console.log('INTERRUPT SUCCESS!!!');
@@ -442,8 +437,8 @@ export default class Globe extends Body {
   showHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = true;
+      this.object.low.visible = false;
       this.object.trajectory.visible = false;
-      this.object.low.material.opacity = 0;
       for (let c = 0; c < this.children.length; c += 1) {
         const child = this.children[c];
         child.show();
@@ -455,8 +450,8 @@ export default class Globe extends Body {
   hideHigh() {
     if (this.object && this.object.high) {
       this.object.high.visible = false;
+      this.object.low.visible = true;
       this.object.trajectory.visible = true;
-      this.object.low.material.opacity = 1;
       for (let c = 0; c < this.children.length; c += 1) {
         const child = this.children[c];
         child.hide();
@@ -509,11 +504,12 @@ export default class Globe extends Body {
     // Planet sphere
     const globeSurface = new GlobeSurface({
       rnd: this.random.seed,
-      size: this.size * 0.000099 * TD.scale,
-      resolution: 16,
+      size: this.size * 0.0001 * TD.scale,
+      resolution: 32,
       detail: 0,
       metal: this.metal,
       fluid: this.fluid,
+      hasGlow: this.glow,
     });
     this.object.low = globeSurface.ground;
     this.object.low.name = this.type === 'planet' ? 'Planet low' : 'Moon low';
@@ -536,10 +532,11 @@ export default class Globe extends Body {
         64
       );
       const ringMaterial = new THREE.MeshStandardMaterial({
-        map: TD.texture.planet.rings,
         color: MISC.colorHelper,
+        map: TD.texture.planet.rings,
         emissive: MISC.colorHelper,
-        emissiveIntensity: 0.01,
+        emissiveMap: TD.texture.planet.rings,
+        emissiveIntensity: 0.5,
         opacity: this.rings.color.a,
         blending: THREE.NormalBlending,
         side: THREE.DoubleSide,
@@ -552,7 +549,7 @@ export default class Globe extends Body {
       ringMesh.rotateX(Math.PI * 0.5);
       ringMesh.castShadow = true;
       ringMesh.receiveShadow = true;
-      this.object.low.add(ringMesh);
+      this.object.add(ringMesh);
     }
 
     this.drawTrajectory({
@@ -575,7 +572,6 @@ export default class Globe extends Body {
   drawHigh() {
     if (this.object) {
       this.object.trajectory.visible = false;
-      this.object.low.material.opacity = 0;
       if (this.object.high) {
         this.drawSurface();
         this.showHigh();
