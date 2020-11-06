@@ -138,5 +138,5 @@ export default function raycastBody() {
       return false;
     }
   }
-  return true;
+  return false;
 }

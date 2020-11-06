@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { BODY, LAYER, MISC, TD } from '../../../variables';
-import setColor, { getColorMix, getColor } from '../../../misc/color';
+import { BODY, GLOBE, LAYER, MISC, TD } from '../../../variables';
+import setColor, { getColor } from '../../../misc/color';
 import toCelcius from '../../../misc/temperature';
 import deleteThree from '../../tools/delete';
 import getTime from '../../../misc/time';
 import GlobeSurface from './surface/GlobeSurface';
 import Atmosphere from './Atmosphere';
 import Random from '../../../misc/Random';
-import { toSize } from '../../../misc/size';
+import radixToSize from '../../../misc/size';
 import Word from '../../../misc/Word';
 import toPercent from '../../../misc/percent';
 import Body from '../Body';
@@ -44,8 +44,8 @@ export default class Globe extends Body {
       this.random.seed = 'size';
       this._size =
         this.type === 'moon'
-          ? parentSize * this.random.rnd(0.02, 0.2)
-          : parentSize * 10 ** this.random.rnd(-2.0, 0.0) * 0.2;
+          ? parentSize * this.random.float(0.02, 0.2)
+          : parentSize * 10 ** this.random.float(-2.0, 0.0) * 0.2;
     }
     return this._size;
   }
@@ -61,10 +61,13 @@ export default class Globe extends Body {
   }
 
   get distanceStar() {
-    let distance = this.type === 'planet' && this.distance;
-    distance =
-      distance || (this.parent.type === 'planet' && this.parent.distance);
-    return distance || 0;
+    if (!this._distanceStar) {
+      let distance = this.type === 'planet' && this.distance;
+      distance =
+        distance || (this.parent.type === 'planet' && this.parent.distance);
+      this._distanceStar = distance || 0;
+    }
+    return this._distanceStar;
   }
 
   get distance() {
@@ -80,7 +83,7 @@ export default class Globe extends Body {
       factor = factor || 2; // planets around star
       const size = this.parent.size * factor * 4 + this.distanceMin;
       this.random.seed = 'distance';
-      factor *= this.index + this.random.rnd(0.8, 1.2);
+      factor *= this.index + this.random.float(0.8, 1.2);
       this._distance = size + (factor ** 2 + 1.0);
     }
     return this._distance;
@@ -88,32 +91,70 @@ export default class Globe extends Body {
 
   get temperature() {
     if (!this._temperature) {
-      const starTemp = this.star.temperature.min;
+      const starTemp = this.star.temperature;
       const distanceToStar = this.distanceStar * 0.5;
       const gas = this.gas.density * 0.6 + 0.4;
       this.random.seed = 'temperature';
-      let temp = [
-        Math.floor(
-          (gas * starTemp) /
-            this.random.rnd(distanceToStar, distanceToStar * 1.3)
-        ),
-        Math.floor(
-          starTemp /
-            (1.0 + gas * this.random.rnd(distanceToStar, distanceToStar * 1.3))
-        ),
-      ];
-      temp = temp.sort((a, b) => (a > b ? 1 : -1));
-      this._temperature = {
-        min: temp[0],
-        max: temp[1],
-      };
+      // let temp = [
+      //   Math.floor(
+      //     (gas * starTemp) /
+      //       this.random.float(distanceToStar, distanceToStar * 1.3)
+      //   ),
+      //   Math.floor(
+      //     starTemp /
+      //       (1.0 +
+      //         gas * this.random.float(distanceToStar, distanceToStar * 1.3))
+      //   ),
+      // ];
+      // temp = temp.sort((a, b) => (a > b ? 1 : -1));
+      // this._temperature = {
+      //   min: temp[0],
+      //   max: temp[1],
+      // };
+      this._temperature = Math.floor(
+        starTemp /
+          (1.0 + gas * this.random.float(distanceToStar, distanceToStar * 1.3))
+      );
     }
     return this._temperature;
   }
 
+  get info() {
+    if (!this._info) {
+      const { level, temperature } = this;
+      const infos = [];
+      if (temperature + MISC.KELVIN < -50) infos.push(GLOBE.ICY);
+      else if (temperature + MISC.KELVIN < 0)
+        infos.push(GLOBE.GLACIAL, GLOBE.TUNDRA);
+      else if (temperature + MISC.KELVIN < 50)
+        infos.push(GLOBE.MODERATE, GLOBE.TUNDRA, GLOBE.SAVANNAH);
+      else if (temperature + MISC.KELVIN < 100)
+        infos.push(GLOBE.VOLCANIC, GLOBE.DESERT);
+      else infos.push(GLOBE.VOLCANIC);
+
+      this.random.seed = 'info';
+      if (level === 0.0 && this.random.int(0, 2) === 0)
+        infos.push(GLOBE.BARREN);
+      if (
+        level === 1.0 &&
+        this.random.int(0, 2) === 0 &&
+        temperature + MISC.KELVIN >= 0 &&
+        temperature + MISC.KELVIN < 50
+      ) {
+        this._info = GLOBE.OCEAN;
+        return this._info;
+      }
+
+      this._info = infos[this.random.int(0, infos.length - 1)];
+
+      // console.log(this.index, `${this.name}`, this.info, this);
+    }
+    return this._info;
+  }
+
   get gas() {
-    if (!this._atmosphere) {
-      this._atmosphere = {
+    if (!this._gas) {
+      this._gas = {
         size: 0,
         density: 0,
         blend: BODY.gas.Dust,
@@ -123,23 +164,24 @@ export default class Globe extends Body {
           lightness: 0,
         },
       };
+      const { level, metal, liquid, size } = this;
       this.random.seed = 'gas';
-      let blend = this.random.rndInt(2);
-      blend = this.metal.level === 1.0 ? 0 : blend;
-      blend = this.fluid.level === 1.0 ? 1 : blend;
-      if (this.random.rndInt(5) > 0) {
+      let blend = this.random.int(2);
+      blend = level === 0.0 ? 0 : blend;
+      blend = level === 1.0 ? 1 : blend;
+      if (this.random.int(5) > 0) {
         // const hsl = {
-        //   hue: this.random.rnd(),
-        //   saturation: this.random.rnd(),
+        //   hue: this.random.float(),
+        //   saturation: this.random.float(),
         //   lightness:
         //     blend === BODY.gas.Dust
-        //       ? this.random.rnd(0.0, 1.0)
-        //       : this.random.rnd(0.5, 1.0),
+        //       ? this.random.float(0.0, 1.0)
+        //       : this.random.float(0.5, 1.0),
         // };
-        const hsl = blend === BODY.gas.Dust ? this.metal : this.fluid;
-        this._atmosphere = {
-          size: this.random.rnd(this.size * 0.1),
-          density: this.random.rnd(0.1, 1.0),
+        const hsl = blend === BODY.gas.Dust ? metal : liquid;
+        this._gas = {
+          size: this.random.float(size * 0.1),
+          density: this.random.float(0.1, 1.0),
           blend,
           color: {
             ...hsl,
@@ -148,84 +190,130 @@ export default class Globe extends Body {
         };
       }
     }
-    return this._atmosphere;
+    return this._gas;
   }
 
   get clouds() {
     this.random.seed = 'clouds';
-    if (
-      this.type === 'planet' &&
-      this.gas.density > 0 &&
-      this.random.rndInt(2) === 0
-    ) {
+    const lightness = this.random.float(0.25);
+    const hasClouds = this.random.int(2) === 0;
+    if (hasClouds && this.type === 'planet' && this.gas.density > 0) {
       return {
         hue: this.gas.color.hue,
         saturation: this.gas.color.saturation,
-        lightness: this.gas.color.lightness + this.random.rnd(0.25),
+        lightness: this.gas.color.lightness + lightness,
         density: this.gas.density,
       };
     }
     return false;
   }
 
-  get fluid() {
-    this.random.seed = 'fluid';
-    const hsl = {
-      hue: this.random.rnd(),
-      saturation: this.random.rnd(),
-      lightness: this.random.rnd(),
-    };
+  get level() {
+    this.random.seed = 'level';
     let level;
-    const levelChance = this.random.rndInt(4);
+    const levelChance = this.random.int(4);
     if (levelChance <= 1) level = levelChance;
-    else level = this.random.rnd(0.05, 0.95);
-    return {
-      level,
-      ...getColor(hsl),
-    };
+    else level = this.random.float(0.05, 0.95);
+    return level;
+  }
+
+  get liquid() {
+    if (!this._liquid) {
+      const { liquid } = this.info;
+      // let hue = [0.0, 1.0];
+      // let saturation = [0.0, 1.0];
+      // if (this.temperature.min < 273 && this.temperature.max < 273)
+      //   hue = getColorRangeByNames('Purple', 'Blue');
+      // if (
+      //   this.temperature.min >= 273 &&
+      //   this.temperature.min < 325 &&
+      //   this.temperature.max >= 273 &&
+      //   this.temperature.max < 325
+      // )
+      //   hue = getColorRangeByNames('Blue', 'Green', 'Yellow');
+      // if (this.temperature.min >= 325 && this.temperature.max >= 325)
+      //   hue = getColorRangeByNames('Yellow', 'Orange', 'Red');
+      // if (this.temperature.min < 273 && this.temperature.max >= 325)
+      //   saturation = [0.0, 0.3];
+      const hue =
+        liquid && liquid.hue ? liquid.hue.map((h) => h / 360) : [0.0, 1.0];
+      // console.log(this.index, `${this.name}`, this.info, hue);
+      const saturation = (liquid && liquid.saturation) || [0.0, 1.0];
+      const lightness = (liquid && liquid.lightness) || [0.0, 1.0];
+      this.random.seed = 'liquid';
+      const hsl = {
+        hue: this.random.float(hue[0], hue[1]),
+        saturation: this.random.float(saturation[0], saturation[1]),
+        lightness: this.random.float(lightness[0], lightness[1]),
+      };
+      this._liquid = {
+        level: this.level,
+        ...getColor(hsl),
+      };
+    }
+    return this._liquid;
   }
 
   get metal() {
-    this.random.seed = 'metal';
-    const hsl = {
-      hue: this.random.rnd(),
-      saturation: this.random.rnd(),
-      lightness: this.random.rnd(),
-    };
-    return {
-      level: 1.0 - this.fluid.level,
-      ...getColor(hsl),
-    };
+    if (!this._metal) {
+      const { metal } = this.info;
+      // let hue = [0.0, 1.0];
+      // let saturation = [0.0, 1.0];
+      // if (this.temperature.min < 273 && this.temperature.max < 273)
+      //   hue = getColorRangeByNames('Purple', 'Blue');
+      // if (
+      //   this.temperature.min >= 273 &&
+      //   this.temperature.min < 325 &&
+      //   this.temperature.max >= 273 &&
+      //   this.temperature.max < 325
+      // )
+      //   hue = getColorRangeByNames('Blue', 'Green', 'Yellow');
+      // if (this.temperature.min >= 325 && this.temperature.max >= 325)
+      //   hue = getColorRangeByNames('Yellow', 'Orange', 'Red');
+      // if (this.temperature.min < 273 && this.temperature.max >= 325)
+      //   saturation = [0.0, 0.3];
+      const hue =
+        metal && metal.hue ? metal.hue.map((h) => h / 360) : [0.0, 1.0];
+      const saturation = (metal && metal.saturation) || [0.0, 1.0];
+      const lightness = (metal && metal.lightness) || [0.0, 1.0];
+      this.random.seed = 'metal';
+      const hsl = {
+        hue: this.random.float(hue[0], hue[1]),
+        saturation: this.random.float(saturation[0], saturation[1]),
+        lightness: this.random.float(lightness[0], lightness[1]),
+      };
+      this._metal = {
+        level: 1.0 - this.level,
+        ...getColor(hsl),
+      };
+    }
+    return this._metal;
   }
 
   get glow() {
+    const { glow } = this.info;
     this.random.seed = 'glow';
-    let glow =
-      this.temperature.min > 400 &&
-      (this.fluid.text.indexOf('Red') > -1 ||
-        this.fluid.text.indexOf('Orange') > -1) &&
-      this.fluid.level > 0.0 &&
-      this.fluid.level < 0.75;
-    glow = glow || (this.fluid.level > 0.0 && this.fluid.level < 0.25);
-    if (glow) {
-      return this.random.rnd(0, 1) === 0;
-    }
-    return false;
+    return (
+      glow &&
+      this.random.int(0, 1) === 0 &&
+      this.level > 0.0 &&
+      this.level < 0.5
+    );
   }
 
   get rings() {
     if (this.type === 'planet') {
+      const { level, size, metal } = this;
       this.random.seed = 'ring';
-      if (this.size > 0.02 && this.random.rndInt(2) === 0) {
+      if (size > 0.02 && this.random.int(2) === 0 && level < 1.0) {
         return {
-          thickness: this.random.rnd(),
-          size: this.size * 2 + this.random.rnd() * this.size * 3,
-          color: {
-            r: this.random.rnd(),
-            g: this.random.rnd(),
-            b: this.random.rnd(),
-            a: this.random.rnd(0.25, 1),
-          },
+          thickness: this.random.float(0.1, 1.0),
+          offset: this.random.float(),
+          size: size * 2 + this.random.float() * size * 3,
+          hue: metal.hue + this.random.float(-0.1, 0.1),
+          saturation: metal.saturation + this.random.float(-0.1, 0.1),
+          lightness: metal.lightness + this.random.float(-0.1, 0.1),
+          opacity: this.random.float(0.25, 1),
         };
       }
     }
@@ -237,7 +325,8 @@ export default class Globe extends Body {
       const children = [];
       const { size } = this;
       this.random.seed = 'children';
-      const childrenLength = this.random.rndInt(Math.sqrt(size) * 10);
+      let childrenLength = this.random.int(Math.sqrt(size) * 10);
+      childrenLength = childrenLength < 6 ? childrenLength : 6;
       if (this.type === 'planet' && childrenLength) {
         for (let index = 0; index < childrenLength; index += 1) {
           const child = new Globe({ system: this.system, index, parent: this });
@@ -269,24 +358,23 @@ export default class Globe extends Body {
       <div class="label--h2">${this.type === 'moon' ? 'Moon' : 'Planet'} #${
       this.index + 1
     } of ${this.parent.name}</div>
-      <div>Size:<span>${toSize(this.size)}</span></div>
-      <div>Temperature:<span>${toCelcius(this.temperature.min)} to ${toCelcius(
-      this.temperature.max
-    )}</span></div>
+      <div>Size:<span>${radixToSize(this.size)}</span></div>
+      <div>Temperature:<span>${toCelcius(this.temperature)}</span></div>
+      <div>Climate:<span>${this.info.climate}</span></div>
       ${this.rings ? '<div>Has rings</div>' : ''}
       ${this.clouds ? '<div>Cloudy</div>' : ''}
       <div>&nbsp;</div>
       ${
-        this.metal.level > 0
-          ? `<div>Metal: ${toPercent(this.metal.level)}<span>${
+        this.level < 1.0
+          ? `<div>Metal: ${toPercent(1.0 - this.level)}<span>${
               this.metal.text
             }</span></div>`
           : ''
       }
       ${
-        this.fluid.level > 0
-          ? `<div>Liquid: ${toPercent(this.fluid.level)}<span>${
-              this.fluid.text
+        this.level > 0.0
+          ? `<div>Liquid: ${toPercent(this.level)}<span>${
+              this.liquid.text
             }</span></div>`
           : ''
       }
@@ -313,22 +401,23 @@ export default class Globe extends Body {
   }
 
   get rotationSpeedAroundParent() {
+    const { parent, distance } = this;
     this.random.seed = 'rotation_speed_parent';
-    const velocity = (1.0 / this.parent.size) * this.distance;
-    let speed = this.parent.type === 'planet' && this.random.rnd(10, 15);
+    const velocity = (1.0 / parent.size) * distance;
+    let speed = parent.type === 'planet' && this.random.float(10, 15);
     speed =
-      speed || (this.parent.type === 'sub-star' && this.random.rnd(0.1, 0.15));
-    speed = speed || this.random.rnd(0.01, 0.015);
+      speed || (parent.type === 'sub-star' && this.random.float(0.1, 0.15));
+    speed = speed || this.random.float(0.01, 0.015);
     return (
-      this.parent.rotationSpeedAroundAxis / (velocity ** 2 * speed) -
-      this.parent.rotationSpeedAroundAxis
+      parent.rotationSpeedAroundAxis / (velocity ** 2 * speed) -
+      parent.rotationSpeedAroundAxis
     );
   }
 
   get rotationSpeedAroundAxis() {
     if (!this._rotationSpeedAroundAxis) {
       this.random.seed = 'rotation_speed';
-      this._rotationSpeedAroundAxis = this.random.rnd(0.01, 0.2);
+      this._rotationSpeedAroundAxis = this.random.float(0.01, 0.2);
     }
     return this._rotationSpeedAroundAxis;
   }
@@ -340,14 +429,14 @@ export default class Globe extends Body {
       this.object.rotation.set(0, 0, 0);
 
       this.random.seed = 'rotation_parent';
-      this.object.rotateY(rotateY + this.random.rnd(2 * Math.PI));
+      this.object.rotateY(rotateY + this.random.float(2 * Math.PI));
       this.object.translateX(this.distance * 0.0001 * TD.scale);
 
       this.object.rotation.set(0, 0, 0);
       this.random.seed = 'rotation';
       this.object.rotateY(getTime() * -this.parent.rotationSpeedAroundAxis);
-      this.object.rotateZ(this.random.rnd(2 * Math.PI));
-      this.object.rotateX(this.random.rnd(2 * Math.PI));
+      this.object.rotateZ(this.random.float(2 * Math.PI));
+      this.object.rotateX(this.random.float(2 * Math.PI));
       this.object.rotateY(getTime() * this.rotationSpeedAroundAxis);
       if (this.children) {
         for (let c = 0; c < this.children.length; c += 1) {
@@ -373,25 +462,11 @@ export default class Globe extends Body {
   drawSurface() {
     if (this.surfaceRenders.resolutions.length > 0 && this.object) {
       const resolution = this.surfaceRenders.resolutions[0];
-      setColor(
-        1,
-        this.gas.color.hue,
-        this.gas.color.saturation,
-        this.gas.color.lightness + 0.25,
-        'hsl'
-      );
       const globeSurface = new GlobeSurface(
         {
-          rnd: this.random.seed,
-          size: this.size * 0.0001 * TD.scale,
+          body: this,
           resolution,
-          detail: 1, // 2 - this.surfaceRenders.resolutions.length,
           biome: this.surfaceRenders.last && this.surfaceRenders.last.biome,
-          hasClouds: this.clouds,
-          hasGlow: this.glow,
-          cloudColor: MISC.colorHelper,
-          metal: this.metal,
-          fluid: this.fluid,
         },
         () => {
           if (this.surfaceRenders.last) {
@@ -408,12 +483,10 @@ export default class Globe extends Body {
       );
       globeSurface.ground.name = `${this.type} high ${resolution}`;
       this.object.high.add(globeSurface.ground);
-      // this.object.high = globeSurface.ground;
       if (globeSurface.clouds) {
         globeSurface.clouds.sphere.name = `${this.type} clouds`;
         this.object.high.add(globeSurface.clouds.sphere);
       }
-      // this.setLayer('high');
     } else {
       this.setSurfaceRender();
     }
@@ -470,46 +543,47 @@ export default class Globe extends Body {
     this.show();
 
     // Set gas color as emissive
-    if (this.gas && this.type === 'planet') {
-      setColor(
-        2,
-        this.gas.color.hue,
-        this.gas.color.saturation,
-        this.gas.color.lightness,
-        'hsl'
-      );
-    }
+    // if (this.gas && this.type === 'planet') {
+    //   setColor(
+    //     2,
+    //     this.gas.color.hue,
+    //     this.gas.color.saturation,
+    //     this.gas.color.lightness,
+    //     'hsl'
+    //   );
+    // }
 
     // Mix inner and outer color
-    if (this.outer && this.type === 'planet') {
-      const mix = getColorMix(
-        this.color.r,
-        this.color.g,
-        this.color.b, // mix inner and outer sphere color
-        this.outer.color.r,
-        this.outer.color.g,
-        this.outer.color.b,
-        this.outer.opacity
-      );
-      setColor(1, ...mix);
-    }
+    // if (this.outer && this.type === 'planet') {
+    //   const mix = getColorMix(
+    //     this.color.r,
+    //     this.color.g,
+    //     this.color.b, // mix inner and outer sphere color
+    //     this.outer.color.r,
+    //     this.outer.color.g,
+    //     this.outer.color.b,
+    //     this.outer.opacity
+    //   );
+    //   setColor(1, ...mix);
+    // }
 
     // Planet pivot
     this.object = new THREE.Object3D();
     this.object.name = `${this.type} pivot`;
     this.parent.object.add(this.object); // .high
-    this.object.rotation.y = this.random.rnd(2 * Math.PI) || 0;
+    this.object.rotation.y = this.random.float(2 * Math.PI) || 0;
     this.object.translateX(this.distance * 0.0001 * TD.scale || 0);
 
     // Planet sphere
     const globeSurface = new GlobeSurface({
-      rnd: this.random.seed,
-      size: this.size * 0.0001 * TD.scale,
+      body: this,
+      // rnd: this.random.seed,
+      // size: this.size * 0.0001 * TD.scale,
       resolution: 32,
       detail: 0,
-      metal: this.metal,
-      fluid: this.fluid,
-      hasGlow: this.glow,
+      // metal: this.metal,
+      // liquid: this.liquid,
+      // hasGlow: this.glow,
     });
     this.object.low = globeSurface.ground;
     this.object.low.name = this.type === 'planet' ? 'Planet low' : 'Moon low';
@@ -521,14 +595,15 @@ export default class Globe extends Body {
     if (this.rings) {
       setColor(
         1,
-        this.metal.hue,
-        this.metal.saturation,
-        this.metal.lightness,
+        this.rings.hue,
+        this.rings.saturation,
+        this.rings.lightness,
         'hsl'
       );
+      const { thickness } = this.rings;
       const ringGeometry = new THREE.RingBufferGeometry(
-        this.rings.size * 0.00006 * TD.scale,
-        this.rings.size * (this.rings.thickness * 0.00004 + 0.00006) * TD.scale,
+        this.rings.size * (-thickness * 0.00002 + 0.00006) * TD.scale,
+        this.rings.size * (thickness * 0.00002 + 0.00006) * TD.scale,
         64
       );
       const ringMaterial = new THREE.MeshStandardMaterial({
@@ -537,7 +612,7 @@ export default class Globe extends Body {
         emissive: MISC.colorHelper,
         emissiveMap: TD.texture.planet.rings,
         emissiveIntensity: 0.5,
-        opacity: this.rings.color.a,
+        opacity: this.rings.opacity,
         blending: THREE.NormalBlending,
         side: THREE.DoubleSide,
         alphaTest: 0,
@@ -545,7 +620,7 @@ export default class Globe extends Body {
       });
       const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
       ringMesh.name = 'Planet rings';
-      ringMesh.renderOrder = 0;
+      ringMesh.renderOrder = 1;
       ringMesh.rotateX(Math.PI * 0.5);
       ringMesh.castShadow = true;
       ringMesh.receiveShadow = true;
@@ -601,7 +676,7 @@ export default class Globe extends Body {
           );
           const atmosphere = new Atmosphere({
             size: this.size * 0.000102 * TD.scale,
-            thickness: this.gas.size * 0.000102 * TD.scale,
+            thickness: this.gas.size * 0.0001 * TD.scale,
             color: MISC.colorHelper,
             color2: MISC.colorHelper2,
             blending:

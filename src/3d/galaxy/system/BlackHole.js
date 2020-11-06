@@ -13,9 +13,12 @@ export default class BlackHole extends MainStar {
   // temperature + size?
   get rotationSpeedAroundAxis() {
     if (!this._rotationSpeedAroundAxis) {
-      const temperature = this.temperature.min;
-      const direction = this.random.rndInt(2) === 0 ? -1 : 1;
-      const speed = this.random.rnd(temperature * 0.0003, temperature * 0.0004);
+      const { temperature } = this;
+      const direction = this.random.int(2) === 0 ? -1 : 1;
+      const speed = this.random.float(
+        temperature * 0.0003,
+        temperature * 0.0004
+      );
       this.random.seed = 'rotation_speed';
       this._rotationSpeedAroundAxis = direction * speed;
     }
@@ -29,7 +32,7 @@ export default class BlackHole extends MainStar {
       this.random.seed = 'children';
       // number of planets depends on star temperature and number of stars
       const childrenLength =
-        this.random.rndInt(Math.sqrt(temperature) * 0.02) /
+        this.random.int(Math.sqrt(temperature) * 0.02) /
         this.parent.children.length;
       if (childrenLength > 0) {
         this.hasSubStar = false;

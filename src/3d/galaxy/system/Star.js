@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
 import setColor from '../../../misc/color';
-import { toSize, toSizeString } from '../../../misc/size';
+import getInfo from '../../../misc/info';
+import radixToSize from '../../../misc/size';
 import toCelcius from '../../../misc/temperature';
 import { LOD, MISC, STAR, TD } from '../../../variables';
 import deleteThree from '../../tools/delete';
@@ -14,55 +15,52 @@ export default class Star extends Body {
     this.visible = true;
   }
 
-  get size() {
-    if (!this._size) {
-      this.random.seed = 'size';
-      const sizeOff = this.random.rnd(0.2, 0.4);
-      const size = this.parent.size * sizeOff;
-      this._size = {
-        valueOf: () => size,
-        text: toSizeString(size),
-      };
+  get info() {
+    if (!this._info) {
+      this.random.seed = 'info';
+      const off = this.random.float(-0.1, 0.1);
+      this._info = getInfo(STAR, this.system.infoFactor + off);
     }
-    return this._size;
+    return this._info;
+  }
+
+  get size() {
+    this.system.random.seed = 'size';
+    const pow = 50;
+    const max = 50;
+    return this.info.size + this.system.random.float() ** pow * max;
+  }
+
+  get sizeText() {
+    switch (Math.floor(this.size ** 0.5)) {
+      case 0:
+        return 'Dwarf';
+      case 1:
+        return 'Star';
+      case 2:
+        return 'Giant';
+      case 3:
+        return 'Supergiant';
+      default:
+        return 'Hypergiant';
+    }
+  }
+
+  get color() {
+    return this.info.index;
+  }
+
+  get colorText() {
+    return this.info.color;
+  }
+
+  get class() {
+    return this.info.class;
   }
 
   // Star temperature in Kelvin
   get temperature() {
-    if (!this._temperature) {
-      this._temperature = {
-        min: 0,
-        max: 0,
-      };
-      this.random.seed = 'temperature';
-      Object.keys(STAR.temperature).forEach((colorKey) => {
-        if (colorKey === this.color.hue.text) {
-          const temp = STAR.temperature[colorKey];
-          const tempBright = temp.min + (temp.max - temp.min) * 0.75;
-          const tempDark = temp.max - (temp.max - temp.min) * 0.75;
-          let temperature = 0;
-          switch (this.color.lightness.text) {
-            case 'Bright':
-              temperature = this.random.rndInt(tempBright, temp.max);
-              break;
-            case 'Dark':
-              temperature = this.random.rndInt(temp.min, tempDark);
-              break;
-            case '':
-              temperature = this.random.rndInt(tempDark, tempBright);
-              break;
-            default:
-              temperature = this.random.rndInt(temp.min, temp.max);
-              break;
-          }
-          this._temperature = {
-            min: temperature,
-            max: temperature,
-          };
-        }
-      });
-    }
-    return this._temperature;
+    return this.info.temperature; // { min: this.info.temperature, max: this.info.temperature };
   }
 
   get textShort() {
@@ -85,9 +83,9 @@ export default class Star extends Body {
             }</div>`
           : ''
       }
-      <div>${this.color.text} ${this.size.text}</div>
-      <div>Size:<span>${toSize(this.size)}</span></div>
-      <div>Temperature:<span>${toCelcius(this.temperature.min)}</span></div>
+      <div>Class ${this.class} "${this.colorText}" ${this.sizeText}</div>
+      <div>Size:<span>${radixToSize(this.size)}</span></div>
+      <div>Temperature:<span>${toCelcius(this.temperature)}</span></div>
     ${
       stars && stars.length > 0
         ? `<div class="label--h3">Stars<span>Planets</span></div>
@@ -113,9 +111,9 @@ export default class Star extends Body {
   // temperature + size?
   get rotationSpeedAroundAxis() {
     if (!this._rotationSpeedAroundAxis) {
-      const temperature = this.temperature.min;
-      const direction = this.random.rndInt(2) === 0 ? -1 : 1;
-      const speed = this.random.rnd(
+      const { temperature } = this;
+      const direction = this.random.int(2) === 0 ? -1 : 1;
+      const speed = this.random.float(
         temperature * 0.000003,
         temperature * 0.000004
       );
@@ -136,11 +134,10 @@ export default class Star extends Body {
 
   drawPre() {
     deleteThree(this.object); // WIP. Maybe we can hide it?
-    const hue2 = this.color.hue - 0.08 > 0 ? this.color.hue - 0.08 : 0;
-    setColor(1, this.color.hue, 1.0, this.color.lightness, 'hsl'); // Inner
-    setColor(2, hue2, 1.0, this.color.lightness - 0.15, 'hsl'); // Outer
-    setColor(3, this.color.hue, 0.25, this.color.lightness + 0.15, 'hsl'); // Light
-
+    const hue2 = this.info.hue - 0.08 > 0 ? this.info.hue - 0.08 : 0;
+    setColor(1, this.info.hue, 1.0, this.info.lightness, 'hsl'); // Inner
+    setColor(2, hue2, 1.0, this.info.lightness, 'hsl'); // Outer
+    setColor(3, this.info.hue, 0.25, this.info.lightness + 0.15, 'hsl'); // Light
     // Star pivot
     this.object = new THREE.Object3D();
     this.object.name = 'Star pivot';
@@ -152,7 +149,7 @@ export default class Star extends Body {
     const far = MISC.camera.far * 0.001 * TD.scale;
     this.light = new THREE.PointLight(MISC.colorHelper3);
     this.light.name = 'Star light';
-    this.light.power = MISC.lod === LOD.LOW ? 30 : 10;
+    this.light.power = MISC.lod === LOD.LOW ? 30 : 8;
     this.light.decay = 2;
     this.light.distance = far;
     this.light.castShadow = true;
@@ -194,7 +191,7 @@ export default class Star extends Body {
     // Star inner
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
     const material = new THREE.MeshBasicMaterial({
-      color: MISC.colorHelper2,
+      color: MISC.colorHelper,
       side: THREE.BackSide,
       alphaTest: 0,
     });
@@ -207,7 +204,7 @@ export default class Star extends Body {
     // Star spots
     const materialSpots = new THREE.MeshBasicMaterial({
       map: TD.texture.star.surface,
-      color: MISC.colorHelper,
+      color: MISC.colorHelper2,
       transparent: true,
       blending: THREE.AdditiveBlending,
       alphaTest: 0,

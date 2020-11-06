@@ -10,7 +10,7 @@ import Store from './Store';
 
 function initEvents() {
   window.onbeforeunload = () => {
-    Store.save();
+    Store.set();
   };
 
   window.addEventListener(
@@ -47,7 +47,7 @@ export default function init3d() {
     interval();
     Store.loadCoordinate();
     Store.loadPosition();
-    Store.loadTime();
+    // Store.loadTime();
     // intervalShadow();
   });
 }

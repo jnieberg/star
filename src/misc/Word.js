@@ -1,9 +1,9 @@
 export default class Word {
   constructor(
-    seed,
+    random,
     { syllablesMin = 2, syllablesMax = 5, numberSuffixLength = 0 } = {}
   ) {
-    this.seed = seed;
+    this.random = random;
     this._NAME_LETTERS = {
       con: [
         'c',
@@ -206,11 +206,11 @@ export default class Word {
     // const vowS = this._NAME_LETTERS.vow;
     const vowM = this._NAME_LETTERS.vow;
     // const vowE = [...this._NAME_LETTERS.vow, ...this._NAME_LETTERS.vowE];
-    const syllableLength = this.seed.rndInt(syllablesMin, syllablesMax);
+    const syllableLength = this.random.int(syllablesMin, syllablesMax);
     const syllables = [];
     // const wordIndex = 0;
-    // const consAtStart = this.seed.rndInt(3) > 0;
-    // const consAtEnd = !consAtStart || this.seed.rndInt(3) > 0;
+    // const consAtStart = this.random.int(3) > 0;
+    // const consAtEnd = !consAtStart || this.random.int(3) > 0;
     let wordStart = true;
     let wordEnd = true;
     let wordLength = 0;
@@ -218,11 +218,9 @@ export default class Word {
       wordLength += 1;
       wordStart = wordEnd;
       wordEnd =
-        this.seed.rndInt(3) === 0 ||
-        wordLength >= 3 ||
-        s === syllableLength - 1;
-      const vowAtStart = this.seed.rndInt(3) === 0;
-      const vowAtEnd = this.seed.rndInt(2) === 0 && !vowAtStart;
+        this.random.int(3) === 0 || wordLength >= 3 || s === syllableLength - 1;
+      const vowAtStart = this.random.int(3) === 0;
+      const vowAtEnd = this.random.int(2) === 0 && !vowAtStart;
       let letterStart = vowAtStart && '';
       letterStart = letterStart || (wordStart && this.getRandomLetter(conS));
       letterStart = letterStart || this.getRandomLetter(conM);
@@ -233,7 +231,7 @@ export default class Word {
       syllables.push(letterStart + letterMid + letterEnd);
       if (wordEnd) {
         wordLength = 0;
-        if (this.seed.rndInt(3) === 0 && s < syllableLength - 1) {
+        if (this.random.int(3) === 0 && s < syllableLength - 1) {
           syllables.push('-');
         } else {
           syllables.push(' ');
@@ -241,9 +239,9 @@ export default class Word {
       }
     }
     // Add number suffix
-    if (this.seed.rndInt(5) === 0 && numberSuffixLength > 0) {
+    if (this.random.int(5) === 0 && numberSuffixLength > 0) {
       syllables.push(' ');
-      syllables.push(this.seed.rndInt(1, numberSuffixLength));
+      syllables.push(this.random.int(1, numberSuffixLength));
     }
     // console.log(syllables);
     return {
@@ -259,6 +257,6 @@ export default class Word {
   }
 
   getRandomLetter(letters) {
-    return letters[this.seed.rndInt(letters.length)];
+    return letters[this.random.int(letters.length)];
   }
 }

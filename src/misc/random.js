@@ -33,13 +33,13 @@ export default class Random {
     return this;
   }
 
-  rnd(minA = 1, maxA = 0) {
+  float(minA = 1, maxA = 0) {
     const min = minA < maxA ? minA : maxA;
     const max = minA < maxA ? maxA : minA;
     return this._rnd() * (max - min) + min;
   }
 
-  rndInt(minA = 1, maxA = 0) {
-    return Math.floor(this.rnd(minA, maxA));
+  int(minA = 1, maxA = 0) {
+    return Math.floor(this.float(minA, maxA));
   }
 }

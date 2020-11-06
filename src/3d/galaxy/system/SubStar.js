@@ -1,9 +1,9 @@
 import Random from '../../../misc/Random';
-import { COLOR } from '../../../variables';
-import { getColor } from '../../../misc/color';
+import { STAR } from '../../../variables';
 import Globe from '../globe/Globe';
 import aggregation from '../../../misc/aggregation';
 import Star from './Star';
+import getInfo from '../../../misc/info';
 
 export default class SubStar extends aggregation(Globe, Star) {
   constructor(props) {
@@ -16,28 +16,25 @@ export default class SubStar extends aggregation(Globe, Star) {
     );
   }
 
-  get color() {
-    if (!this._color) {
-      this.random.seed = 'color';
-      const hue =
+  get info() {
+    if (!this._info) {
+      this.random.seed = 'info';
+      this._info = getInfo(
+        STAR,
         this.system.special === 'black-hole'
-          ? this.random.rnd()
-          : this.random.rnd(COLOR.hue.Orange);
-      const lightness =
-        this.system.special === 'black-hole'
-          ? this.random.rnd(0.1, 1.0)
-          : this.random.rnd(0.1, COLOR.lightness['']);
-      this._color = getColor({ hue, lightness });
+          ? this.random.float()
+          : this.random.float(0.2)
+      );
     }
-    return this._color;
+    return this._info;
   }
 
   get children() {
     if (!this._children) {
       const children = [];
-      const temperature = this.temperature.min;
+      const { temperature } = this;
       this.random.seed = 'children';
-      const childrenLength = this.random.rndInt(Math.sqrt(temperature) * 0.05);
+      const childrenLength = this.random.int(Math.sqrt(temperature) * 0.05);
       if (childrenLength > 0) {
         for (let index = 0; index < childrenLength; index += 1) {
           const child = new Globe({ system: this.system, index, parent: this });

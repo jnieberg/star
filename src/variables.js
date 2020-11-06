@@ -14,7 +14,7 @@ export const TD = {
       density: 512,
     },
   },
-  scale: 1000,
+  scale: 10000,
   camera: undefined,
   clock: undefined,
   scene: undefined,
@@ -67,9 +67,9 @@ export const MISC = {
   interrupt: false,
   lod: LOD.LOW,
   timers: {},
-  timeStart: Date.now(),
+  // timeStart: Date.now(),
   time: 0.0001,
-  loaded: 0,
+  loaded: false,
   things: new ThingList(),
   colorHelper: new THREE.Color(),
   colorHelper2: new THREE.Color(),
@@ -83,6 +83,7 @@ export const MISC = {
     fade: 350,
     far: 700,
   },
+  KELVIN: -273.25,
 };
 
 export const LAYER = {
@@ -90,15 +91,170 @@ export const LAYER = {
   SYSTEM: 1,
 };
 
-export const STAR = {
-  temperature: {
-    Red: { min: 2400, max: 3700 },
-    Orange: { min: 3700, max: 5200 },
-    Yellow: { min: 5200, max: 6000 },
-    White: { min: 6000, max: 7500 },
-    Green: { min: 7500, max: 10000 },
-    Blue: { min: 10000, max: 30000 },
-    Purple: { min: 30000, max: 40000 },
+export const STAR = [
+  [
+    -0.01,
+    {
+      color: 'Brown',
+      class: 'R',
+      hue: 0,
+      lightness: 0.1,
+      temperature: 1300,
+      size: 0.2,
+    },
+    0.0,
+    {
+      color: 'Brown',
+      class: 'R',
+      hue: 0,
+      lightness: 0.1,
+      temperature: 1300,
+      size: 0.2,
+    },
+  ],
+  [
+    0.1,
+    {
+      color: 'Red',
+      class: 'M',
+      hue: 0,
+      lightness: 0.7,
+      temperature: 2000,
+      size: 0.4,
+    },
+  ],
+  [
+    0.3,
+    {
+      color: 'Orange',
+      class: 'K',
+      hue: 30 / 360,
+      lightness: 0.7,
+      temperature: 3700,
+      size: 0.7,
+    },
+  ],
+  [
+    0.5,
+    {
+      color: 'Yellow',
+      class: 'G',
+      hue: 60 / 360,
+      lightness: 0.7,
+      temperature: 5200,
+      size: 0.96,
+    },
+  ],
+  [
+    0.6,
+    {
+      color: 'Yellow-White',
+      class: 'F',
+      hue: 60 / 360,
+      lightness: 0.85,
+      temperature: 6000,
+      size: 1.15,
+    },
+  ],
+  [
+    0.7,
+    {
+      color: 'White',
+      class: 'A',
+      hue: 60 / 360,
+      lightness: 1.0,
+      temperature: 7500,
+      size: 1.4,
+    },
+  ],
+  [
+    0.7,
+    {
+      color: 'White',
+      class: 'A',
+      hue: 180 / 360,
+      lightness: 1.0,
+      temperature: 7500,
+      size: 1.4,
+    },
+  ],
+  [
+    0.85,
+    {
+      color: 'Blue-White',
+      class: 'B',
+      hue: 210 / 360,
+      lightness: 0.85,
+      temperature: 10000,
+      size: 1.8,
+    },
+  ],
+  [
+    1.0,
+    {
+      color: 'Blue',
+      class: 'O',
+      hue: 240 / 360,
+      lightness: 0.7,
+      temperature: 33000,
+      size: 6.6,
+    },
+  ],
+];
+
+// Magenta 300
+// Blue-Magenta 270
+// Blue 240
+// Cyan 180
+// Green-Cyan 150
+// Green 120
+// Green-Yellow 90
+// Yellow 60
+// Orange 30
+// Red 0
+export const GLOBE = {
+  VOLCANIC: {
+    climate: 'Volcanic',
+    metal: { hue: [0, 60], saturation: [0.0, 1.0], lightness: [0.1, 0.7] },
+    liquid: { hue: [0, 60], saturation: [0.8, 1.0], lightness: [0.3, 0.7] },
+    glow: true,
+  },
+  BARREN: {
+    climate: 'Barren',
+    metal: { saturation: [0.0, 0.2], lightness: [0.1, 0.7] },
+  },
+  DESERT: {
+    climate: 'Desert',
+    metal: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
+  },
+  SAVANNAH: {
+    climate: 'Savannah',
+    metal: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
+    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+  },
+  OCEAN: {
+    climate: 'Ocean',
+    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+  },
+  MODERATE: {
+    climate: 'Moderate',
+    metal: { hue: [90, 120], saturation: [0.1, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+  },
+  TUNDRA: {
+    climate: 'Tundra',
+    metal: { hue: [30, 150], saturation: [0.2, 0.8], lightness: [0.2, 0.8] },
+    liquid: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.7, 1.0] },
+  },
+  GLACIAL: {
+    climate: 'Glacial',
+    metal: { hue: [150, 300], saturation: [0.0, 1.0], lightness: [0.3, 1.0] },
+    liquid: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.3, 1.0] },
+  },
+  ICY: {
+    climate: 'Icy',
+    metal: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.7, 1.0] },
+    liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.7, 1.0] },
   },
 };
 
@@ -111,12 +267,13 @@ export const BODY = {
 
 export const COLOR = {
   hue: {
-    Purple: 0.9,
-    Blue: 0.7,
-    Green: 0.5,
-    Yellow: 0.2,
-    Orange: 0.15,
-    Red: 0.05,
+    Red_: 360 / 360,
+    Purple: 300 / 360,
+    Blue: 240 / 360,
+    Green: 120 / 360,
+    Yellow: 60 / 360,
+    Orange: 30 / 360,
+    Red: 0 / 360,
   },
   saturation: {
     '': 10,

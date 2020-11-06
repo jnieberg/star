@@ -103,7 +103,7 @@ export default class Entity {
                 );
               }
               const map = Array.isArray(this.texture)
-                ? this.texture[this.random.rndInt(this.random.length)]
+                ? this.texture[this.random.int(this.random.length)]
                 : this.texture;
               let opacity = 1.0;
               if (typeof this.group[i].opacity[v] !== 'undefined') {
@@ -217,11 +217,11 @@ export default class Entity {
             this.random.seed = coordString;
             const quantity =
               this.config.density <= 1
-                ? this.random.rndInt(
+                ? this.random.int(
                     this.config.density * content,
                     this.config.density * content * 2
                   )
-                : Number(this.random.rnd(this.config.density) < 1.0);
+                : Number(this.random.float(this.config.density) < 1.0);
             if (this.type === 'system') {
               for (let index = 0; index < quantity; index += 1) {
                 // eslint-disable-next-line no-unused-vars

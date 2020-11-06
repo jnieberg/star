@@ -8,6 +8,7 @@ function raycastSystemEvents(intersect) {
   const distanceNear = 0.1;
   const tag = intersect.object.name;
   const id = intersect.index;
+  let showLabel = false;
   let system;
   if (TD.galaxy.star.group[tag] && TD.galaxy.star.group[tag].this && id) {
     system = TD.galaxy.star.group[tag].this[id];
@@ -25,25 +26,26 @@ function raycastSystemEvents(intersect) {
     }
     if (intersect.distance > distanceNear * TD.scale) {
       labelShow();
-      return true;
     }
+    showLabel = true;
   }
   Store.loadSystem();
-  return false;
+  return showLabel;
 }
 
 export default function raycastSystem() {
-  const distance = 10;
+  const distanceMax = 10;
+  const distanceMin = 0.1;
   if (TD.system && TD.system.object) {
     // fixObjectToCamera(TD.system.object);
-    const distanceCam = TD.camera.distanceTo(TD.system.object.position);
+    const distance = TD.camera.distanceTo(TD.system.object.position);
     EVENT.controls.speedFactorStar =
-      distanceCam / (distance * 2) < 1.0 ? distanceCam / (distance * 2) : 1.0;
+      distance / (distanceMax * 2) < 1.0 ? distance / (distanceMax * 2) : 1.0;
     EVENT.controls.speedFactorStar =
       EVENT.controls.speedFactorStar > 0.001
         ? EVENT.controls.speedFactorStar
         : 0.001;
-    if (distanceCam >= distance) {
+    if (distance >= distanceMax) {
       TD.system.remove();
       TD.system = undefined;
       TD.star = undefined;
@@ -51,17 +53,18 @@ export default function raycastSystem() {
       TD.moon = undefined;
       EVENT.controls.speedFactorStar = 1.0;
       EVENT.controls.speedFactorPlanet = 1.0;
-      return false;
     }
-  } else {
-    TD.raycaster.layers.enable(LAYER.ENTITY);
-    const obj = Object.values(TD.galaxy.star.group)
-      .map((sys) => sys.object)
-      .filter((sys) => sys);
-    const intersect = raycastFound(obj, distance, 0.5);
-    if (intersect && intersect.object && intersect.object.name) {
-      return raycastSystemEvents(intersect);
-    }
+    if (distance < distanceMin || distance >= distanceMax) return false;
+    return true;
   }
+  TD.raycaster.layers.enable(LAYER.ENTITY);
+  const obj = Object.values(TD.galaxy.star.group)
+    .map((sys) => sys.object)
+    .filter((sys) => sys);
+  const intersect = raycastFound(obj, distanceMax, 0.5);
+  if (intersect && intersect.object && intersect.object.name) {
+    return raycastSystemEvents(intersect);
+  }
+
   return false;
 }

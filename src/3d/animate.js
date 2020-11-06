@@ -2,6 +2,7 @@ import { TD, EVENT, MISC, LOD } from '../variables';
 import { eventLabel, labelHide } from './label/label';
 import raycastSystem from './raycast/raycast-systems';
 import raycastBody from './raycast/raycast-bodies';
+import Store from './init/Store';
 
 export function render() {
   if (MISC.lod === LOD.HIGH) {
@@ -32,11 +33,9 @@ export function interval() {
       labelHide();
     }
     eventLabel();
+    Store.set();
     MISC.debug.update();
   }, MISC.interval);
-  // setTimeout(() => {
-  //   Store.loadPosition();
-  // }, MISC.interval + 100);
 }
 
 export function intervalShadow() {
@@ -49,7 +48,7 @@ export function intervalShadow() {
 
 export default function animate() {
   MISC.animation = requestAnimationFrame(animate);
-  if (MISC.loaded === 2) {
+  if (MISC.loaded) {
     loop();
     render();
   }

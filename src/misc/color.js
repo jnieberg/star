@@ -29,48 +29,55 @@ export function getColor({ hue, saturation, lightness }) {
   let hueString = 'Red';
   let saturationString = '';
   Object.keys(COLOR.lightness).forEach((col) => {
-    // for (const col in COLOR.lightness) {
-    //  if (COLOR.lightness.hasOwnProperty(col)) {
     const b = COLOR.lightness[col];
-    if (lightness < b) {
-      lightnessString = col;
-    }
-    // }
+    if (lightness < b) lightnessString = col;
   });
   Object.keys(COLOR.hue).forEach((col) => {
-    // for (const col in COLOR.hue) {
-    //   if (COLOR.hue.hasOwnProperty(col)) {
     const h = COLOR.hue[col];
-    if (hue < h) {
-      hueString = col;
-    }
-    // }
+    if (hue - 15 / 360 < h) hueString = col;
   });
   Object.keys(COLOR.saturation).forEach((col) => {
-    // for (const col in COLOR.saturation) {
-    //   if (COLOR.saturation.hasOwnProperty(col)) {
     const h = COLOR.saturation[col];
-    if (saturation < h) {
-      saturationString = col;
-    }
-    // }
+    if (saturation < h) saturationString = col;
   });
   return {
-    hue: {
-      valueOf: () => hue,
-      text: hueString,
-    },
-    saturation: {
-      valueOf: () => saturation,
-      text: saturationString,
-    },
-    lightness: {
-      valueOf: () => lightness,
-      text: lightnessString,
-    },
+    hue,
+    saturation,
+    lightness,
     text: `${saturationString} ${lightnessString} ${hueString}`.replace(
       /^.*(Grey|White|Black).*$/g,
       '$1'
     ),
   };
+}
+
+export function getColorRangeByNames(...names) {
+  const result = [];
+  const redAdd = names.indexOf('Red') > -1 ? 1.0 : 0.0;
+  names.forEach((name) => {
+    switch (name) {
+      case 'Red':
+        result.push(COLOR.hue.Purple, COLOR.hue.Red + redAdd);
+        break;
+      case 'Purple':
+        result.push(COLOR.hue.Blue, COLOR.hue.Purple);
+        break;
+      case 'Blue':
+        result.push(COLOR.hue.Green, COLOR.hue.Blue);
+        break;
+      case 'Green':
+        result.push(COLOR.hue.Yellow + redAdd, COLOR.hue.Green + redAdd);
+        break;
+      case 'Yellow':
+        result.push(COLOR.hue.Orange + redAdd, COLOR.hue.Yellow + redAdd);
+        break;
+      case 'Orange':
+        result.push(COLOR.hue.Red + redAdd, COLOR.hue.Orange + redAdd);
+        break;
+      default:
+        break;
+    }
+  });
+  // console.log(names, result, [Math.min(...result), Math.max(...result)]);
+  return [Math.min(...result), Math.max(...result)];
 }

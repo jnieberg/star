@@ -22,9 +22,9 @@ export default class Nebula {
     if (!this._position) {
       this.random.seed = 'position';
       this._position = {
-        x: this.random.rnd(this.config.size),
-        y: this.random.rnd(this.config.size),
-        z: this.random.rnd(this.config.size),
+        x: this.random.float(this.config.size),
+        y: this.random.float(this.config.size),
+        z: this.random.float(this.config.size),
       };
     }
     return this._position;
@@ -34,9 +34,9 @@ export default class Nebula {
     if (!this._rotation) {
       this.random.seed = 'rotation';
       this._rotation = {
-        x: this.random.rnd(Math.PI * 2),
-        y: this.random.rnd(Math.PI * 2),
-        z: this.random.rnd(Math.PI * 2),
+        x: this.random.float(Math.PI * 2),
+        y: this.random.float(Math.PI * 2),
+        z: this.random.float(Math.PI * 2),
       };
     }
     return this._rotation;
@@ -70,8 +70,8 @@ export default class Nebula {
     if (!this._size) {
       this.random.seed = 'size';
       this._size = {
-        x: this.random.rnd(this.config.size * 10, this.config.size * 30),
-        y: this.random.rnd(this.config.size * 10, this.config.size * 30),
+        x: this.random.float(this.config.size * 10, this.config.size * 30),
+        y: this.random.float(this.config.size * 10, this.config.size * 30),
       };
     }
     return this._size;
@@ -80,8 +80,8 @@ export default class Nebula {
   get color() {
     if (!this._color) {
       this.random.seed = 'color';
-      const hue = this.random.rnd();
-      const lightness = this.random.rnd(0.5, 0.75);
+      const hue = this.random.float();
+      const lightness = this.random.float(0.5, 0.75);
       this._color = getColor({ hue, saturation: 1.0, lightness });
     }
     return this._color;
@@ -92,8 +92,8 @@ export default class Nebula {
       this.random.seed = 'opacity';
       this._opacity =
         MISC.lod === LOD.LOW
-          ? this.random.rnd(0.1, 1.0)
-          : this.random.rnd(0.05, 0.5);
+          ? this.random.float(0.1, 1.0)
+          : this.random.float(0.05, 0.5);
     }
     return this._opacity;
   }

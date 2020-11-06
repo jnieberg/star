@@ -3,14 +3,16 @@ import * as THREE from 'three';
 import { Color } from 'three';
 import CloudMap from './CloudMap';
 import Random from '../../../../misc/Random';
+import { TD } from '../../../../variables';
 
 class Clouds {
-  constructor({ rnd, size, resolution, show, color, opacity = 0.9 }) {
+  constructor({ random, size, resolution, show, color, opacity = 0.9 }) {
+    this.random = random;
     // this.view = new THREE.Object3D();
-    this.seedString = rnd || 'lorem';
-    this.initSeed();
-    this.seed = Clouds.randRange(0, 100000);
-    this.timerBank = this.seedString;
+    // this.seedString = rnd || 'lorem';
+    // this.initSeed();
+    // this.seed = this.random.float(0, 100000);
+    this.timerBank = this.random.seed;
     this.show = show;
     this.materials = [];
     this.roughness = 0.9;
@@ -20,9 +22,9 @@ class Clouds {
     this.sphere = new THREE.Mesh();
 
     this.resolution = resolution;
-    this.size = size * 1.01;
+    this.size = size;
 
-    this.color = color || Clouds.randomizeColor();
+    this.color = color || new Color(1.0, 1.0, 1.0);
 
     // this.cloudColor = [ this.color.r * 255, this.color.g * 255, this.color.b * 255 ];
 
@@ -61,7 +63,8 @@ class Clouds {
     }
 
     const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);
-    const radius = this.size;
+    const radius = this.size * 0.000101 * TD.scale;
+
     for (let v = 0; v < geo.vertices.length; v += 1) {
       const vertex = geo.vertices[v];
       vertex.normalize().multiplyScalar(radius);
@@ -87,12 +90,12 @@ class Clouds {
     this.cloudMap.render(
       {
         timerBank: this.timerBank,
-        seed: this.seed,
+        seed: this.random.float(0, 1000),
         resolution: this.resolution,
-        res1: Clouds.randRange(size.min, size.max),
-        res2: Clouds.randRange(size.min, size.max),
-        resMix: Clouds.randRange(size.min, size.max),
-        mixScale: Clouds.randRange(size.min, size.max),
+        res1: this.random.float(size.min, size.max),
+        res2: this.random.float(size.min, size.max),
+        resMix: this.random.float(size.min, size.max),
+        mixScale: this.random.float(size.min, size.max),
       },
       () => {
         this.updateMaterial();
@@ -125,20 +128,6 @@ class Clouds {
         material.needsUpdate = true;
       }
     }
-  }
-
-  static randomizeColor() {
-    return new Color(
-      Clouds.randRange(0.5, 1.0),
-      Clouds.randRange(0.5, 1.0),
-      Clouds.randRange(0.5, 1.0)
-    );
-  }
-
-  static randRange(low, high) {
-    const range = high - low;
-    const n = window.seed.rnd() * range;
-    return low + n;
   }
 
   static computeGeometry(geometry) {

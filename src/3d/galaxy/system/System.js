@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import Word from '../../../misc/Word';
-import { TD, MISC, LAYER } from '../../../variables';
+import { TD, MISC, LAYER, STAR } from '../../../variables';
 import deleteThree from '../../tools/delete';
 import Random from '../../../misc/Random';
 import MainStar from './MainStar';
 import BlackHole from './BlackHole';
-import { toSizeString } from '../../../misc/size';
-import setColor, { getColor } from '../../../misc/color';
+import setColor from '../../../misc/color';
 import getTime from '../../../misc/time';
+import getInfo from '../../../misc/info';
 
 export default class System {
   constructor({ parent, index, x, y, z }) {
@@ -40,9 +40,9 @@ export default class System {
     if (!this._position) {
       this.random.seed = 'position';
       this._position = {
-        x: this.random.rnd(this.config.size),
-        y: this.random.rnd(this.config.size),
-        z: this.random.rnd(this.config.size),
+        x: this.random.float(this.config.size),
+        y: this.random.float(this.config.size),
+        z: this.random.float(this.config.size),
       };
     }
     return this._position;
@@ -74,36 +74,38 @@ export default class System {
 
   get special() {
     this.random.seed = 'special';
-    if (this.random.rndInt(1000) === 0) {
+    if (this.random.int(1000) === 0) {
       // black hole
       return 'black-hole';
     }
     return undefined;
   }
 
-  get size() {
-    if (!this._size) {
-      this.random.seed = 'size';
-      const size =
-        this.special === 'black-hole'
-          ? this.random.rnd(15, 50)
-          : this.random.rnd(0.3, 15);
-      this._size = {
-        valueOf: () => size,
-        text: toSizeString(size),
-      };
+  get infoFactor() {
+    if (!this._infoFactor) {
+      this.random.seed = 'infoFactor';
+      const pow = 10;
+      this._infoFactor = this.random.float() ** pow;
     }
-    return this._size;
+    return this._infoFactor;
+  }
+
+  get info() {
+    if (!this._info) {
+      this._info = getInfo(STAR, this.infoFactor);
+    }
+    return this._info;
+  }
+
+  get size() {
+    this.random.seed = 'size';
+    const pow = 1;
+    const max = 1;
+    return this.info.size + this.random.float() ** pow * max;
   }
 
   get color() {
-    if (!this._color) {
-      this.random.seed = 'color';
-      const hue = this.random.rnd();
-      const lightness = this.random.rnd(0.1, 1.0);
-      this._color = getColor({ hue, lightness });
-    }
-    return this._color;
+    return this.info.index;
   }
 
   // Radius amongst multinairy stars
@@ -113,7 +115,7 @@ export default class System {
       const size = this.stars
         .map((child) => child.size)
         .reduce((acc, cur) => acc + cur);
-      return size * this.random.rnd(1, 15);
+      return size * this.random.float(1, 15);
     }
     return 0;
   }
@@ -125,7 +127,7 @@ export default class System {
       do {
         // chance on multinary stars
         childrenLength += 1;
-      } while (this.random.rndInt(15) === 0);
+      } while (this.random.int(15) === 0);
       const children = [];
       for (let i = 0; i < childrenLength; i += 1) {
         const StarClass = this.special === 'black-hole' ? BlackHole : MainStar;
@@ -194,12 +196,12 @@ export default class System {
       if (this.stars.length > 1) {
         let temperature = 0;
         this.stars.forEach((child) => {
-          temperature += child.temperature.min;
+          temperature += child.temperature;
         });
         this.random.seed = 'rotation_speed';
         this._rotationSpeedAroundAxis =
-          (this.random.rndInt(2) === 0 ? -1 : 1) *
-          this.random.rnd(temperature * 0.000002, temperature * 0.000004);
+          (this.random.int(2) === 0 ? -1 : 1) *
+          this.random.float(temperature * 0.000002, temperature * 0.000004);
       } else {
         this._rotationSpeedAroundAxis = 0;
       }
@@ -211,9 +213,9 @@ export default class System {
     if (!this._rotation) {
       this.random.seed = 'rotation';
       this._rotation = {
-        x: this.random.rnd(2 * Math.PI),
-        y: this.random.rnd(2 * Math.PI),
-        z: this.random.rnd(2 * Math.PI),
+        x: this.random.float(2 * Math.PI),
+        y: this.random.float(2 * Math.PI),
+        z: this.random.float(2 * Math.PI),
       };
     }
     return this._rotation;
@@ -278,13 +280,9 @@ export default class System {
 
   drawLow() {
     const pos = this.universe;
-    setColor(
-      1,
-      Number(this.color.hue),
-      1.0,
-      Number(this.color.lightness),
-      'hsl'
-    );
+    // eslint-disable-next-line no-unused-vars
+    const { hue, lightness } = this.info;
+    setColor(1, hue, 1.0, lightness, 'hsl');
     const id = `${this.coordinate.x}_${this.coordinate.y}_${this.coordinate.z}`;
     this.parent.group[id].this.push(this);
     this.parent.group[id].positions.push(pos.xr, pos.yr, pos.zr);
@@ -293,7 +291,7 @@ export default class System {
       MISC.colorHelper.g,
       MISC.colorHelper.b
     );
-    this.parent.group[id].sizes.push(this.size * 0.1 * TD.scale);
+    this.parent.group[id].sizes.push(this.size * TD.scale);
   }
 
   remove() {
