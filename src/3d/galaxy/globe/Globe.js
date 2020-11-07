@@ -28,6 +28,7 @@ export default class Globe extends Body {
     if (this.type !== 'moon') {
       this._children = this.children;
     }
+    this._info = this.info;
   }
 
   get name() {
@@ -93,7 +94,7 @@ export default class Globe extends Body {
     if (!this._temperature) {
       const starTemp = this.star.temperature;
       const distanceToStar = this.distanceStar * 0.5;
-      const gas = this.gas.density * 0.6 + 0.4;
+      // const gas = this.gas.density * 0.6 + 0.4;
       this.random.seed = 'temperature';
       // let temp = [
       //   Math.floor(
@@ -113,7 +114,7 @@ export default class Globe extends Body {
       // };
       this._temperature = Math.floor(
         starTemp /
-          (1.0 + gas * this.random.float(distanceToStar, distanceToStar * 1.3))
+          (1.0 + this.random.float(distanceToStar, distanceToStar * 1.3))
       );
     }
     return this._temperature;
@@ -147,7 +148,7 @@ export default class Globe extends Body {
 
       this._info = infos[this.random.int(0, infos.length - 1)];
 
-      // console.log(this.index, `${this.name}`, this.info, this);
+      //console.log('info', this.index, `${this.name}`, this.info, this);
     }
     return this._info;
   }
@@ -209,12 +210,13 @@ export default class Globe extends Body {
   }
 
   get level() {
-    this.random.seed = 'level';
-    let level;
-    const levelChance = this.random.int(4);
-    if (levelChance <= 1) level = levelChance;
-    else level = this.random.float(0.05, 0.95);
-    return level;
+    if (!this._level) {
+      this.random.seed = 'level';
+      const levelChance = this.random.int(4);
+      if (levelChance <= 1) this._level = levelChance;
+      else this._level = this.random.float(0.05, 0.95);
+    }
+    return this._level;
   }
 
   get liquid() {
@@ -237,7 +239,7 @@ export default class Globe extends Body {
       //   saturation = [0.0, 0.3];
       const hue =
         liquid && liquid.hue ? liquid.hue.map((h) => h / 360) : [0.0, 1.0];
-      // console.log(this.index, `${this.name}`, this.info, hue);
+      // console.log('liquid', this.index, `${this.name}`, this.info, hue);
       const saturation = (liquid && liquid.saturation) || [0.0, 1.0];
       const lightness = (liquid && liquid.lightness) || [0.0, 1.0];
       this.random.seed = 'liquid';
