@@ -47,7 +47,7 @@ export default function init3d() {
     interval();
     Store.loadCoordinate();
     Store.loadPosition();
-    // Store.loadTime();
+    Store.timeout();
     // intervalShadow();
   });
 }

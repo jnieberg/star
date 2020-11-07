@@ -126,11 +126,9 @@ export default class Store {
     }
   }
 
-  // static loadTime() {
-  //   MISC.loaded = 1;
-  //   setTimeout(() => {
-  //     MISC.timeStart = Date.now() - (Number(Store.get('time')) || 0);
-  //     MISC.loaded = 2;
-  //   }, 2000);
-  // }
+  static timeout() {
+    setTimeout(() => {
+      MISC.loaded = true;
+    }, 2000);
+  }
 }
