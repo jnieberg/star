@@ -1,4 +1,4 @@
-import animate, { interval } from '../animate';
+import animate, { interval, intervalShadow } from '../animate';
 import { initCamera } from './camera';
 import initScene from './scene';
 import initControls, { getMouse, getKeys } from './controls';
@@ -7,6 +7,7 @@ import { TD, MISC } from '../../variables';
 import Debug from '../../misc/debug';
 import Galaxy from '../galaxy/Galaxy';
 import Store from './Store';
+import { Queue } from '../tools/wait';
 
 function initEvents() {
   window.onbeforeunload = () => {
@@ -34,6 +35,7 @@ function initEvents() {
 
 export function init() {
   MISC.debug = new Debug();
+  // MISC.queue = new Queue();
 }
 
 export default function init3d() {
@@ -48,6 +50,6 @@ export default function init3d() {
     Store.loadCoordinate();
     Store.loadPosition();
     Store.timeout();
-    // intervalShadow();
+    intervalShadow();
   });
 }

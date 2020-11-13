@@ -32,14 +32,8 @@ export default class Atmosphere {
   add(parent) {
     if (this.inner) {
       this.atmosphereIn = new Thing('glowInside')
-        .geometry(new THREE.SphereBufferGeometry(this.size, 32, 32))
+        .geometry(new THREE.SphereBufferGeometry(this.size, 64, 64))
         .material(this.atmosphereMaterial, {
-          'uniforms.size.value': this.size,
-          'uniforms.thickness.value': this.thickness,
-          'uniforms.opacity.value': this.opacity,
-          'uniforms.power.value': this.power,
-          'uniforms.color.value': this.color,
-          'uniforms.color2.value': this.color2,
           'uniforms.inner.value': true,
           side: THREE.FrontSide,
         })
@@ -47,20 +41,15 @@ export default class Atmosphere {
           name: 'Atmosphere inside',
           castShadow: false,
           receiveShadow: false,
-          renderOrder: 1,
+          renderOrder: 0,
+          onBeforeRender: (rend) => rend.clearDepth(),
         })
         .add(parent);
     }
     if (this.outer) {
       this.atmosphereOut = new Thing('glowOutside')
-        .geometry(new THREE.SphereBufferGeometry(this.size, 32, 32)) // + thickness
+        .geometry(new THREE.SphereBufferGeometry(this.size, 64, 64)) // + thickness
         .material(this.atmosphereMaterial, {
-          'uniforms.size.value': this.size,
-          'uniforms.thickness.value': this.thickness,
-          'uniforms.opacity.value': this.opacity,
-          'uniforms.power.value': this.power,
-          'uniforms.color.value': this.color,
-          'uniforms.color2.value': this.color2,
           'uniforms.inner.value': false,
           side: THREE.BackSide,
           depthTest: this.depth,
@@ -69,7 +58,7 @@ export default class Atmosphere {
           name: 'Atmosphere outside',
           castShadow: false,
           receiveShadow: false,
-          renderOrder: 1,
+          renderOrder: 0,
         })
         .add(parent);
     }
@@ -88,13 +77,13 @@ export default class Atmosphere {
             type: 'c',
             value: new THREE.Color(0x00ff00),
           },
-          size: { type: 'f', value: 1.0 },
-          thickness: { type: 'f', value: 1.0 },
-          opacity: { type: 'f', value: 1.0 },
-          inner: { type: 'f', value: 0.0 },
-          power: { type: 'f', value: 2.0 },
-          color: { type: 'c', value: new THREE.Color(0xffffff) },
-          color2: { type: 'c', value: new THREE.Color(0xffffff) },
+          size: { type: 'f', value: this.size },
+          thickness: { type: 'f', value: this.thickness },
+          opacity: { type: 'f', value: this.opacity },
+          inner: { type: 'f', value: false },
+          power: { type: 'f', value: this.power },
+          color: { type: 'c', value: this.color },
+          color2: { type: 'c', value: this.color2 },
         },
       ]),
       lights: true,

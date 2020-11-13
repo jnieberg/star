@@ -30,19 +30,21 @@ class RoughnessMap extends Map {
     }
   }
 
-  render(props, callback) {
+  render(props) {
     // props.resolution
     // props.heightMaps[]
     // props.waterLevel
-    if (this.enabled) {
-      for (let i = 0; i < 6; i += 1) {
-        this.mats[i].uniforms.resolution.value = props.resolution;
-        this.mats[i].uniforms.waterLevel.value = props.waterLevel;
-        this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
-        this.mats[i].needsUpdate = true;
+    return new Promise((resolve) => {
+      if (this.enabled) {
+        for (let i = 0; i < 6; i += 1) {
+          this.mats[i].uniforms.resolution.value = props.resolution;
+          this.mats[i].uniforms.waterLevel.value = props.waterLevel;
+          this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
+          this.mats[i].needsUpdate = true;
+        }
       }
-    }
-    super.render(props, callback);
+      super.render(props).then(resolve);
+    });
   }
 }
 

@@ -84,6 +84,7 @@ export const MISC = {
     far: 700,
   },
   KELVIN: -273.25,
+  queued: false,
 };
 
 export const LAYER = {
@@ -205,6 +206,7 @@ export const STAR = [
 // Magenta 300
 // Blue-Magenta 270
 // Blue 240
+// Cyan-Blue 210
 // Cyan 180
 // Green-Cyan 150
 // Green 120
@@ -215,46 +217,78 @@ export const STAR = [
 export const GLOBE = {
   VOLCANIC: {
     climate: 'Volcanic',
-    metal: { hue: [0, 60], saturation: [0.0, 1.0], lightness: [0.1, 0.7] },
-    liquid: { hue: [0, 60], saturation: [0.8, 1.0], lightness: [0.3, 0.7] },
+    land: { hue: [0, 45], saturation: [0.0, 0.7], lightness: [0.3, 0.7] },
+    liquid: { hue: [0, 45], saturation: [0.8, 1.0], lightness: [0.4, 0.7] },
     glow: true,
+  },
+  HOT: {
+    climate: 'Hot',
+    land: { hue: [0, 45], saturation: [0.2, 0.7], lightness: [0.2, 0.7] },
+    liquid: { hue: [0, 45], saturation: [0.2, 1.0], lightness: [0.3, 0.7] },
   },
   BARREN: {
     climate: 'Barren',
-    metal: { saturation: [0.0, 0.2], lightness: [0.1, 0.7] },
+    land: { saturation: [0.0, 0.2], lightness: [0.1, 0.7] },
   },
   DESERT: {
     climate: 'Desert',
-    metal: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
+    land: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.3, 0.4] },
   },
   SAVANNAH: {
     climate: 'Savannah',
-    metal: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
-    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+    land: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
+    liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
   },
   OCEAN: {
     climate: 'Ocean',
-    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [180, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+  },
+  JUNGLE: {
+    climate: 'Jungle',
+    land: { hue: [90, 150], saturation: [0.2, 0.7], lightness: [0.3, 0.7] },
+  },
+  SWAMP: {
+    climate: 'Swamp',
+    land: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.2, 0.4] },
+    liquid: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.1, 0.4] },
   },
   MODERATE: {
     climate: 'Moderate',
-    metal: { hue: [90, 120], saturation: [0.1, 1.0], lightness: [0.3, 0.7] },
-    liquid: { hue: [120, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+    land: { hue: [90, 120], saturation: [0.1, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
   },
   TUNDRA: {
     climate: 'Tundra',
-    metal: { hue: [30, 150], saturation: [0.2, 0.8], lightness: [0.2, 0.8] },
+    land: { hue: [30, 150], saturation: [0.2, 0.8], lightness: [0.2, 0.8] },
     liquid: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.7, 1.0] },
   },
-  GLACIAL: {
-    climate: 'Glacial',
-    metal: { hue: [150, 300], saturation: [0.0, 1.0], lightness: [0.3, 1.0] },
-    liquid: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.3, 1.0] },
+  ARCTIC: {
+    climate: 'Arctic',
+    land: { hue: [150, 240], saturation: [0.2, 7.0], lightness: [0.2, 1.0] },
+    liquid: { hue: [150, 240], saturation: [0.3, 7.0], lightness: [0.2, 1.0] },
   },
   ICY: {
     climate: 'Icy',
-    metal: { hue: [150, 240], saturation: [0.0, 1.0], lightness: [0.7, 1.0] },
+    land: { hue: [150, 240], saturation: [0.2, 1.0], lightness: [0.7, 1.0] },
     liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.7, 1.0] },
+  },
+  TOXIC: {
+    climate: 'Toxic',
+    land: { hue: [90, 150], saturation: [0.2, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [90, 150], saturation: [0.5, 1.0], lightness: [0.3, 0.7] },
+    glow: true,
+  },
+  RADIOACTIVE: {
+    climate: 'Radioactive',
+    land: { hue: [150, 180], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [150, 180], saturation: [0.5, 1.0], lightness: [0.3, 0.7] },
+    glow: true,
+  },
+  ALIEN: {
+    climate: 'Alien',
+    land: { hue: [240, 330], saturation: [0.2, 1.0], lightness: [0.0, 0.7] },
+    liquid: { hue: [300, 360], saturation: [0.2, 1.0], lightness: [0.0, 0.7] },
+    glow: true,
   },
 };
 

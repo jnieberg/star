@@ -70,18 +70,10 @@ export default class BlackHole extends MainStar {
       minFilter: THREE.LinearMipmapLinearFilter,
     });
     this.camera = new THREE.CubeCamera(
-      MISC.camera.near * TD.scale,
+      MISC.camera.near * 10000 * TD.scale,
       MISC.camera.far * TD.scale,
       cubeRenderTarget
     );
-    // this.camera.children.forEach((cam) => {
-    // cam.fov = 90;
-    // cam.aspect = window.innerWidth / window.innerHeight;
-    // const helper = new THREE.CameraHelper(cam);
-    // TD.scene.add(helper);
-    // });
-    // this.camera.fov = 90;
-    // this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
 
     const geometry = new THREE.SphereBufferGeometry(size, 32, 32);
@@ -162,46 +154,47 @@ export default class BlackHole extends MainStar {
 
     if (MISC.lod === LOD.LOW) {
       // Sub star flare
-      const materialFlare = new THREE.SpriteMaterial({
-        map: TD.texture.star.large,
-        color: MISC.colorHelper,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        alphaTest: 0,
-        rotation: Math.PI * 0.25,
-      });
-      const objectFlare = new THREE.Sprite(materialFlare);
-      objectFlare.name = 'Black hole flare';
-      objectFlare.scale.set(size * 8, size * 8, size * 8);
-      objectFlare.castShadow = false;
-      objectFlare.receiveShadow = false;
-      objectFlare.renderOrder = 3;
-      this.object.add(objectFlare);
+      // const materialFlare = new THREE.SpriteMaterial({
+      //   map: TD.texture.star.large,
+      //   color: MISC.colorHelper,
+      //   transparent: true,
+      //   blending: THREE.AdditiveBlending,
+      //   alphaTest: 0,
+      //   rotation: Math.PI * 0.25,
+      // });
+      // const objectFlare = new THREE.Sprite(materialFlare);
+      // objectFlare.name = 'Black hole flare';
+      // objectFlare.scale.set(size * 8, size * 8, size * 8);
+      // objectFlare.castShadow = false;
+      // objectFlare.receiveShadow = false;
+      // objectFlare.renderOrder = 3;
+      // this.object.add(objectFlare);
 
       // Star double corona
       // eslint-disable-next-line no-unused-vars
-      const _ = new Atmosphere(this.object.high, {
-        size: size * 1.01,
-        thickness: size * 1.01 * 15,
+      const atmosphere = new Atmosphere({
+        size,
+        thickness: size * 15,
         color: MISC.colorHelper,
         color2: MISC.colorHelper2,
         blending: THREE.AdditiveBlending,
         opacity: 0.75,
-        opacityInner: 1.0,
         power: 5.0,
-        depth: false,
+        inner: false,
       });
+      atmosphere.add(this.object);
 
       // eslint-disable-next-line no-unused-vars
-      const __ = new Atmosphere(this.object.high, {
-        size: size * 1.01,
-        thickness: size * 1.01 * 1.1,
+      const atmosphere2 = new Atmosphere({
+        size,
+        thickness: size * 1.1,
         color: MISC.colorHelper,
         color2: MISC.colorHelper2,
         blending: THREE.AdditiveBlending,
         opacity: 1.0,
         power: 2.0,
       });
+      atmosphere2.add(this.object);
     }
 
     // Black hole aura

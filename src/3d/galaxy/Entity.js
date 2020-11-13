@@ -93,7 +93,6 @@ export default class Entity {
             this.group[i].object = new THREE.Object3D();
             this.group[i].geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
             for (let v = 0; v < this.group[i].sizes.length / 2; v += 1) {
-              this.random.seed = `texture_${i}_${v}`;
               let color = 0xff00ff;
               if (typeof this.group[i].colors[v] !== 'undefined') {
                 color = new Color(
@@ -102,8 +101,9 @@ export default class Entity {
                   this.group[i].colors[v * 3 + 2]
                 );
               }
+              this.random.seed = `texture_${i}_${v}`;
               const map = Array.isArray(this.texture)
-                ? this.texture[this.random.int(this.random.length)]
+                ? this.texture[this.random.int(this.texture.length - 1)]
                 : this.texture;
               let opacity = 1.0;
               if (typeof this.group[i].opacity[v] !== 'undefined') {
@@ -219,7 +219,7 @@ export default class Entity {
               this.config.density <= 1
                 ? this.random.int(
                     this.config.density * content,
-                    this.config.density * content * 2
+                    this.config.density * content * 2 - 1
                   )
                 : Number(this.random.float(this.config.density) < 1.0);
             if (this.type === 'system') {

@@ -18,7 +18,7 @@ export default class Random {
   }
 
   get seed() {
-    return this.seedSuffix;
+    return this._seedString;
   }
 
   set seed(seedString) {
@@ -40,6 +40,8 @@ export default class Random {
   }
 
   int(minA = 1, maxA = 0) {
-    return Math.floor(this.float(minA, maxA));
+    const min = minA < maxA ? minA : maxA;
+    const max = minA < maxA ? maxA: minA;
+    return Math.floor(this._rnd() * (max - min + 1) + min);
   }
 }

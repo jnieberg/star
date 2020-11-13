@@ -30,18 +30,19 @@ class NormalMap extends Map {
     }
   }
 
-  render(props, callback) {
-    if (this.enabled) {
-      for (let i = 0; i < 6; i += 1) {
-        this.mats[i].uniforms.resolution.value = props.resolution;
-        this.mats[i].uniforms.waterLevel.value = props.waterLevel;
-        this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
-        this.mats[i].uniforms.textureMap.value = props.textureMaps[i];
-        this.mats[i].needsUpdate = true;
+  render(props) {
+    return new Promise((resolve) => {
+      if (this.enabled) {
+        for (let i = 0; i < 6; i += 1) {
+          this.mats[i].uniforms.resolution.value = props.resolution;
+          this.mats[i].uniforms.waterLevel.value = props.waterLevel;
+          this.mats[i].uniforms.heightMap.value = props.heightMaps[i];
+          this.mats[i].uniforms.textureMap.value = props.textureMaps[i];
+          this.mats[i].needsUpdate = true;
+        }
       }
-    }
-
-    super.render(props, callback);
+      super.render(props).then(resolve);
+    });
   }
 }
 

@@ -1,7 +1,7 @@
 export default class Word {
   constructor(
     random,
-    { syllablesMin = 2, syllablesMax = 5, numberSuffixLength = 0 } = {}
+    { syllablesMin = 2, syllablesMax = 4, numberSuffixLength = 0 } = {}
   ) {
     this.random = random;
     this._NAME_LETTERS = {
@@ -218,9 +218,9 @@ export default class Word {
       wordLength += 1;
       wordStart = wordEnd;
       wordEnd =
-        this.random.int(3) === 0 || wordLength >= 3 || s === syllableLength - 1;
-      const vowAtStart = this.random.int(3) === 0;
-      const vowAtEnd = this.random.int(2) === 0 && !vowAtStart;
+        this.random.int(2) === 0 || wordLength >= 3 || s === syllableLength - 1;
+      const vowAtStart = this.random.int(2) === 0;
+      const vowAtEnd = this.random.int(1) === 0 && !vowAtStart;
       let letterStart = vowAtStart && '';
       letterStart = letterStart || (wordStart && this.getRandomLetter(conS));
       letterStart = letterStart || this.getRandomLetter(conM);
@@ -231,7 +231,7 @@ export default class Word {
       syllables.push(letterStart + letterMid + letterEnd);
       if (wordEnd) {
         wordLength = 0;
-        if (this.random.int(3) === 0 && s < syllableLength - 1) {
+        if (this.random.int(2) === 0 && s < syllableLength - 1) {
           syllables.push('-');
         } else {
           syllables.push(' ');
@@ -239,9 +239,9 @@ export default class Word {
       }
     }
     // Add number suffix
-    if (this.random.int(5) === 0 && numberSuffixLength > 0) {
+    if (this.random.int(4) === 0 && numberSuffixLength > 0) {
       syllables.push(' ');
-      syllables.push(this.random.int(1, numberSuffixLength));
+      syllables.push(this.random.int(1, numberSuffixLength - 1));
     }
     // console.log(syllables);
     return {
@@ -257,6 +257,6 @@ export default class Word {
   }
 
   getRandomLetter(letters) {
-    return letters[this.random.int(letters.length)];
+    return letters[this.random.int(letters.length - 1)];
   }
 }

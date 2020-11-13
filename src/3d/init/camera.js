@@ -30,6 +30,7 @@ export default class Camera {
       this.config.size * TD.scale * 0.5
     );
     this.object.rotation.set(0, 0, 0);
+    this.farFactor = 1.0;
   }
 
   get parent() {

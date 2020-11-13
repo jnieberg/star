@@ -34,7 +34,7 @@ export function getColor({ hue, saturation, lightness }) {
   });
   Object.keys(COLOR.hue).forEach((col) => {
     const h = COLOR.hue[col];
-    if (hue - 15 / 360 < h) hueString = col;
+    if (hue - 30 / 360 < h) hueString = col;
   });
   Object.keys(COLOR.saturation).forEach((col) => {
     const h = COLOR.saturation[col];

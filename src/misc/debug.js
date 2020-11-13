@@ -36,7 +36,7 @@ export default class Debug {
       y: toSystemCoord(TD.camera.object.position.y),
       z: toSystemCoord(TD.camera.object.position.z),
     };
-    wait('debug', () => {
+    wait('debug').then(() => {
       this.view.innerHTML = `
         <div>FPS:<span>${this.fps}</span></div>
         <div>Objects:<span>${Debug.meshes}</span></div>

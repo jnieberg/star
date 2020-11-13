@@ -22,6 +22,7 @@ export function render() {
 
 export function loop() {
   EVENT.controls.update(TD.clock.getDelta());
+  // MISC.queue.check();
 }
 
 export function interval() {

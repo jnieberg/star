@@ -75,7 +75,7 @@ const Test = {
     this.sphere.position.set(0, 0, 0);
     this.scene.add(this.sphere);
 
-    this.atmosphere = new Atmosphere(this.sphere, {
+    this.atmosphere = new Atmosphere({
       size: this.data.size * 1.0001,
       thickness: this.data.thickness,
       color: 0x0000ff,
@@ -86,6 +86,7 @@ const Test = {
       power: this.data.power,
       inner: this.data.inner,
     });
+    this.sphere.add(this.atmosphere);
   },
 
   update() {

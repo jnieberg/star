@@ -26,8 +26,7 @@ export default class Star extends Body {
 
   get size() {
     this.system.random.seed = 'size';
-    const pow = 50;
-    const max = 50;
+    const [pow, max] = this.type === 'sub-star' ? [1, 1] : [50, 50];
     return this.info.size + this.system.random.float() ** pow * max;
   }
 
@@ -66,7 +65,7 @@ export default class Star extends Body {
   get textShort() {
     return `<span class="index">${this.index + 1}</span>${this.name}${
       this.children && this.children.length
-        ? `<span class="children">${this.children.length}</span>`
+        ? `<span class="hide-info">${this.children.length}</span>`
         : ''
     }`;
   }
@@ -98,7 +97,7 @@ export default class Star extends Body {
     }
     ${
       children && children.length > 0
-        ? `<div class="label--h3">Planets<span>Moons</span></div>
+        ? `<div class="label--h3">Planets<span>Climate</span></div>
     <ol>
       ${children
         .map((body) => `<li class="planet">${body.textShort}</li>`)
@@ -112,7 +111,7 @@ export default class Star extends Body {
   get rotationSpeedAroundAxis() {
     if (!this._rotationSpeedAroundAxis) {
       const { temperature } = this;
-      const direction = this.random.int(2) === 0 ? -1 : 1;
+      const direction = this.random.int(1) === 0 ? -1 : 1;
       const speed = this.random.float(
         temperature * 0.000003,
         temperature * 0.000004
@@ -153,7 +152,7 @@ export default class Star extends Body {
     this.light.decay = 2;
     this.light.distance = far;
     this.light.castShadow = true;
-    this.light.shadow.bias = -near * 0.001; // < more   > less
+    this.light.shadow.bias = -near * 0.0001; // < more   > less
     // this.light.shadow.radius = 2;
     // this.light.shadow.normalBias = -0.15;
     this.light.shadow.mapSize.width = 1024;
@@ -162,7 +161,7 @@ export default class Star extends Body {
     this.light.shadow.camera.far = far;
     this.light.shadow.autoUpdate = false;
     this.light.shadow.needsUpdate = true;
-    this.object.high.add(this.light);
+    this.object.add(this.light);
 
     // Draw planets of star
     if (this.children && this.children.length) {
@@ -211,7 +210,6 @@ export default class Star extends Body {
     });
     this.object.high = new THREE.Mesh(geometry, materialSpots);
     this.object.high.name = 'Star high';
-    this.object.high.scale.set(1, 1, 1);
     this.object.high.castShadow = false;
     this.object.high.receiveShadow = false;
 
@@ -237,7 +235,7 @@ export default class Star extends Body {
 
       // Star corona
       const atmosphere = new Atmosphere({
-        size: size * 1.01,
+        size,
         thickness: 15.0,
         color: MISC.colorHelper,
         color2: MISC.colorHelper2,
@@ -246,7 +244,7 @@ export default class Star extends Body {
         power: 5.0,
         depth: false,
       });
-      atmosphere.add(this.object.high);
+      atmosphere.add(this.object);
     }
 
     // Star trajectory

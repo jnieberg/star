@@ -18,7 +18,6 @@ export default class SphereGeometry {
     geometry.dispose();
     newGeometry.computeVertexNormals();
     newGeometry.computeFaceNormals();
-    // newGeometry.computeMorphNormals();
     newGeometry.computeBoundingSphere();
     newGeometry.computeBoundingBox();
     newGeometry.verticesNeedUpdate = true;

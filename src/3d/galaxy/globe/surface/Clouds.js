@@ -3,10 +3,18 @@ import * as THREE from 'three';
 import { Color } from 'three';
 import CloudMap from './CloudMap';
 import Random from '../../../../misc/Random';
-import { TD } from '../../../../variables';
+import { BODY, MISC, TD } from '../../../../variables';
 
 class Clouds {
-  constructor({ random, size, resolution, show, color, opacity = 0.9 }) {
+  constructor({
+    random,
+    size,
+    resolution,
+    show,
+    color,
+    opacity = 0.9,
+    blend = BODY.gas.Dust,
+  }) {
     this.random = random;
     // this.view = new THREE.Object3D();
     // this.seedString = rnd || 'lorem';
@@ -19,7 +27,8 @@ class Clouds {
     this.metalness = 0.5;
     this.normalScale = 5.0;
     this.opacity = opacity;
-    this.sphere = new THREE.Mesh();
+    this.blend =
+      blend === BODY.gas.Dust ? THREE.NormalBlending : THREE.AdditiveBlending;
 
     this.resolution = resolution;
     this.size = size;
@@ -28,9 +37,16 @@ class Clouds {
 
     // this.cloudColor = [ this.color.r * 255, this.color.g * 255, this.color.b * 255 ];
 
-    this.cloudMaps = [];
-
-    this.setup();
+    this.cloudMap = new CloudMap(this.resolution, this.show);
+    this.cloudMaps = this.cloudMap.maps;
+    const setupIn = this.setup({
+      inner: true,
+    });
+    this.sphereIn = setupIn.sphere;
+    this.materialsIn = setupIn.materials;
+    const setup = this.setup();
+    this.sphere = setup.sphere;
+    this.materials = setup.materials;
 
     // const cloudControl = window.gui.add(this, 'clouds', 0.0, 1.0);
     // cloudControl.onChange(value => {
@@ -46,70 +62,69 @@ class Clouds {
     // });
   }
 
-  setup() {
-    this.cloudMap = new CloudMap(this.resolution, this.show);
-    this.cloudMaps = this.cloudMap.maps;
-
+  setup({ inner = false } = {}) {
+    const materials = [];
     for (let i = 0; i < 6; i += 1) {
       const material = new THREE.MeshPhongMaterial({
-        color: this.color,
-        emissive: this.color,
-        emissiveIntensity: 0.1,
+        color: inner ? 0x000000 : this.color,
+        emissive: inner ? 0x000000 : this.color,
+        emissiveIntensity: inner ? 1.0 : 0.1,
+        shininess: 0,
         alphaTest: 0,
         transparent: true,
-        side: THREE.DoubleSide,
+        side: THREE.FrontSide,
+        blending: inner ? THREE.NormalBlending : this.blend,
+        opacity: this.opacity,
       });
-      this.materials[i] = material;
+      materials[i] = material;
     }
 
     const geo = new THREE.BoxGeometry(1, 1, 1, 16, 16, 16);
-    const radius = this.size * 0.000101 * TD.scale;
+    const radius = this.size * (inner ? 1.0 : 1.01) * TD.scale;
 
     for (let v = 0; v < geo.vertices.length; v += 1) {
       const vertex = geo.vertices[v];
       vertex.normalize().multiplyScalar(radius);
     }
     Clouds.computeGeometry(geo);
-    this.geometry = new THREE.BufferGeometry().fromGeometry(geo);
+    const geometry = new THREE.BufferGeometry().fromGeometry(geo);
     geo.dispose();
-    this.sphere.geometry = this.geometry;
-    this.sphere.material = this.materials;
-    this.sphere.receiveShadow = true;
-    this.sphere.visible = false;
-    this.sphere.renderOrder = 1;
-
-    // this.view.add(this.sphere);
+    const sphere = new THREE.Mesh();
+    sphere.geometry = geometry;
+    sphere.material = materials;
+    sphere.receiveShadow = true;
+    sphere.visible = false;
+    sphere.renderOrder = inner ? 0 : 0;
+    sphere.onBeforeRender = (rend) => rend.clearDepth();
+    return { sphere, materials };
   }
 
-  render(props, callback) {
-    const size = {
-      min: 0.1,
-      max: 1,
-    };
+  render() {
+    return new Promise((resolve) => {
+      const size = {
+        min: 0.1,
+        max: 1,
+      };
+      this.random.seed = 'clouds';
 
-    this.cloudMap.render(
-      {
-        timerBank: this.timerBank,
-        seed: this.random.float(0, 1000),
-        resolution: this.resolution,
-        res1: this.random.float(size.min, size.max),
-        res2: this.random.float(size.min, size.max),
-        resMix: this.random.float(size.min, size.max),
-        mixScale: this.random.float(size.min, size.max),
-      },
-      () => {
-        this.updateMaterial();
-        this.sphere.visible = true;
-        // console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
-        if (callback) {
-          callback();
-        }
-      }
-    );
-  }
-
-  initSeed() {
-    window.seed = new Random(this.seedString, 'clouds');
+      this.cloudMap
+        .render({
+          timerBank: this.timerBank,
+          seed: this.random.float(0, 1000),
+          resolution: this.resolution,
+          res1: this.random.float(size.min, size.max),
+          res2: this.random.float(size.min, size.max),
+          resMix: this.random.float(size.min, size.max),
+          mixScale: this.random.float(size.min, size.max),
+        })
+        .then(() => {
+          this.updateMaterial();
+          this.sphere.visible = true;
+          this.sphereIn.visible = true;
+          // console.log(`[${this.timerBank}] CALLBACK CLOUDS: ${this.resolution}`);
+          resolve();
+        });
+    });
   }
 
   updateMaterial() {
@@ -120,12 +135,14 @@ class Clouds {
         material.metalness = this.metalness;
         material.map = this.cloudMaps[i];
         material.emissiveMap = this.cloudMaps[i];
-        material.color = this.color;
-        // material.alphaMap = this.cloudMaps[i],
-        // material.bumpMap = this.cloudMaps[i],
-        // material.bumpScale = 1.0,
-        material.opacity = this.opacity;
         material.needsUpdate = true;
+
+        const materialIn = this.materialsIn[i];
+        materialIn.roughness = this.roughness;
+        materialIn.metalness = this.metalness;
+        materialIn.map = this.cloudMaps[i];
+        materialIn.emissiveMap = this.cloudMaps[i];
+        materialIn.needsUpdate = true;
       }
     }
   }

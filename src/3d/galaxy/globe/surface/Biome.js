@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 class Biome {
-  constructor({ random, metal, liquid, glow, show = false }) {
+  constructor({ random, land, liquid, glow, show = false }) {
     this.random = random;
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'biomeCanvas';
@@ -10,7 +10,7 @@ class Biome {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.ctx = this.canvas.getContext('2d');
-    this.metal = metal;
+    this.land = land;
     this.liquid = liquid;
     this.glow = !!glow;
 
@@ -36,7 +36,7 @@ class Biome {
 
   drawNerfs() {
     this.random.seed = 'biome_nerfs';
-    if (this.random.int(0, 1) === 0) {
+    if (this.random.int(1) === 0) {
       const c = {
         hue: Math.floor(this.liquid.hue * 360),
         saturation: Math.floor(this.liquid.saturation * 100),
@@ -92,9 +92,9 @@ class Biome {
 
       const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-      const c = this.randomMetalColor(-0.2);
-      const c2 = this.randomMetalColor(0);
-      const c3 = this.randomMetalColor(0.2);
+      const c = this.randomLandColor(-30 / 360);
+      const c2 = this.randomLandColor(0);
+      const c3 = this.randomLandColor(30 / 360);
       const falloff = 0.5;
       const falloff1 = 0.75;
       const falloff2 = 1.0;
@@ -133,7 +133,7 @@ class Biome {
     if (!this.glow) {
       this.random.seed = 'biome_detail';
       // land detail
-      const landDetail = this.random.int(0, 5);
+      const landDetail = this.random.int(5);
       // landDetail = 20;
       // console.log("landDetail = " + landDetail);
       for (let i = 0; i < landDetail; i += 1) {
@@ -158,7 +158,7 @@ class Biome {
 
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-    const c = this.randomMetalColor();
+    const c = this.randomLandColor();
     gradient.addColorStop(
       this.random.float(0, 0.5),
       `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`
@@ -175,9 +175,9 @@ class Biome {
 
   fillBaseColor() {
     this.baseColor = new THREE.Color().setHSL(
-      this.metal.hue,
-      this.metal.saturation,
-      this.metal.lightness
+      this.land.hue,
+      this.land.saturation,
+      this.land.lightness
     );
     this.ctx.fillStyle = Biome.toCanvasColor(this.baseColor);
     this.ctx.fillRect(0, 0, this.width, this.height);
@@ -191,7 +191,7 @@ class Biome {
 
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-    const c = this.randomMetalColor();
+    const c = this.randomLandColor();
     gradient.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`);
     gradient.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 1.0)`);
 
@@ -213,7 +213,7 @@ class Biome {
 
       const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-      const c = this.randomMetalColor();
+      const c = this.randomLandColor();
       const c2 = {
         hue: Math.floor(this.liquid.hue * 360),
         saturation: Math.floor(this.liquid.saturation * 100),
@@ -252,7 +252,7 @@ class Biome {
 
     const gradient = this.ctx.createLinearGradient(x1, y1, x2, y2);
 
-    // const c = this.randomMetalColor();
+    // const c = this.randomLandColor();
     // const c = this.randomWaterColor();
     const c = {
       hue: Math.floor(this.liquid.hue * 360),
@@ -264,11 +264,11 @@ class Biome {
     const opacity3 = this.glow ? 0.6 : 1;
     const opacity4 = this.glow ? 0.8 : 1;
     const opacity5 = this.glow ? 1 : 1;
-    const hue = Math.round(c.hue + (this.glow ? 0 : 0)) % 360;
-    const hue2 = Math.round(c.hue + (this.glow ? 0 : 0)) % 360;
-    const hue3 = Math.round(c.hue + (this.glow ? 0 : 0)) % 360;
-    const hue4 = Math.round(c.hue + (this.glow ? 10 : 0)) % 360;
-    const hue5 = Math.round(c.hue + (this.glow ? 20 : 0)) % 360;
+    const hue = Math.round(c.hue + (this.glow ? -20 : 0) + 360) % 360;
+    const hue2 = Math.round(c.hue + (this.glow ? -10 : 0) + 360) % 360;
+    const hue3 = Math.round(c.hue + (this.glow ? 0 : 0) + 360) % 360;
+    const hue4 = Math.round(c.hue + (this.glow ? 10 : 0) + 360) % 360;
+    const hue5 = Math.round(c.hue + (this.glow ? 20 : 0) + 360) % 360;
     const saturation = Math.round(c.saturation + (this.glow ? 0 : 0));
     const saturation2 = Math.round(c.saturation + (this.glow ? 10 : 0));
     const saturation3 = Math.round(c.saturation + (this.glow ? 20 : 0));
@@ -318,7 +318,7 @@ class Biome {
       this.ctx.strokeStyle = `hsla(${Math.round(c.hue)}, ${Math.round(
         c.saturation
       )}%, ${Math.round(c.lightness)}%, ${opacity})`;
-      this.ctx.lineWidth = 3;
+      this.ctx.lineWidth = 1;
       let x = this.random.float(0, this.width);
       let y = this.random.float(0, this.height);
       let prevX = x;
@@ -355,7 +355,7 @@ class Biome {
 
         const gradient = this.ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
 
-        const c = this.randomMetalColor();
+        const c = this.randomLandColor();
 
         gradient.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, 1.0)`);
         gradient.addColorStop(1, `rgba(${c.r}, ${c.g}, ${c.b}, 0.0)`);
@@ -366,12 +366,13 @@ class Biome {
     }
   }
 
-  randomMetalColor(hueOff = 0.0) {
+  randomLandColor(hueOff = 0.0) {
+    this.random.seed = 'biome_land';
     const newColor = new THREE.Color();
     const hsl = {
-      hue: this.metal.hue + hueOff,
-      saturation: this.metal.saturation + this.random.float(-0.1, 0.1),
-      lightness: this.metal.lightness + this.random.float(-0.1, 0.1),
+      hue: this.land.hue + hueOff,
+      saturation: this.land.saturation + this.random.float(-0.1, 0.1),
+      lightness: this.land.lightness + this.random.float(-0.1, 0.1),
     };
     hsl.hue = (hsl.hue + 100.0) % 1.0;
     newColor.setHSL(hsl.hue, hsl.saturation, hsl.lightness);

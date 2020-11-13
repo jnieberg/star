@@ -85,6 +85,17 @@ export default function initScene() {
   TD.labelRenderer.domElement.style.top = '0px';
   document.body.appendChild(TD.labelRenderer.domElement);
 
+  // TD.mapCanvas = document.querySelector('#map');
+  // TD.mapRenderer = new THREE.WebGLRenderer({
+  //   canvas: TD.mapCanvas,
+  //   precision: 'highp',
+  //   powerPreference: 'high-performance',
+  //   antialias: false,
+  //   autoClear: false,
+  // });
+  // TD.mapRenderer.setPixelRatio(window.devicePixelRatio);
+  // TD.mapRenderer.setSize(window.innerWidth, window.innerHeight);
+
   setBloom();
 
   TD.raycaster = new THREE.Raycaster();

@@ -30,7 +30,7 @@ export default class System {
       this.random.seed = 'name';
       this._name = new Word(this.random, {
         syllablesMin: 3,
-        syllablesMax: 6,
+        syllablesMax: 5,
       });
     }
     return this._name;
@@ -200,7 +200,7 @@ export default class System {
         });
         this.random.seed = 'rotation_speed';
         this._rotationSpeedAroundAxis =
-          (this.random.int(2) === 0 ? -1 : 1) *
+          (this.random.int(1) === 0 ? -1 : 1) *
           this.random.float(temperature * 0.000002, temperature * 0.000004);
       } else {
         this._rotationSpeedAroundAxis = 0;

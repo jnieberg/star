@@ -9,7 +9,7 @@ body {
 }
 
 #biomeCanvas {
-	display: none;
+  display: none;
 }
 
 #debug {
@@ -97,6 +97,10 @@ body {
     display: block;
   }
 
+  i {
+    font-style: normal;
+  }
+
   .star {
     color: $color-star;
   }
@@ -155,7 +159,7 @@ body {
       line-height: 1vmax;
     }
     
-    .children {
+    .hide-info {
       display: none;
     }
     
