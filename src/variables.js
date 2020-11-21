@@ -215,14 +215,20 @@ export const STAR = [
 // Orange 30
 // Red 0
 export const GLOBE = {
-  VOLCANIC: {
-    climate: 'Volcanic',
+  LAVA: {
+    climate: 'Lava',
     land: { hue: [0, 45], saturation: [0.0, 0.7], lightness: [0.3, 0.7] },
     liquid: { hue: [0, 45], saturation: [0.8, 1.0], lightness: [0.4, 0.7] },
     glow: true,
   },
-  HOT: {
-    climate: 'Hot',
+  CHTHONIAN: {
+    climate: 'Chthonian',
+    land: { saturation: [0.0, 0.5], lightness: [0.0, 0.2] },
+    liquid: { hue: [0, 45], saturation: [0.8, 1.0], lightness: [0.4, 0.7] },
+    glow: true,
+  },
+  CHARRED: {
+    climate: 'Charred',
     land: { hue: [0, 45], saturation: [0.2, 0.7], lightness: [0.2, 0.7] },
     liquid: { hue: [0, 45], saturation: [0.2, 1.0], lightness: [0.3, 0.7] },
   },
@@ -252,9 +258,14 @@ export const GLOBE = {
     land: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.2, 0.4] },
     liquid: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.1, 0.4] },
   },
-  MODERATE: {
-    climate: 'Moderate',
+  TERRESTRIAL: {
+    climate: 'Terrestrial',
     land: { hue: [90, 120], saturation: [0.1, 1.0], lightness: [0.3, 0.7] },
+    liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
+  },
+  TERRAFORMED: {
+    climate: 'Terraformed',
+    land: { hue: [150, 420], saturation: [0.1, 1.0], lightness: [0.3, 0.7] },
     liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
   },
   TUNDRA: {
@@ -284,11 +295,18 @@ export const GLOBE = {
     liquid: { hue: [150, 180], saturation: [0.5, 1.0], lightness: [0.3, 0.7] },
     glow: true,
   },
-  ALIEN: {
-    climate: 'Alien',
-    land: { hue: [240, 330], saturation: [0.2, 1.0], lightness: [0.0, 0.7] },
-    liquid: { hue: [300, 360], saturation: [0.2, 1.0], lightness: [0.0, 0.7] },
-    glow: true,
+  IRON: {
+    climate: 'Iron',
+    land: { saturation: [0.0, 0.1], lightness: [0.0, 0.5] },
+  },
+  HELIUM: {
+    climate: 'Helium',
+    liquid: { saturation: [0.0, 0.1], lightness: [0.7, 1.0] },
+  },
+  CARBON: {
+    climate: 'Carbon',
+    land: { hue: [0, 30], saturation: [0.05, 0.2], lightness: [0.0, 0.3] },
+    liquid: { hue: [0, 30], saturation: [0.05, 0.2], lightness: [0.0, 0.3] },
   },
 };
 

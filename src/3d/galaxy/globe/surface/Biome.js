@@ -21,47 +21,52 @@ class Biome {
 
   generateTexture(props) {
     this.waterLevel = props.waterLevel;
-
     this.drawBase();
     this.drawInland();
-    this.randomGradientCircles();
-    this.drawDetail();
-    // this.drawNerfs();
+    this.random.seed = 'biome_texture';
+    if (this.random.int(0, 1) === 1) {
+      this.randomGradientCircles();
+      this.drawDetail();
+    } else {
+      this.drawNerfs();
+    }
     this.drawRivers();
     this.drawWater();
     this.drawBeach();
-
     this.texture = new THREE.CanvasTexture(this.canvas);
   }
 
   drawNerfs() {
     this.random.seed = 'biome_nerfs';
-    if (this.random.int(1) === 0) {
-      const c = {
-        hue: Math.floor(this.liquid.hue * 360),
-        saturation: Math.floor(this.liquid.saturation * 100),
-        lightness: Math.floor(this.liquid.lightness * 100),
-      };
-      const opacity = 0.6;
-      this.ctx.strokeStyle = `hsla(${Math.round(c.hue)}, ${Math.round(
-        c.saturation
-      )}%, ${Math.round(c.lightness)}%, ${opacity})`;
-      this.ctx.lineWidth = 3;
+    const opacity = 0.05;
 
-      const lines = this.random.int(64, 256);
-      for (let i = 0; i < lines; i += 1) {
-        const x1 = this.random.int(-512, 1024);
-        const y1 = this.random.int(-512, 1024);
-        const x2 = this.random.int(-256, 256);
-        const y2 = this.random.int(-256, 256);
-        this.ctx.moveTo(x1, y1);
-        this.ctx.lineTo(x1 + x2, y1 + y2);
-        this.ctx.moveTo(x1 - 512, y1);
-        this.ctx.lineTo(x1 + x2 - 512, y1 + y2);
-        this.ctx.moveTo(x1 + 512, y1);
-        this.ctx.lineTo(x1 + x2 + 512, y1 + y2);
-        this.ctx.stroke();
-      }
+    const lines = this.random.int(64, 256);
+    for (let i = 0; i < lines; i += 1) {
+      const c = {
+        hue:
+          Math.floor((this.land.hue + this.random.float(1.0)) * 360 + 360) %
+          360,
+        saturation: Math.floor(
+          (this.land.saturation + this.random.float(-0.5, 0.5)) * 100
+        ),
+        lightness: Math.floor(
+          (this.land.lightness + this.random.float(-0.5, 0.5)) * 100
+        ),
+      };
+      const x1 = this.random.int(-512, 1024);
+      const y1 = this.random.int(-512, 1024);
+      const r = this.random.int(8, 64);
+
+      this.ctx.fillStyle = `hsla(${c.hue}, ${c.saturation}%, ${c.lightness}%, ${opacity})`;
+      this.ctx.beginPath();
+      this.ctx.arc(x1, y1, r, 0, 2 * Math.PI);
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.arc(x1 - 512, y1, r, 0, 2 * Math.PI);
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.arc(x1 + 512, y1, r, 0, 2 * Math.PI);
+      this.ctx.fill();
     }
   }
 

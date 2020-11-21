@@ -36,11 +36,13 @@ export default class MainStar extends Star {
         this.hasSubStar = false;
         this.random.seed = 'sub-star';
         for (let index = 0; index < childrenLength; index += 1) {
-          const subStar =
-            (this.sizeText === 'Supergiant' && this.random.int(20) === 0) ||
-            (this.sizeText === 'Hypergiant' && this.random.int(10) === 0);
+          const isHot = this.temperature > 6000;
+          const hasSubStar =
+            isHot &&
+            ((this.sizeText === 'Supergiant' && this.random.int(20) === 0) ||
+              (this.sizeText === 'Hypergiant' && this.random.int(10) === 0));
           let child;
-          if (subStar) {
+          if (hasSubStar) {
             this.hasSubStar = true;
             child = new SubStar({ system: this.system, index, parent: this });
           } else {

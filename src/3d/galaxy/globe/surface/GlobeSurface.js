@@ -41,22 +41,22 @@ class GlobeSurface {
 
   render({ biome } = {}) {
     return new Promise((resolve) => {
-      // wait(this.timerBank).then(() => {
-      this.biome =
-        biome ||
-        new Biome({
-          random: this.random,
-          show: this.resolution === 512,
-          land: this.body.land,
-          liquid: this.body.liquid,
-          glow: this.glow,
+      wait(this.timerBank).then(() => {
+        this.biome =
+          biome ||
+          new Biome({
+            random: this.random,
+            show: this.resolution === 512,
+            land: this.body.land,
+            liquid: this.body.liquid,
+            glow: this.glow,
+          });
+        wait(this.timerBank).then(() => {
+          this.createScene();
+          this.renderScene().then(resolve);
+          // console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
         });
-      // wait(this.timerBank).then(() => {
-      this.createScene();
-      this.renderScene().then(resolve);
-      // console.log(`[${this.timerBank}] RENDER: ${this.resolution}`);
-      // });
-      // });
+      });
     });
   }
 
