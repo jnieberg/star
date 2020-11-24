@@ -8,6 +8,7 @@ import Debug from '../../misc/debug';
 import Galaxy from '../galaxy/Galaxy';
 import Store from './Store';
 import { Queue } from '../tools/wait';
+import FadeIn from '../tools/fade-in';
 
 function initEvents() {
   window.onbeforeunload = () => {
@@ -35,6 +36,7 @@ function initEvents() {
 
 export function init() {
   MISC.debug = new Debug();
+  TD.fade = new FadeIn();
   // MISC.queue = new Queue();
 }
 

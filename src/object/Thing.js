@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MISC } from '../variables';
+import { MISC, TD } from '../variables';
 
 export default class Thing {
   constructor(id) {
@@ -30,6 +30,7 @@ export default class Thing {
 
   add(parent) {
     this.mesh.thing = this;
+    TD.fade.add(this.mesh);
     parent.add(this.mesh);
     return this.mesh;
   }

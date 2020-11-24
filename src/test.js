@@ -86,7 +86,7 @@ const Test = {
       power: this.data.power,
       inner: this.data.inner,
     });
-    this.sphere.add(this.atmosphere);
+    this.atmosphere.add(this.sphere);
   },
 
   update() {

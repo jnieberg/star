@@ -59,6 +59,7 @@ export default class Atmosphere {
           castShadow: false,
           receiveShadow: false,
           renderOrder: 0,
+          // onBeforeRender: (rend) => rend.clearDepth(),
         })
         .add(parent);
     }

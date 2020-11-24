@@ -19,24 +19,6 @@ export default class Entity {
     this.texture = texture;
     this.config = TD.entity[this.type];
     this.density = this.config.density;
-    if (this.buffered) {
-      const uniforms = {
-        texture2: { type: 't', value: this.texture },
-        fogColor: { type: 'c', value: TD.scene.fog && TD.scene.fog.color },
-        fogNear: { type: 'f', value: MISC.camera.near * TD.scale },
-        fogFar: { type: 'f', value: MISC.camera.far * TD.scale },
-        brightness: { type: 'f', value: MISC.lod === LOD.LOW ? 1.0 : 0.0 },
-      };
-      this.material = new THREE.ShaderMaterial({
-        uniforms,
-        vertexShader: vertShader,
-        fragmentShader: fragShader,
-        blending: THREE.AdditiveBlending,
-        depthTest: false,
-        vertexColors: true,
-        fog: true,
-      });
-    }
     this.group = {};
   }
 
@@ -54,6 +36,30 @@ export default class Entity {
       if (!this.group[i].object) {
         if (this.group[i].sizes && this.group[i].sizes.length) {
           if (this.buffered === 'sprite') {
+            const uniforms = {
+              texture2: { type: 't', value: this.texture },
+              fogColor: {
+                type: 'c',
+                value: TD.scene.fog && TD.scene.fog.color,
+              },
+              fogNear: { type: 'f', value: MISC.camera.near * TD.scale },
+              fogFar: { type: 'f', value: MISC.camera.far * TD.scale },
+              brightness: {
+                type: 'f',
+                value: MISC.lod === LOD.LOW ? 1.0 : 0.0,
+              },
+              opacity: { type: 'f', value: 1.0 },
+            };
+            const material = new THREE.ShaderMaterial({
+              uniforms,
+              vertexShader: vertShader,
+              fragmentShader: fragShader,
+              blending: THREE.AdditiveBlending,
+              depthTest: false,
+              vertexColors: true,
+              fog: true,
+              opacity: 1.0,
+            });
             this.group[i].geometry = new THREE.BufferGeometry();
             this.group[i].geometry.setAttribute(
               'position',
@@ -71,8 +77,9 @@ export default class Entity {
             this.group[i].geometry.verticesNeedUpdate = false;
             this.group[i].object = new THREE.Points(
               this.group[i].geometry,
-              this.material
+              material
             );
+            TD.fade.add(this.group[i].object);
           } else if (this.buffered === 'mesh') {
             this.group[i].geometry = new THREE.BufferGeometry();
             this.group[i].geometry.setAttribute(
@@ -89,6 +96,7 @@ export default class Entity {
               this.group[i].geometry,
               this.material
             );
+            TD.fade.add(this.group[i].object);
           } else {
             this.group[i].object = new THREE.Object3D();
             this.group[i].geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
@@ -143,6 +151,7 @@ export default class Entity {
                 );
               }
               this.group[i].object.add(object);
+              TD.fade.add(object);
             }
           }
           this.group[i].object.renderOrder = this.order;

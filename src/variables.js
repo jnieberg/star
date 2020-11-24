@@ -49,7 +49,9 @@ export const TD = {
   star: undefined,
   planet: undefined,
   moon: undefined,
+  globe: undefined,
   label: undefined,
+  fade: undefined,
 };
 
 export const EVENT = {
@@ -223,9 +225,11 @@ export const GLOBE = {
   },
   CHTHONIAN: {
     climate: 'Chthonian',
-    land: { saturation: [0.0, 0.5], lightness: [0.0, 0.2] },
+    land: { saturation: [0.0, 0.5], lightness: [0.4, 0.6] },
     liquid: { hue: [0, 45], saturation: [0.8, 1.0], lightness: [0.4, 0.7] },
     glow: true,
+    contrast: 0.4,
+    scale: [0.02, 0.5],
   },
   CHARRED: {
     climate: 'Charred',
@@ -242,7 +246,7 @@ export const GLOBE = {
   },
   SAVANNAH: {
     climate: 'Savannah',
-    land: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.1, 0.4] },
+    land: { hue: [15, 60], saturation: [0.1, 0.7], lightness: [0.3, 0.7] },
     liquid: { hue: [150, 240], saturation: [0.3, 1.0], lightness: [0.3, 0.7] },
   },
   OCEAN: {
@@ -251,12 +255,12 @@ export const GLOBE = {
   },
   JUNGLE: {
     climate: 'Jungle',
-    land: { hue: [90, 150], saturation: [0.2, 0.7], lightness: [0.3, 0.7] },
+    land: { hue: [90, 150], saturation: [0.2, 0.5], lightness: [0.3, 0.7] },
   },
   SWAMP: {
     climate: 'Swamp',
-    land: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.2, 0.4] },
-    liquid: { hue: [75, 120], saturation: [0.5, 0.7], lightness: [0.1, 0.4] },
+    land: { hue: [90, 120], saturation: [0.5, 0.7], lightness: [0.2, 0.4] },
+    liquid: { hue: [90, 120], saturation: [0.5, 0.7], lightness: [0.1, 0.4] },
   },
   TERRESTRIAL: {
     climate: 'Terrestrial',
@@ -276,7 +280,7 @@ export const GLOBE = {
   ARCTIC: {
     climate: 'Arctic',
     land: { hue: [150, 240], saturation: [0.2, 7.0], lightness: [0.2, 1.0] },
-    liquid: { hue: [150, 240], saturation: [0.3, 7.0], lightness: [0.2, 1.0] },
+    liquid: { hue: [180, 240], saturation: [0.3, 7.0], lightness: [0.2, 1.0] },
   },
   ICY: {
     climate: 'Icy',
@@ -298,6 +302,7 @@ export const GLOBE = {
   IRON: {
     climate: 'Iron',
     land: { saturation: [0.0, 0.1], lightness: [0.0, 0.5] },
+    scale: [0.001, 0.02],
   },
   HELIUM: {
     climate: 'Helium',
@@ -307,6 +312,13 @@ export const GLOBE = {
     climate: 'Carbon',
     land: { hue: [0, 30], saturation: [0.05, 0.2], lightness: [0.0, 0.3] },
     liquid: { hue: [0, 30], saturation: [0.05, 0.2], lightness: [0.0, 0.3] },
+  },
+  DIAMOND: {
+    climate: 'Diamond',
+    liquid: { hue: [240, 270], saturation: [0.5, 1.0], lightness: [0.5, 0.7] },
+    contrast: 0.5,
+    scale: [0.001, 0.02],
+    glow: true,
   },
 };
 

@@ -55,7 +55,7 @@ export default class Store {
     data = JSON.stringify(data);
     const query = new URLSearchParams(window.location.search);
     query.set('data', data);
-    const newPath = `${window.location.pathname}?${data}`;
+    const newPath = `${window.location.pathname}?data=${data}`;
     window.history.pushState(null, '', newPath);
     localStorage.setItem('data', data);
     // localStorage.setItem('time', Date.now() - MISC.timeStart);

@@ -46,9 +46,10 @@ class GlobeSurface {
           biome ||
           new Biome({
             random: this.random,
-            show: this.resolution === 512,
+            show: this.resolution === 2048,
             land: this.body.land,
             liquid: this.body.liquid,
+            info: this.body.info,
             glow: this.glow,
           });
         wait(this.timerBank).then(() => {
@@ -122,11 +123,11 @@ class GlobeSurface {
       this.updateNormalScaleForRes(this.resolution);
 
       this.renderBiomeTexture();
-
-      let resMin = 0.01; // 0.01
-      let resMax = 5.0; // 5.0
-      const mixMin = 0.5; // 0.5
-      const mixMax = 1.0; // 1.0
+      const { scale } = this.body.info;
+      let resMin = (scale && scale[0]) || 0.01; // 0.01
+      let resMax = (scale && scale[1]) || 5.0; // 5.0
+      const mixMin = 0.0; // 0.0
+      const mixMax = 2.0; // 2.0
 
       MISC.interrupt = false;
       this.random.seed = 'map';
@@ -153,7 +154,7 @@ class GlobeSurface {
         resMin *= resMod;
 
         this.random.seed = 'map';
-        this.moistureMap
+        return this.moistureMap
           .render({
             timerBank: this.timerBank,
             seed: this.random.float(1000, 2000),
@@ -216,6 +217,7 @@ class GlobeSurface {
         .then(() => {
           this.updateMaterial();
           this.ground.visible = true;
+
           // console.log(`[${this.timerBank}] CALLBACK PLANET: ${this.resolution}`);
           this.createGlow().then(grandResolve);
         });

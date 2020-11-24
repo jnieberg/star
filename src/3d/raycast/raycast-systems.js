@@ -4,8 +4,8 @@ import setLabel, { labelShow } from '../label/label';
 import raycastFound from './raycast-found';
 
 function raycastSystemEvents(intersect) {
-  const distanceFar = 10;
-  const distanceNear = 0.1;
+  const distanceMax = 10;
+  const distanceMin = 0.1;
   const tag = intersect.object.name;
   const id = intersect.index;
   let showLabel = false;
@@ -14,7 +14,7 @@ function raycastSystemEvents(intersect) {
     system = TD.galaxy.star.group[tag].this[id];
   }
   if (system) {
-    if (intersect.distance / TD.scale < distanceFar) {
+    if (intersect.distance / TD.scale < distanceMax) {
       if (!TD.system || TD.system.key !== system.key) {
         if (TD.system) TD.system.remove();
         TD.system = system;
@@ -24,7 +24,7 @@ function raycastSystemEvents(intersect) {
         console.log(TD.system);
       }
     }
-    if (intersect.distance > distanceNear * TD.scale) {
+    if (intersect.distance > distanceMin * TD.scale) {
       labelShow();
     }
     showLabel = true;
@@ -40,17 +40,17 @@ export default function raycastSystem() {
     // fixObjectToCamera(TD.system.object);
     const distance = TD.camera.distanceTo(TD.system.object.position);
     EVENT.controls.speedFactorStar =
-      distance / (distanceMax * 2) < 1.0 ? distance / (distanceMax * 2) : 1.0;
+      distance / (distanceMax * 1) < 1.0 ? distance / (distanceMax * 1) : 1.0;
     EVENT.controls.speedFactorStar =
       EVENT.controls.speedFactorStar > 0.001
         ? EVENT.controls.speedFactorStar
         : 0.001;
+
     if (distance >= distanceMax) {
       TD.system.remove();
       TD.system = undefined;
       TD.star = undefined;
-      TD.planet = undefined;
-      TD.moon = undefined;
+      TD.globe = undefined;
       EVENT.controls.speedFactorStar = 1.0;
       EVENT.controls.speedFactorPlanet = 1.0;
     }

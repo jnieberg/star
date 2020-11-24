@@ -291,7 +291,7 @@ export default class System {
       MISC.colorHelper.g,
       MISC.colorHelper.b
     );
-    this.parent.group[id].sizes.push(this.size * TD.scale);
+    this.parent.group[id].sizes.push(this.size * 0.5 * TD.scale);
   }
 
   remove() {

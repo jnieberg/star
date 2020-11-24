@@ -11,7 +11,7 @@ import fragShader from '../../shaders/bloom.frag';
 
 function setBloom() {
   const params = {
-    bloomStrength: 2.0,
+    bloomStrength: 1.5,
     bloomThreshold: 0.2,
     bloomRadius: 1.0,
   };

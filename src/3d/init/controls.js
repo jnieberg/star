@@ -458,8 +458,7 @@ export function getKeys(e) {
       }
       TD.system = undefined;
       TD.star = undefined;
-      TD.planet = undefined;
-      TD.moon = undefined;
+      TD.globe = undefined;
       TD.label = undefined;
       TD.camera.reset();
       MISC.reload = true;

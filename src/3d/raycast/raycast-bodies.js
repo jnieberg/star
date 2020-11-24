@@ -58,13 +58,11 @@ export default function raycastBody() {
     const { distance, body } = getNearestBody(bodies);
     const bodyRadius = body ? body.size * 0.0001 * 0.5 : 0;
     const distanceOrbitStar = 0.01 + bodyRadius;
-    const distanceOrbitPlanet = 0.0005 + bodyRadius;
-    const distanceOrbitMoon = 0.00005 + bodyRadius;
+    const distanceOrbitGlobe = 0.0005 + bodyRadius;
     if (distance >= distanceMax) {
-      if (TD.planet && TD.planet.type === 'planet') {
+      if (TD.globe && TD.globe.type === 'planet') {
         TD.system.hideChildren();
-        TD.planet = undefined;
-        TD.moon = undefined;
+        TD.globe = undefined;
       }
       EVENT.controls.speedFactorPlanet = 1.0;
       return false;
@@ -81,29 +79,33 @@ export default function raycastBody() {
         EVENT.controls.speedFactorPlanet > speedMin
           ? EVENT.controls.speedFactorPlanet
           : speedMin;
-      let moon;
-      if (distance < distanceOrbitMoon) {
-        moon = body.type === 'moon' && body;
-        if (moon && TD.moon !== moon) {
-          TD.moon = moon;
-          TD.moon.parent.hideChildren();
-          TD.moon.drawHigh();
-        }
-      } else if (TD.moon) {
-        TD.moon = undefined;
-      }
-      let planet;
-      if (distance < distanceOrbitPlanet) {
-        planet = body.type === 'moon' && body.parent;
-        planet = planet || (body.type === 'planet' && body);
-        if (planet && TD.planet !== planet) {
-          TD.planet = planet;
-          TD.planet.parent.hideChildren();
-          TD.planet.drawHigh();
+      // let moon;
+      // if (distance < distanceOrbitMoon) {
+      //   moon = body.type === 'moon' && body;
+      //   if (moon && TD.globe !== moon) {
+      //     TD.globe = moon;
+      //     TD.globe.parent.hideChildren();
+      //     TD.globe.drawHigh();
+      //   }
+      // } else if (TD.globe) {
+      //   TD.globe = undefined;
+      // }
+      let globe;
+      if (distance < distanceOrbitGlobe) {
+        // globe = body.type === 'moon' && body.parent;
+        globe =
+          globe || ((body.type === 'planet' || body.type === 'moon') && body);
+        if (globe && TD.globe !== globe) {
+          TD.globe = globe;
+          TD.globe.parent.hideChildren();
+          TD.globe.drawHigh();
+          if (TD.globe.parent.type === 'planet') {
+            TD.globe.parent.drawHigh();
+          }
         }
         TD.camera.farFactor = distance * 1000 > 0.001 ? distance * 1000 : 0.001;
-      } else if (TD.planet) {
-        TD.planet = undefined;
+      } else if (TD.globe) {
+        TD.globe = undefined;
         TD.camera.farFactor = 1.0;
       }
       let star;
@@ -116,17 +118,18 @@ export default function raycastBody() {
           TD.star = star;
         }
       }
-      if (star || planet || moon) {
+      if (star || globe) {
+        // || moon
         // console.log(
         //   TD.moon && TD.moon.type,
         //   TD.planet && TD.planet.type,
         //   TD.star && TD.star.type,
         // );
-        if (!checkOrbitBody(TD.moon, distance < distanceOrbitMoon)) {
-          if (!checkOrbitBody(TD.planet, distance < distanceOrbitPlanet)) {
-            checkOrbitBody(TD.star, distance < distanceOrbitStar);
-          }
+        // if (!checkOrbitBody(TD.moon, distance < distanceOrbitMoon)) {
+        if (!checkOrbitBody(TD.globe, distance < distanceOrbitGlobe)) {
+          checkOrbitBody(TD.star, distance < distanceOrbitStar);
         }
+        // }
       }
       return raycastBodyEvents(intersect);
     }

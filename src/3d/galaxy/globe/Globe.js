@@ -119,8 +119,8 @@ export default class Globe extends Body {
       //   (starTemp * 2) /
       //     (1.0 + this.random.float(distanceToStar * 0.8, distanceToStar * 1.2))
       // );
-      const starTemp = this.star.temperature;
-      const distanceToStarSurface = this.distanceStar * 1.0 + this.parent.size;
+      const starTemp = this.star.temperature * 1;
+      const distanceToStarSurface = this.distanceStar * 1.0; // higher colder
       const idealTemperature = MISC.KELVIN - 25;
       this.random.seed = 'temperature';
       this._temperature =
@@ -148,16 +148,19 @@ export default class Globe extends Body {
         temperature + MISC.KELVIN >= 50 && temperature + MISC.KELVIN < 100,
         temperature + MISC.KELVIN >= 100,
       ];
-      const [isOnlyLand, isOnlyLiquid] = [level === 0.0, level === 1.0];
+      const [hasOnlyLand, hasOnlyLiquid] = [level === 0.0, level === 1.0];
       const hasNoAtmosphere = gasDensity === 0.0;
       const hasGoodAtmosphere = gasDensity > 0.5;
       const hasMoist = gasDensity > 0.0 && gasBlend === BODY.gas.Moist;
       const hasDust = gasDensity > 0.0 && gasBlend === BODY.gas.Dust;
       const hasLandAndLiquid = level > 0.0 && level < 1.0;
       const isEarthLike = hasGoodAtmosphere && hasMoist && hasLandAndLiquid;
-      const rarePlanet = () => this.random.int(6) === 0 || infos.length === 0;
+      const rarePlanet = () => this.random.int(0) === 0 && infos.length === 0;
 
-      if (isFreezing) infos.push(GLOBE.ARCTIC, GLOBE.ICY);
+      if (isFreezing) {
+        infos.push(GLOBE.ARCTIC, GLOBE.ICY);
+        if (hasOnlyLiquid) infos.push(GLOBE.DIAMOND);
+      }
       if (isCold) {
         infos.push(GLOBE.ARCTIC);
         if (isEarthLike) infos.push(GLOBE.TUNDRA);
@@ -168,35 +171,36 @@ export default class Globe extends Body {
             GLOBE.TERRESTRIAL,
             GLOBE.TERRESTRIAL,
             GLOBE.TERRESTRIAL,
-            GLOBE.TERRESTRIAL,
-            GLOBE.TERRESTRIAL,
-            GLOBE.JUNGLE,
+            GLOBE.SWAMP,
             GLOBE.TUNDRA,
             GLOBE.SAVANNAH,
-            GLOBE.SWAMP,
             GLOBE.TERRAFORMED
           );
-        if (isOnlyLand) infos.push(GLOBE.DESERT);
-        if (isOnlyLiquid) infos.push(GLOBE.OCEAN);
+        if (isEarthLike && hasOnlyLand) infos.push(GLOBE.JUNGLE);
+        if (hasOnlyLand) infos.push(GLOBE.DESERT);
+        if (hasOnlyLiquid) infos.push(GLOBE.OCEAN);
       }
       if (isWarm) {
         infos.push(GLOBE.CHARRED);
-        if (isEarthLike) infos.push(GLOBE.SWAMP, GLOBE.JUNGLE, GLOBE.SAVANNAH);
-        if (isOnlyLand) infos.push(GLOBE.DESERT);
+        if (isEarthLike) infos.push(GLOBE.SWAMP, GLOBE.SAVANNAH);
+        if (isEarthLike && hasOnlyLand) infos.push(GLOBE.DESERT);
+        if (hasOnlyLand) infos.push(GLOBE.DESERT);
       }
       if (isHot) {
-        infos.push(GLOBE.CHARRED, GLOBE.LAVA);
-        if (!isOnlyLiquid) infos.push(GLOBE.CHTHONIAN);
+        infos.push(GLOBE.LAVA);
+        if (hasOnlyLand) infos.push(GLOBE.CHARRED);
+        if (hasLandAndLiquid) infos.push(GLOBE.CHTHONIAN);
       }
-      if (isOnlyLand && (hasNoAtmosphere || hasDust))
+      if (hasOnlyLand && (hasNoAtmosphere || hasDust))
         infos.push(GLOBE.BARREN, GLOBE.IRON, GLOBE.CARBON);
 
-      if (isOnlyLiquid) infos.push(GLOBE.HELIUM);
+      if (hasOnlyLiquid) infos.push(GLOBE.HELIUM);
+
+      if (rarePlanet()) {
+        infos.push(GLOBE.TOXIC, GLOBE.RADIOACTIVE);
+      }
 
       this.random.seed = 'info';
-      if (infos.length <= 2 && rarePlanet())
-        infos.push(GLOBE.TOXIC, GLOBE.RADIOACTIVE);
-
       this._info = infos[this.random.int(infos.length - 1)];
 
       // console.log('info', this.index, `${this.name}`, this.info, this);
@@ -363,7 +367,7 @@ export default class Globe extends Body {
   get glow() {
     const { glow } = this.info;
     this.random.seed = 'glow';
-    return glow && this.random.int(1) === 0 && this.level > 0.0
+    return glow && this.level > 0.0
       ? this.random.float(0.1, 1.1 - this.level)
       : 0.0;
   }
@@ -658,44 +662,6 @@ export default class Globe extends Body {
       })
       .add(this.object);
 
-    // Planet rings
-    if (this.rings) {
-      setColor(
-        1,
-        this.rings.hue,
-        this.rings.saturation,
-        this.rings.lightness,
-        'hsl'
-      );
-      const { thickness } = this.rings;
-      const ringGeometry = new THREE.RingBufferGeometry(
-        this.rings.size * (-thickness * 0.00002 + 0.00006) * TD.scale,
-        this.rings.size * (thickness * 0.00002 + 0.00006) * TD.scale,
-        64
-      );
-      const ringMaterial = new THREE.MeshStandardMaterial({
-        color: MISC.colorHelper,
-        map: TD.texture.planet.rings,
-        emissive: MISC.colorHelper,
-        emissiveMap: TD.texture.planet.rings,
-        emissiveIntensity: 0.5,
-        opacity: this.rings.opacity,
-        blending: THREE.NormalBlending,
-        side: THREE.DoubleSide,
-        alphaTest: 0,
-        transparent: true,
-      });
-      const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-      ringMesh.name = 'Planet rings';
-      ringMesh.renderOrder = 0;
-      ringMesh.rotateX(Math.PI * 0.5);
-      ringMesh.castShadow = true;
-      ringMesh.receiveShadow = true;
-      // ringMesh.onBeforeRender = (rend) => rend.clearDepth();
-
-      this.object.add(ringMesh);
-    }
-
     this.drawTrajectory({
       thickness: this.parent.size * 0.05,
       opacity: this.type === 'moon' ? 0.15 : 0.25,
@@ -724,6 +690,43 @@ export default class Globe extends Body {
         this.object.high.name = `${this.type} high pivot`;
         this.object.add(this.object.high);
         this.drawSurface();
+
+        // Planet rings
+        if (this.rings) {
+          setColor(
+            1,
+            this.rings.hue,
+            this.rings.saturation,
+            this.rings.lightness,
+            'hsl'
+          );
+          const { thickness } = this.rings;
+          const ringGeometry = new THREE.RingBufferGeometry(
+            this.rings.size * (-thickness * 0.00002 + 0.00006) * TD.scale,
+            this.rings.size * (thickness * 0.00002 + 0.00006) * TD.scale,
+            64
+          );
+          const ringMaterial = new THREE.MeshStandardMaterial({
+            color: MISC.colorHelper,
+            map: TD.texture.planet.rings,
+            emissive: MISC.colorHelper,
+            emissiveMap: TD.texture.planet.rings,
+            emissiveIntensity: 0.5,
+            opacity: this.rings.opacity,
+            blending: THREE.NormalBlending,
+            side: THREE.DoubleSide,
+            alphaTest: 0,
+            transparent: true,
+          });
+          const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+          ringMesh.name = 'Planet rings';
+          ringMesh.renderOrder = 0;
+          ringMesh.rotateX(Math.PI * 0.5);
+          ringMesh.castShadow = true;
+          ringMesh.receiveShadow = true;
+          // ringMesh.onBeforeRender = (rend) => rend.clearDepth();
+          this.object.add(ringMesh);
+        }
 
         // Planet gas
         if (this.gasDensity > 0.0) {

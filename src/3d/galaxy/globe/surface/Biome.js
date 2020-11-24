@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 class Biome {
-  constructor({ random, land, liquid, glow, show = false }) {
+  constructor({ random, land, liquid, info, glow, show = false }) {
     this.random = random;
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'biomeCanvas';
@@ -12,7 +12,8 @@ class Biome {
     this.ctx = this.canvas.getContext('2d');
     this.land = land;
     this.liquid = liquid;
-    this.glow = !!glow;
+    this.info = info;
+    this.glow = glow;
 
     if (document.body && show) {
       document.body.appendChild(this.canvas);
@@ -30,7 +31,7 @@ class Biome {
     } else {
       this.drawNerfs();
     }
-    this.drawRivers();
+    if (this.random.int(0, 1) === 1) this.drawRivers();
     this.drawWater();
     this.drawBeach();
     this.texture = new THREE.CanvasTexture(this.canvas);
@@ -100,6 +101,8 @@ class Biome {
       const c = this.randomLandColor(-30 / 360);
       const c2 = this.randomLandColor(0);
       const c3 = this.randomLandColor(30 / 360);
+      const { contrast } = this.info;
+      const con = (contrast || 0) * 100;
       const falloff = 0.5;
       const falloff1 = 0.75;
       const falloff2 = 1.0;
@@ -107,8 +110,14 @@ class Biome {
       gradient.addColorStop(
         0.0,
         `hsla(${Math.round(c.hue)}, ${Math.round(
-          c.saturation * falloff
-        )}%, ${Math.round(c.lightness * falloff1)}%, 1.0)`
+          c.saturation * falloff + con
+        )}%, ${Math.round(c.lightness * falloff1 + con)}%, 1.0)`
+      );
+      gradient.addColorStop(
+        0.05,
+        `hsla(${Math.round(c.hue)}, ${Math.round(
+          c.saturation * falloff + con * 0.5
+        )}%, ${Math.round(c.lightness * falloff1 + con * 0.5)}%, 1.0)`
       );
       gradient.addColorStop(
         0.3,
@@ -119,14 +128,14 @@ class Biome {
       gradient.addColorStop(
         0.7,
         `hsla(${Math.round(c2.hue)}, ${Math.round(
-          c2.saturation * falloff2
-        )}%, ${Math.round(c2.lightness * falloff3)}%, 1.0)`
+          c2.saturation * falloff2 - con * 0.5
+        )}%, ${Math.round(c2.lightness * falloff3 - con * 0.5)}%, 1.0)`
       );
       gradient.addColorStop(
         1.0,
         `hsla(${Math.round(c3.hue)}, ${Math.round(
-          c3.saturation * falloff3
-        )}%, ${Math.round(c3.lightness * falloff3)}%, 1.0)`
+          c3.saturation * falloff3 - con
+        )}%, ${Math.round(c3.lightness * falloff3 - con)}%, 1.0)`
       );
 
       this.ctx.fillStyle = gradient;
@@ -264,26 +273,34 @@ class Biome {
       saturation: Math.floor(this.liquid.saturation * 100),
       lightness: Math.floor(this.liquid.lightness * 100),
     };
-    const opacity = this.glow ? 0.2 : 1;
-    const opacity2 = this.glow ? 0.4 : 1;
-    const opacity3 = this.glow ? 0.6 : 1;
-    const opacity4 = this.glow ? 0.8 : 1;
-    const opacity5 = this.glow ? 1 : 1;
-    const hue = Math.round(c.hue + (this.glow ? -20 : 0) + 360) % 360;
-    const hue2 = Math.round(c.hue + (this.glow ? -10 : 0) + 360) % 360;
-    const hue3 = Math.round(c.hue + (this.glow ? 0 : 0) + 360) % 360;
-    const hue4 = Math.round(c.hue + (this.glow ? 10 : 0) + 360) % 360;
-    const hue5 = Math.round(c.hue + (this.glow ? 20 : 0) + 360) % 360;
-    const saturation = Math.round(c.saturation + (this.glow ? 0 : 0));
-    const saturation2 = Math.round(c.saturation + (this.glow ? 10 : 0));
-    const saturation3 = Math.round(c.saturation + (this.glow ? 20 : 0));
-    const saturation4 = Math.round(c.saturation + (this.glow ? 30 : 0));
-    const saturation5 = Math.round(c.saturation + (this.glow ? 50 : 0));
-    const lightness = Math.round(c.lightness * (this.glow ? 0.8 : 1.0));
-    const lightness2 = Math.round(c.lightness * (this.glow ? 0.8 : 0.9));
-    const lightness3 = Math.round(c.lightness * (this.glow ? 0.8 : 0.8));
-    const lightness4 = Math.round(c.lightness * (this.glow ? 0.8 : 0.7));
-    const lightness5 = Math.round(c.lightness * (this.glow ? 0.8 : 0.6));
+    const { glow, contrast } = this.info;
+    const con = (contrast || 0) * 100;
+    const opacity = glow ? 0.2 : 1;
+    const opacity2 = glow ? 0.4 : 1;
+    const opacity3 = glow ? 0.6 : 1;
+    const opacity4 = glow ? 0.8 : 1;
+    const opacity5 = glow ? 1 : 1;
+    const hue = Math.round(c.hue + (glow ? -20 : 0) + 360) % 360;
+    const hue2 = Math.round(c.hue + (glow ? -10 : 0) + 360) % 360;
+    const hue3 = Math.round(c.hue + (glow ? 0 : 0) + 360) % 360;
+    const hue4 = Math.round(c.hue + (glow ? 10 : 0) + 360) % 360;
+    const hue5 = Math.round(c.hue + (glow ? 20 : 0) + 360) % 360;
+    const saturation = Math.round(c.saturation + (glow ? 0 : 0) - con);
+    const saturation2 = Math.round(c.saturation + (glow ? 10 : 0) - con * 0.5);
+    const saturation3 = Math.round(c.saturation + (glow ? 20 : 0) - con * 0.25);
+    const saturation4 = Math.round(c.saturation + (glow ? 30 : 0) + con * 0.25);
+    const saturation5 = Math.round(c.saturation + (glow ? 50 : 0) + con * 0.5);
+    const saturation6 = Math.round(c.saturation + (glow ? 50 : 0) + con);
+    const lightness = Math.round(c.lightness * (glow ? 0.8 : 1.0) - con);
+    const lightness2 = Math.round(c.lightness * (glow ? 0.8 : 0.9) - con * 0.5);
+    const lightness3 = Math.round(
+      c.lightness * (glow ? 0.8 : 0.8) - con * 0.25
+    );
+    const lightness4 = Math.round(
+      c.lightness * (glow ? 0.8 : 0.7) + con * 0.25
+    );
+    const lightness5 = Math.round(c.lightness * (glow ? 0.8 : 0.6) + con * 0.5);
+    const lightness6 = Math.round(c.lightness * (glow ? 0.8 : 0.6) + con);
     gradient.addColorStop(
       0.0,
       `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
@@ -303,6 +320,10 @@ class Biome {
     gradient.addColorStop(
       0.8,
       `hsla(${hue5}, ${saturation5}%, ${lightness5}%, ${opacity5})`
+    );
+    gradient.addColorStop(
+      0.99,
+      `hsla(${hue5}, ${saturation6}%, ${lightness6}%, ${opacity5})`
     );
 
     this.ctx.fillStyle = gradient;
