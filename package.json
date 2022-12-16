@@ -20,6 +20,7 @@
 		"three-orbitcontrols": "^2.110.3"
 	},
 	"scripts": {
+		"build": "node build",
 		"start": "node server",
 		"dev": "source $HOME/.nvm/nvm.sh; nvm use && node index"
 	},
